@@ -9,7 +9,7 @@ hide_table_of_contents: true
 import { Card, CardGroup } from '@site/src/components/Cards';
 import ThemedImage from '@theme/ThemedImage';
 
-# Welcome to Dagster
+# Dagster へようこそ
 
 Dagster is a data orchestrator built for data engineers, with integrated lineage, observability, a declarative programming model, and best-in-class testability.
 
