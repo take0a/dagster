@@ -6,50 +6,50 @@ last_update:
 sidebar_class_name: hidden
 ---
 
-# Build your first ETL pipeline
+# 最初のETLパイプラインを構築する
 
-In this tutorial, you'll build an ETL pipeline with Dagster that:
+このチュートリアルでは、Dagsterを使用してETLパイプラインを構築します:
 
-- Imports sales data to DuckDB
-- Transforms data into reports
-- Runs scheduled reports automatically
-- Generates one-time reports on demand
+- 販売データをDuckDBにインポートする
+- データをレポートに変換する
+- スケジュールされたレポートを自動的に実行する
+- オンデマンドで1回限りのレポートを生成
 
-## You will learn to:
+## 以下の内容を学びます:
 
-- Set up a Dagster project with the recommended project structure
-- Create and materialize assets
-- Create and materialize dependant assets
-- Ensure data quality with asset checks
-- Create and materialize partitioned assets
-- Automate the pipeline
-- Create and materialize a sensor asset
-- Refactor your project when it becomes more complex
+- 推奨プロジェクト構造でDagsterプロジェクトを設定する
+- アセットの作成と実装
+- 依存アセットの作成と実装
+- アセットチェックでデータ品質を確保
+- パーティション化したアセットの作成と実装
+- パイプラインを自動化する
+- センサーアセットの作成と実装
+- プロジェクトが複雑になったらリファクタリングする
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには:
 
-- Basic Python knowledge
-- Python 3.9+ installed on your system. Refer to the [Installation guide](/getting-started/installation) for information.
-- Familiarity with SQL and Python data manipulation libraries, such as Pandas.
-- Understanding of data pipelines and the extract, transform, and load process.
+- Pythonの基礎知識
+- システムに Python 3.9 以降がインストールされていること。詳細については、[インストール ガイド](/getting-started/installation)を参照してください。
+- SQL および Pandas などの Python データ操作ライブラリに精通していること。
+- データ パイプラインと抽出、変換、ロード プロセスに関する理解。
 </details>
 
 
-## Step 1: Set up your Dagster environment
+## Step 1: Dagster環境を設定する
 
-First, set up a new Dagster project.
+まず、新しい Dagster プロジェクトを設定します。
 
-1. Open your terminal and create a new directory for your project:
+1. ターミナルを開き、プロジェクト用の新しいディレクトリを作成します:
 
    ```bash
    mkdir dagster-etl-tutorial
    cd dagster-etl-tutorial
    ```
 
-2. Create and activate a virtual environment:
+2. 仮想環境を作成してアクティブ化します:
 
    <Tabs>
    <TabItem value="macos" label="MacOS">
@@ -66,13 +66,13 @@ First, set up a new Dagster project.
    </TabItem>
    </Tabs>
 
-3. Install Dagster and the required dependencies:
+3. Dagster と必要な依存関係をインストールします:
 
    ```bash
    pip install dagster dagster-webserver pandas dagster-duckdb
    ```
 
-## Step 2: Create the Dagster project structure
+## Step 2: Dagsterプロジェクト構造を作成する
 
 Run the following command to create the project directories and files for this tutorial:
 

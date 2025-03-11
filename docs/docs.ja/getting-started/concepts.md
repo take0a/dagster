@@ -1,9 +1,9 @@
 ---
-title: "Concepts"
+title: "コンセプト"
 sidebar_position: 200
 ---
 
-Dagster provides a variety of abstractions for building and orchestrating data pipelines. These concepts enable a modular, declarative approach to data engineering, making it easier to manage dependencies, monitor execution, and ensure data quality.
+Dagster は、データ パイプラインの構築とオーケストレーションのためのさまざまな抽象化を提供します。これらの概念により、データ エンジニアリングに対するモジュール式の宣言型アプローチが可能になり、依存関係の管理、実行の監視、データ品質の確保が容易になります。
 
 ```mermaid
 %%{
@@ -99,7 +99,7 @@ Dagster provides a variety of abstractions for building and orchestrating data p
     Definitions ==> CodeLocation
 ```
 
-### Asset
+### アセット
 
 ```mermaid
 %%{
@@ -141,7 +141,7 @@ Dagster provides a variety of abstractions for building and orchestrating data p
     Asset ==> Definitions
 ```
 
-An <PyObject section="assets" module="dagster" object="asset" /> represents a logical unit of data such as a table, dataset, or machine learning model. Assets can have dependencies on other assets, forming the data lineage for your pipelines. As the core abstraction in Dagster, assets can interact with many other Dagster concepts to facilitate certain tasks.
+ <PyObject section="assets" module="dagster" object="asset" /> は、テーブル、データセット、機械学習モデルなどのデータの論理単位を表します。アセットは他のアセットに依存し、パイプラインのデータ系統を形成することができます。アセットは Dagster のコア抽象化として、他の多くの Dagster 概念と相互作用して、特定のタスクを容易にすることができます。
 
 | Concept | Relationship |
 | --- | --- |
@@ -182,12 +182,12 @@ An <PyObject section="assets" module="dagster" object="asset" /> represents a lo
     AssetCheck ==> Definitions
 ```
 
-An <PyObject section="asset-checks" module="dagster" object="asset_check" /> is associated with an <PyObject section="assets" module="dagster" object="asset" /> to ensure it meets certain expectations around data quality, freshness or completeness. Asset checks run when the asset is executed and store metadata about the related run and if all the conditions of the check were met.
+<PyObject section="asset-checks" module="dagster" object="asset_check" />  は、データの品質、鮮度、完全性に関する特定の期待を満たすように <PyObject section="assets" module="dagster" object="asset" /> に関連付けられます。アセット チェックは、アセットが実行されたときに実行され、関連する実行に関するメタデータと、チェックのすべての条件が満たされたかどうかを保存します。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `asset check` may be used by an `asset` |
-| [definitions](concepts#definitions) | `asset check` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `asset check` は `asset` によって使用される可能性があります |
+| [definitions](concepts#definitions) | デプロイするには、`asset check` を `definitions` に設定する必要があります。 |
 
 ### Code Location
 
@@ -213,11 +213,11 @@ An <PyObject section="asset-checks" module="dagster" object="asset_check" /> is 
     Definitions ==> CodeLocation
 ```
 
-A `code location` is a collection of <PyObject section="definitions" module="dagster" object="Definitions" /> deployed in a specific environment. A code location determines the Python environment (including the version of Dagster being used as well as any other Python dependencies). A Dagster project can have multiple code locations, helping isolate dependencies.
+`code location` は、特定の環境にデプロイされた <PyObject section="definitions" module="dagster" object="Definitions" /> のコレクションです。コードの場所は、Python 環境 (使用されている Dagster のバージョンやその他の Python 依存関係を含む) を決定します。Dagster プロジェクトには複数のコードの場所を設定できるため、依存関係を分離するのに役立ちます。
 
 | Concept | Relationship |
 | --- | --- |
-| [definitions](concepts#definitions) | `code location` must contain at least one `definitions` |
+| [definitions](concepts#definitions) | `code location` には少なくとも 1 つの `definitions` が含まれている必要があります |
 
 ### Config
 
@@ -249,14 +249,14 @@ A `code location` is a collection of <PyObject section="definitions" module="dag
     Config -.-> Sensor
 ```
 
-A <PyObject section="config" module="dagster" object="RunConfig" /> is a set schema applied to a Dagster object that is input at the time of execution. This allows for parameterization and the reuse of pipelines to serve multiple purposes.
+<PyObject section="config" module="dagster" object="RunConfig" /> は、実行時に入力される Dagster オブジェクトに適用されるセット スキーマです。これにより、パラメーター化とパイプラインの再利用が可能になり、複数の目的に使用できます。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `config` may be used by an `asset` |
-| [job](concepts#job) | `config` may be used by a `job` |
-| [schedule](concepts#schedule) | `config` may be used by a `schedule` |
-| [sensor](concepts#sensor) | `config` may be used by a `sensor` |
+| [asset](concepts#asset) | `config` は `asset` によって使用される場合があります |
+| [job](concepts#job) | `config` は `job` によって使用される場合があります |
+| [schedule](concepts#schedule) | `config` は `schedule` によって使用される場合があります |
+| [sensor](concepts#sensor) | `config` は `sensor` によって使用される場合があります |
 
 ### Definitions
 
@@ -298,18 +298,18 @@ A <PyObject section="config" module="dagster" object="RunConfig" /> is a set sch
     Definitions ==> CodeLocation
 ```
 
-<PyObject section="definitions" module="dagster" object="Definitions" /> is a top-level construct that contains references to all the objects of a Dagster project, such as <PyObject section="assets" module="dagster" object="asset" pluralize />, <PyObject section="jobs" module="dagster" object="job" pluralize /> and <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" pluralize />. Only objects included in the definitions will be deployed and visible within the Dagster UI.
+<PyObject section="definitions" module="dagster" object="Definitions" /> は、<PyObject section="assets" module="dagster" object="asset" pluralize />、<PyObject section="jobs" module="dagster" object="job" pluralize />、<PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" pluralize /> など、Dagster プロジェクトのすべてのオブジェクトへの参照を含むトップレベル構造です。定義に含まれるオブジェクトのみがデプロイされ、Dagster UI 内に表示されます。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `definitions` may contain one or more `assets` |
-| [asset check](concepts#asset-check) | `definitions` may contain one or more `asset checks` |
-| [io manager](concepts#io-manager) | `definitions` may contain one or more `io managers` |
-| [job](concepts#job) | `definitions` may contain one or more `jobs` |
-| [resource](concepts#resource) | `definitions` may contain one or more `resources` |
-| [schedule](concepts#schedule) | `definitions` may contain one or more `schedules` |
-| [sensor](concepts#sensor) | `definitions` may contain one or more `sensors` |
-| [code location](concepts#code-location) | `definitions` must be deployed in a `code location` |
+| [asset](concepts#asset) | `definitions` には 1 つ以上の `assets` が含まれる場合があります |
+| [asset check](concepts#asset-check) | `definitions` には 1 つ以上の `asset checks` が含まれる場合があります |
+| [io manager](concepts#io-manager) | `definitions` には 1 つ以上の `io manager` が含まれる場合があります。 |
+| [job](concepts#job) | `definitions` には 1 つ以上の `jobs` が含まれる場合があります |
+| [resource](concepts#resource) | `definitions` には 1 つ以上の `resources` が含まれる場合があります |
+| [schedule](concepts#schedule) | `definitions` には 1 つ以上の `schedules` が含まれる場合があります |
+| [sensor](concepts#sensor) | `definitions` には 1 つ以上の `sensors` が含まれる場合があります |
+| [code location](concepts#code-location) | `definitions` は `code location` にデプロイする必要があります |
 
 ### Graph
 
@@ -340,13 +340,13 @@ A <PyObject section="config" module="dagster" object="RunConfig" /> is a set sch
     Graph ==> Job
 ```
 
-A <PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> connects multiple <PyObject section="ops" module="dagster" object="op" pluralize /> together to form a DAG. If you are using <PyObject section="assets" module="dagster" object="asset" pluralize />, you will not need to use graphs directly.
+<PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> は複数の <PyObject section="ops" module="dagster" object="op" pluralize /> を接続して DAG を形成します。<PyObject section="assets" module="dagster" object="asset" pluralize /> を使用している場合は、グラフを直接使用する必要はありません。
 
 | Concept | Relationship |
 | --- | --- |
-| [config](concepts#config) | `graph` may use a `config` |
-| [op](concepts#op) | `graph` must include one or more `ops` |
-| [job](concepts#job) | `graph` must be part of `job` to execute |
+| [config](concepts#config) | `graph` は `config` を使用する場合があります |
+| [op](concepts#op) | `graph` には 1 つ以上の `ops` が含まれている必要があります |
+| [job](concepts#job) | 実行するには `graph` は `job` の一部でなければなりません |
 
 ### IO Manager
 
@@ -375,12 +375,12 @@ A <PyObject section="graphs" module="dagster" object="GraphDefinition" method="t
     IOManager ==> Definitions
 ```
 
-An <PyObject section="io-managers" module="dagster" object="IOManager" /> defines how data is stored and retrieved between the execution of <PyObject section="assets" module="dagster" object="asset" pluralize /> and <PyObject section="ops" module="dagster" object="op" pluralize />. This allows for a customizable storage and format at any interaction in a pipeline.
+<PyObject section="io-managers" module="dagster" object="IOManager" /> は、<PyObject section="assets" module="dagster" object="asset" pluralize /> と <PyObject section="ops" module="dagster" object="op" pluralize />　の実行間でデータがどのように保存および取得されるかを定義します。これにより、パイプライン内のあらゆるインタラクションでカスタマイズ可能なストレージとフォーマットが可能になります。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `io manager` may be used by an `asset` |
-| [definitions](concepts#definitions) | `io manager` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `io manager` は `asset` によって使用される場合があります |
+| [definitions](concepts#definitions) | デプロイするには、`io manager` を `definitions` に設定する必要があります。 |
 
 ### Job
 
@@ -417,16 +417,16 @@ An <PyObject section="io-managers" module="dagster" object="IOManager" /> define
     Job ==> Definitions
 ```
 
-A <PyObject section="jobs" module="dagster" object="job" /> is a subset of <PyObject section="assets" module="dagster" object="asset" pluralize /> or the <PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> of <PyObject section="ops" module="dagster" object="op" pluralize />. Jobs are the main form of execution in Dagster.
+<PyObject section="jobs" module="dagster" object="job" /> は <PyObject section="assets" module="dagster" object="asset" pluralize /> のサブセットまたは <PyObject section="ops" module="dagster" object="op" pluralize /> の <PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> です。ジョブは Dagster における実行の主な形式です。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `job` may contain a selection of `assets` |
-| [config](concepts#config) | `job` may use a `config` |
-| [graph](concepts#graph) | `job` may contain a `graph` |
-| [schedule](concepts#schedule) | `job` may be used by a `schedule` |
-| [sensor](concepts#sensor) | `job` may be used by a `sensor` |
-| [definitions](concepts#definitions) | `job` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `job` には `assets` の選択が含まれる場合があります |
+| [config](concepts#config) | `job` は `config` を使用する場合があります |
+| [graph](concepts#graph) | `job` には `graph` が含まれる場合があります |
+| [schedule](concepts#schedule) | `job` は `schedule` によって使用される場合があります |
+| [sensor](concepts#sensor) | `job` は `sensor` によって使用される場合があります |
+| [definitions](concepts#definitions) | `job` はデプロイするために `definitions` 内に設定する必要があります |
 
 ### Op
 
@@ -455,12 +455,12 @@ A <PyObject section="jobs" module="dagster" object="job" /> is a subset of <PyOb
     Op ==> Graph
 ```
 
-An <PyObject section="ops" module="dagster" object="op" /> is a computational unit of work. Ops are arranged into a <PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> to dictate their order. Ops have largely been replaced by <PyObject section="assets" module="dagster" object="asset" pluralize />.
+<PyObject section="ops" module="dagster" object="op" /> は、作業の計算単位です。Op は <PyObject section="graphs" module="dagster" object="GraphDefinition" method="to_job" /> に配置され、順序が決定されます。Op は主に <PyObject section="assets" module="dagster" object="asset" pluralize /> に置き換えられました。
 
 | Concept | Relationship |
 | --- | --- |
-| [type](concepts#type) | `op` may use a `type` |
-| [graph](concepts#graph) | `op` must be contained in `graph` to execute |
+| [type](concepts#type) | `op` は `type` を使用する場合があります |
+| [graph](concepts#graph) | 実行するには `op` が `graph` に含まれている必要があります |
 
 ### Partition
 
@@ -486,11 +486,11 @@ An <PyObject section="ops" module="dagster" object="op" /> is a computational un
     Partition -.-> Asset
 ```
 
-A <PyObject section="partitions" object="PartitionsDefinition" /> represents a logical slice of a dataset or computation mapped to a certain segments (such as increments of time). Partitions enable incremental processing, making workflows more efficient by only running on relevant subsets of data.
+<PyObject section="partitions" object="PartitionsDefinition" /> は、特定のセグメント (時間の増分など) にマップされたデータセットまたは計算の論理スライスを表します。パーティションにより増分処理が可能になり、関連するデータのサブセットのみを実行することでワークフローの効率が向上します。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `partition` may be used by an `asset` |
+| [asset](concepts#asset) | `partition` は `asset` によって使用される場合があります |
 
 ### Resource
 
@@ -522,14 +522,14 @@ A <PyObject section="partitions" object="PartitionsDefinition" /> represents a l
     Resource ==> Definitions
 ```
 
-A <PyObject section="resources" module="dagster" object="ConfigurableResource"/> is a configurable external dependency. These can be databases, APIs, or anything outside of Dagster.
+<PyObject section="resources" module="dagster" object="ConfigurableResource"/> は、構成可能な外部依存関係です。これらには、データベース、API、または Dagster 外部のあらゆるものが含まれます。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `resource` may be used by an `asset` |
-| [schedule](concepts#schedule) | `resource` may be used by a `schedule` |
-| [sensor](concepts#sensor) | `resource` may be used by a `sensor` |
-| [definitions](concepts#definitions) | `resource` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `resource` は、`asset` によって使用される可能性があります|
+| [schedule](concepts#schedule) | `resource` は `schedule` によって使用される可能性があります |
+| [sensor](concepts#sensor) | `resource` は `sensor` によって使用される可能性があります |
+| [definitions](concepts#definitions) | デプロイするには、`resource` を `definitions` に設定する必要があります。 |
 
 ### Type
 
@@ -555,11 +555,11 @@ A <PyObject section="resources" module="dagster" object="ConfigurableResource"/>
     Type -.-> Op
 ```
 
-A `type` is a way to define and validate the data passed between <PyObject section="ops" module="dagster" object="op" pluralize />.
+`type` は <PyObject section="ops" module="dagster" object="op" pluralize /> 間で渡されるデータを定義および検証する方法です。
 
 | Concept | Relationship |
 | --- | --- |
-| [op](concepts#op) | `type` may be used by an `op` |
+| [op](concepts#op) | `type` は `op` によって使用される場合があります |
 
 ### Schedule
 
@@ -591,14 +591,14 @@ A `type` is a way to define and validate the data passed between <PyObject secti
     Schedule ==> Definitions
 ```
 
-A <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" /> is a way to automate <PyObject section="jobs" module="dagster" object="job" pluralize /> or <PyObject section="assets" module="dagster" object="asset" pluralize /> to occur on a specified interval. In the cases that a job or asset is parameterized, the schedule can also be set with a run configuration (<PyObject section="config" module="dagster" object="RunConfig" />) to match.
+<PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" />  は、指定された間隔で <PyObject section="jobs" module="dagster" object="job" pluralize /> または <PyObject section="assets" module="dagster" object="asset" pluralize /> を自動的に実行する方法の 1 つです。ジョブまたはアセットがパラメーター化されている場合は、一致するように実行構成  (<PyObject section="config" module="dagster" object="RunConfig" />) を使用してスケジュールを設定することもできます。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `schedule` may include a `job` or selection of `assets` |
-| [config](concepts#config) | `schedule` may include a `config` if the `job` or `assets` include a `config` |
-| [job](concepts#job) | `schedule` may include a `job` or selection of `assets` |
-| [definitions](concepts#definitions) | `schedule` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `schedule` には `job` または `assets` の選択が含まれる場合があります |
+| [config](concepts#config) | `job` または `assets` に `config` が含まれている場合、`schedule` に `config` が含まれることがあります。 |
+| [job](concepts#job) | `schedule` には `job` または `assets` の選択が含まれる場合があります |
+| [definitions](concepts#definitions) | デプロイするには、`schedule` を `definitions` に設定する必要があります。 |
 
 ### Sensor
 
@@ -630,11 +630,11 @@ A <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinit
     Sensor ==> Definitions
 ```
 
-A `sensor` is a way to trigger <PyObject section="jobs" module="dagster" object="job" pluralize /> or <PyObject section="assets" module="dagster" object="asset" pluralize /> when an event occurs, such as a file being uploaded or a push notification. In the cases that a job or asset is parameterized, the sensor can also be set with a run configuration (<PyObject section="config" module="dagster" object="RunConfig" />) to match.
+`sensor` は、ファイルのアップロードやプッシュ通知などのイベントが発生したときに <PyObject section="jobs" module="dagster" object="job" pluralize /> または <PyObject section="assets" module="dagster" object="asset" pluralize /> をトリガーする方法です。ジョブまたはアセットがパラメーター化されている場合は、一致するように実行構成 (<PyObject section="config" module="dagster" object="RunConfig" />) を使用してセンサーを設定することもできます。
 
 | Concept | Relationship |
 | --- | --- |
-| [asset](concepts#asset) | `sensor` may include a `job` or selection of `assets` |
-| [config](concepts#config) | `sensor` may include a `config` if the `job` or `assets` include a `config` |
-| [job](concepts#job) | `sensor` may include a `job` or selection of `assets` |
-| [definitions](concepts#definitions) | `sensor` must be set in a `definitions` to be deployed |
+| [asset](concepts#asset) | `sensor` には `job` または `assets` の選択が含まれる場合があります |
+| [config](concepts#config) | `job` または `assets` に `config` が含まれている場合、`sensor` に `config` が含まれることがあります。 |
+| [job](concepts#job) | `sensor` には `job` または `assets` の選択が含まれる場合があります |
+| [definitions](concepts#definitions) | `sensor` は、デプロイするには `definitions` で設定する必要があります |

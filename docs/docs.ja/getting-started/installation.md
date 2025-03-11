@@ -1,20 +1,20 @@
 ---
-title: Installing Dagster
+title: Dagsterのインストール
 description: Learn how to install Dagster
 sidebar_position: 20
 sidebar_label: Installation
 ---
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、次のことが必要です。
 
-- To install Python 3.9 or higher. **Python 3.12 is recommended**.
-- To install pip, a Python package installer
+- Python 3.9 以降をインストールします。**Python 3.12 が推奨されます**。
+- Pythonパッケージインストーラーpipをインストールする
 
-## Setting up a virtual environment
+## 仮想環境の設定
 
-After installing Python, it's recommended that you set up a virtual environment. This will isolate your Dagster project from the rest of your system and make it easier to manage dependencies.
+Python をインストールした後は、仮想環境を設定することをお勧めします。これにより、Dagster プロジェクトがシステムの他の部分から分離され、依存関係の管理が容易になります。
 
-There are many ways to do this, but this guide will use `venv` as it doesn't require additional dependencies.
+これを行う方法はたくさんありますが、このガイドでは追加の依存関係を必要としないため、`venv` を使用します。
 
 <Tabs>
 <TabItem value="macos" label="MacOS">
@@ -32,42 +32,42 @@ source venv\Scripts\activate
 </Tabs>
 
 :::tip
-**Looking for something more powerful than `venv`?** Try `pyenv` or `pyenv-virtualenv`, which can help you manage multiple versions of Python on a single machine. Learn more in the [pyenv GitHub repository](https://github.com/pyenv/pyenv).
+**`venv` よりも強力なものをお探しですか?** `pyenv` または `pyenv-virtualenv` をお試しください。これらは、1 台のマシンで複数のバージョンの Python を管理するのに役立ちます。詳細については、[pyenv GitHub リポジトリ](https://github.com/pyenv/pyenv) を参照してください。
 :::
 
-## Installing Dagster
+## Dagsterのインストール
 
-To install Dagster in your virtual environment, open your terminal and run the following command:
+仮想環境に Dagster をインストールするには、ターミナルを開いて次のコマンドを実行します。
 
 ```bash
 pip install dagster dagster-webserver
 ```
 
-This command will install the core Dagster library and the webserver, which is used to serve the Dagster UI.
+このコマンドは、Dagster UI を提供するために使用されるコア Dagster ライブラリと Web サーバーをインストールします。
 
-## Verifying installation
+## インストールの確認
 
-To verify that Dagster is installed correctly, run the following command:
+Dagster が正しくインストールされていることを確認するには、次のコマンドを実行します:
 
 ```bash
 dagster --version
 ```
 
-The version numbers of Dagster should be printed in the terminal:
+Dagster のバージョン番号がターミナルに表示されるはずです:
 
 ```bash
 > dagster --version
 dagster, version 1.8.4
 ```
 
-## Troubleshooting
+## トラブルシューティング
 
-If you encounter any issues during the installation process:
+インストールプロセス中に問題が発生した場合:
 
-- Refer to the [Dagster GitHub repository](https://github.com/dagster-io/dagster) for troubleshooting, or
-- Reach out to the [Dagster community](/about/community)
+- トラブルシューティングについては、[Dagster GitHubリポジトリ](https://github.com/dagster-io/dagster)を参照してください。もしくは
+- [Dagster コミュニティ](/about/community) に連絡してください
 
-## Next steps
+## 次のステップ
 
-- Get up and running with your first Dagster project in the [Quickstart](/getting-started/quickstart)
-- Learn to [create data assets in Dagster](/guides/build/assets/defining-assets)
+- [クイックスタート](/getting-started/quickstart)で最初のDagsterプロジェクトを立ち上げて実行しましょう
+- [Dagster でデータアセットを作成する](/guides/build/assets/defining-assets) 方法を学ぶ

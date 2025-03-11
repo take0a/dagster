@@ -11,7 +11,7 @@ import ThemedImage from '@theme/ThemedImage';
 
 # Dagster へようこそ
 
-Dagster is a data orchestrator built for data engineers, with integrated lineage, observability, a declarative programming model, and best-in-class testability.
+Dagster は、統合された系統、可観測性、宣言型プログラミング モデル、クラス最高のテスト可能性を備えた、データ エンジニア向けに構築されたデータ オーケストレーターです。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/getting-started/hello-world.py" language="python" />
 <ThemedImage
