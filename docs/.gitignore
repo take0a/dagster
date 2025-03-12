@@ -16,6 +16,7 @@ sphinx/_build/
 # Production
 /build
 !/docs/guides/build
+!/docs.ja/guides/build
 !/versioned_docs/*/guides/build
 !/static/images/guides/build
 
