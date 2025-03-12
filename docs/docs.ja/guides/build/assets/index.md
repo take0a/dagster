@@ -1,17 +1,17 @@
 ---
-title: Assets
+title: アセット
 sidebar_position: 10
 ---
 
-An **asset** is an object in persistent storage, such as a table, file, or persisted machine learning model. An **asset definition** is a description, in code, of an asset that should exist and how to produce and update that asset.
+**アセット** は、テーブル、ファイル、永続的な機械学習モデルなどの永続ストレージ内のオブジェクトです。**アセット定義** は、存在する必要があるアセットとそのアセットを生成および更新する方法をコードで説明したものです。
 
-Asset definitions enable a declarative approach to data management, in which code is the source of truth on what data assets should exist and how those assets are computed. To learn how to define assets in code, see "[Defining assets](defining-assets)".
+アセット定義により、データ管理に対する宣言型アプローチが可能になります。このアプローチでは、コードは、どのようなデータ アセットが存在するべきか、およびそれらのアセットがどのように計算されるかに関する真実のソースとなります。コードでアセットを定義する方法については、「[アセットの定義](defining-assets)」を参照してください。
 
-**Materializing** an asset is the act of running its function and saving the results to persistent storage. You can materialize assets from the Dagster UI or by invoking [Python APIs](/api/python-api/).
+**アセットのマテリアライズ** とは、その関数を実行し、その結果を永続ストレージに保存する行為です。アセットは、Dagster UI から、または [Python API](/api/python-api/) を呼び出してマテリアライズできます。
 
 :::note Assets vs ops
 
-Behind the scenes, the Python function in an asset is an [op](/guides/build/ops). A crucial distinction between asset definitions and ops is that asset definitions know about their dependencies, while ops do not. Ops aren't connected to dependencies until they're placed inside a graph. You do not need to use ops to use Dagster.
+舞台裏では、アセット内の Python 関数は [op](/guides/build/ops) です。アセット定義と ops の重要な違いは、アセット定義は依存関係を認識しますが、ops は認識しないという点です。ops は、グラフ内に配置されない限り、依存関係に接続されません。Dagster を使用するために ops を使用する必要はありません。
 
 :::
 

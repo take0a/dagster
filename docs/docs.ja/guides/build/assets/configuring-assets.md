@@ -1,46 +1,46 @@
 ---
-title: Configuring assets in the UI
+title: UI でアセットを構成する
 sidebar_position: 600
 ---
 
-The Dagster UI is commonly used to manually materialize assets, backfill historical data, debug a production issue, or some other one-off task.
+Dagster UI は、アセットを手動で実現したり、履歴データをバックフィルしたり、運用上の問題をデバッグしたり、その他の 1 回限りのタスクを実行したりするためによく使用されます。
 
-You'll often want to be able to adjust parameters when materializing assets, which can be accomplished with Dagster's asset configuration system.
+アセットを具体化するときにパラメータを調整したい場合がよくありますが、これは Dagster のアセット構成システムで実現できます。
 
 :::note
 
-This article assume familiarity with [assets](index.md) and [Pydantic](https://docs.pydantic.dev/latest/).
+この記事では、[アセット](index.md) と [Pydantic](https://docs.pydantic.dev/latest/) に精通していることを前提としています。
 
 :::
 
 
-## Making assets configurable
+## アセットを構成可能にする
 
-For an asset to be configurable, first define a [run configuration schema](/guides/operate/configuration/run-configuration) that inherits from the Dagster <PyObject section="config" module="dagster" object="Config" /> class.
+アセットを構成可能にするには、まず Dagster <PyObject section="config" module="dagster" object="Config" /> クラスから継承する[実行構成スキーマ](/guides/operate/configuration/run-configuration)を定義します。
 
-For example, you want to allow your team to change the lookback time window for the computation that materializes an asset:
+たとえば、アセットを実体化する計算のルックバック時間ウィンドウをチームが変更できるようにしたいとします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/configuring-assets/config-schema.py" language="python" />
 
-## Specifying config using the Dagster UI
+## Dagster UI を使用して構成を指定する
 
 :::note
 
-Run configurations reference an <PyObject section="ops" module="dagster" object="op" /> which is the underlying compute associated with an asset.
+実行構成は、アセットに関連付けられた基礎となるコンピューティングである <PyObject section="ops" module="dagster" object="op" /> を参照します。
 
 :::
 
-When launching a run using the Launchpad in the UI, you can provide a run config file as YAML or JSON that overrides the default configuration for your asset.
+UI の Launchpad を使用して実行を開始するときに、アセットのデフォルト構成をオーバーライドする実行構成ファイルを YAML または JSON として提供できます。
 
-On any page with a **Materialize** button, click the **options menu > Open launchpad** to access the Launchpad:
+**Materialize** ボタンのあるページで、**options menu > Open launchpad** をクリックして Launchpad にアクセスします。
 
 ![Highlighted Open Launchpad option in the Materialize options menu of the Dagster UI](/images/guides/build/assets/configuring-assets-in-the-ui/open-launchpad.png)
 
-This will open the Launchpad, where you can scaffold the config, customize its values, and manually materialize the asset:
+これにより、Launchpad が開き、構成の土台を作って、その値をカスタマイズし、アセットを手動でマテリアライズできます。
 
 ![Dagster Launchpad that configures an asset to have a lookback window of 7 days](/images/guides/build/assets/configuring-assets-in-the-ui/look-back-7.png)
 
-## Next steps
+## 次は
 
-- Learn more about Dagster [assets](/guides/build/assets/)
-- Connect to external [APIs](/guides/build/external-resources/connecting-to-apis) and [databases](/guides/build/external-resources/connecting-to-databases) with resources
+- Dagster [アセット](/guides/build/assets/) について詳しく見る
+- リソースを使用して外部の [API](/guides/build/external-resources/connecting-to-apis) および [データベース](/guides/build/external-resources/connecting-to-databases) に接続する

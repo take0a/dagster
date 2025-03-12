@@ -1,65 +1,65 @@
 ---
-title: External assets
+title: 外部アセット
 sidebar_position: 500
 ---
 
-One of Dagster's goals is to present a single unified lineage of all of the data assets in an organization, even if those assets are orchestrated by systems other than Dagster.
+Dagster の目標の 1 つは、たとえそれらの資産が Dagster 以外のシステムによってオーケストレーションされている場合でも、組織内のすべてのデータ資産の単一の統一された系統を提示することです。
 
-With **external assets**, you can model assets orchestrated by other systems natively within Dagster, ensuring you have a comprehensive catalog of your organization's data. You can also create new data assets downstream of these external assets.
+**外部アセット** を使用すると、他のシステムによってオーケストレーションされたアセットを Dagster 内でネイティブにモデル化できるため、組織のデータの包括的なカタログを確保できます。また、これらの外部アセットの下流に新しいデータ アセットを作成することもできます。
 
-Unlike native assets, Dagster can't materialize external assets directly or put them in a schedule. In these cases, an external system must inform Dagster when an external asset is updated.
+ネイティブ アセットとは異なり、Dagster は外部アセットを直接実現したり、スケジュールに組み込んだりすることはできません。このような場合、外部アセットが更新されたときに外部システムが Dagster に通知する必要があります。
 
-For example, external assets could be:
+たとえば、外部アセットには次のようなものがあります。
 
-- Files in a data lake that are populated by a bespoke internal tool
-- A CSV file delivered daily by SFTP from a partner
-- A table in a data warehouse populated by another orchestrator
+- 特注の内部ツールによって入力されたデータレイク内のファイル
+- パートナーからSFTPで毎日配信されるCSVファイル
+- 別のオーケストレーターによって入力されたデータ ウェアハウス内のテーブル
 
 :::note
 
-This article assumes familiarity with [assets](/guides/build/assets/defining-assets) and [sensors](/guides/automate/sensors).
+この記事では、[アセット](/guides/build/assets/defining-assets) と [センサー](/guides/automate/sensors) に精通していることを前提としています。
 
 :::
 
-## Defining external assets
+## 外部アセットの定義
 
-Let's say you have a partner who sends you raw transaction data by SFTP on an almost daily basis. This data is later cleaned and stored in an internal data lake.
+ほぼ毎日、SFTP で生のトランザクションデータを送信するパートナーがいるとします。このデータは後でクリーンアップされ、内部データレイクに保存されます。
 
-Because the raw transaction data isn't materialized by Dagster, it makes sense to model it as an external asset. The following example accomplishes this by using `AssetSpec`:
+生のトランザクション データは Dagster によって具体化されないため、外部アセットとしてモデル化するのが合理的です。次の例では、`AssetSpec` を使用してこれを実現します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/creating-external-assets.py" language="python" />
 
-Refer to the <PyObject section="assets" module="dagster" object="AssetSpec" /> for the parameters you can provide to an external asset.
+外部アセットに提供できるパラメータについては、<PyObject section="assets" module="dagster" object="AssetSpec" /> を参照してください。
 
-## Recording materializations and metadata
+## マテリアライゼーションとメタデータの記録
 
-When an external asset is modeled in Dagster, you also need to inform Dagster whenever the external asset is updated. You should also include any relevant metadata about the asset, such as the time it was last updated.
+外部アセットが Dagster でモデル化されている場合は、外部アセットが更新されるたびに Dagster に通知する必要があります。また、最終更新時刻など、アセットに関する関連メタデータも含める必要があります。
 
-There are two main ways to do this:
+これを行うには主に 2 つの方法があります:
 
-- Pulling external assets events with sensors
-- Pushing external asset events using Dagster's REST API
+- センサーによる外部アセットのイベントの取得
+- Dagster の REST API を使用して外部アセット イベントをプッシュする
 
-### Pulling with sensors
+### センサーによるプル
 
-You can use a Dagster [sensor](/guides/automate/sensors) to regularly poll the external system and pull information about the external asset into Dagster.
+Dagster [センサー](/guides/automate/sensors) を使用すると、外部システムを定期的にポーリングし、外部アセットに関する情報を Dagster に取り込むことができます。
 
-For example, here's how you would poll an external system like an SFTP server to update an external asset whenever the file is changed.
+たとえば、ファイルが変更されるたびに SFTP サーバーなどの外部システムをポーリングして外部アセットを更新する方法は次のとおりです。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/pulling-with-sensors.py" language="python" />
 
-Refer to the [Sensors guide](/guides/automate/sensors) for more information about sensors.
+センサーの詳細については、[センサーガイド](/guides/automate/sensors)を参照してください。
 
-### Pushing with the REST API
+### REST API によるプッシュ
 
-You can inform Dagster that an external asset has materialized by pushing the event from an external system to the REST API. The following examples demonstrate how to inform Dagster that a materialization of the `raw_transactions` external asset has occurred.
+外部システムから REST API にイベントをプッシュすることで、外部アセットが実現されたことを Dagster に通知できます。次の例は、`raw_transactions` 外部アセットの実現が発生したことを Dagster に通知する方法を示しています。
 
-The required headers for the REST API depend on whether you're using Dagster+ or OSS. Use the tabs to view an example API request for each Dagster type.
+REST API に必要なヘッダーは、Dagster+ を使用しているか OSS を使用しているかによって異なります。タブを使用して、各 Dagster タイプの API リクエストの例を表示します。
 
 <Tabs>
 <TabItem value="dagster-plus" label="Dagster+">
 
-Authentication headers are required if using Dagster+. The request should made to your Dagster+ organization and a specific deployment in the organization.
+Dagster+ を使用する場合は、認証ヘッダーが必要です。リクエストは、Dagster+ 組織と組織内の特定のデプロイに対して行う必要があります。
 
 ```shell
 curl \
@@ -79,7 +79,7 @@ curl \
 </TabItem>
 <TabItem value="oss" label="OSS">
 
-Authentication headers aren't required if using Dagster OSS. The request should be pointed at your open source URL, which is `http://localhost:3000` in this example.
+Dagster OSS を使用する場合、認証ヘッダーは必要ありません。リクエストはオープン ソース URL (この例では `http://localhost:3000`) を指す必要があります。
 
 ```shell
 curl \
@@ -98,10 +98,10 @@ curl \
 </TabItem>
 </Tabs>
 
-Refer to the [External assets REST API documentation](/api/python-api/external-assets-rest-api) for more information.
+詳細については、[外部アセット REST API ドキュメント](/api/python-api/external-assets-rest-api)を参照してください。
 
-## Modeling a graph of external assets
+## 外部アセットのグラフのモデリング
 
-Like regular Dagster assets, external assets can have dependencies. This is useful when you want to model an entire data pipeline orchestrated by another system.
+通常の Dagster アセットと同様に、外部アセットにも依存関係を設定できます。これは、別のシステムによってオーケストレーションされるデータ パイプライン全体をモデル化する場合に役立ちます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/dag-of-external-assets.py" language="python" />

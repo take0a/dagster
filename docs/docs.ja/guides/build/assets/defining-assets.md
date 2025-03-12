@@ -1,54 +1,54 @@
 ---
-title: 'Defining assets'
+title: 'アセットの定義'
 sidebar_position: 100
 ---
 
-The most common way to create a data asset in Dagster is by annotating a Python function with an <PyObject section="assets" module="dagster" object="asset" decorator /> decorator. The function computes the contents of the asset, such as a database table or file.
+Dagster でデータ アセットを作成する最も一般的な方法は、Python 関数に <PyObject section="assets" module="dagster" object="asset" decorator /> デコレータを注釈として付けることです。この関数は、データベース テーブルやファイルなどのアセットの内容を計算します。
 
-An asset definition includes the following:
+アセットの定義には、次のものが含まれます:
 
-* An `AssetKey`, which is a handle for referring to the asset.
-* A set of upstream asset keys, which refer to assets that the contents of the asset definition are derived from.
-* A Python function, which is responsible for computing the contents of the asset from its upstream dependencies and storing the results.
+* アセットを参照するためのハンドルである `AssetKey`。
+* アセット定義の内容の派生元となるアセットを参照する、アップストリームのアセットのキーのセット。
+* 上流の依存関係からアセットの内容を計算し、結果を保存する役割を担う Python 関数。
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To run the code in this article, you'll need to install Dagster. For more information, see the [Installation guide](/getting-started/installation).
+この記事のコードを実行するには、Dagster をインストールする必要があります。詳細については、[インストールガイド](/getting-started/installation) を参照してください。
 
 </details>
 
-## Asset decorators
+## アセットデコレータ
 
-Dagster has four types of asset decorators:
+Dagsterには4種類のアセットデコレータがある:
 
-| Decorator            | Description                                                                                                                    |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `@asset`             | Defines a single asset. [See an example](#single-asset).                                                                       |
-| `@multi_asset`       | Outputs multiple assets from a single operation. [See an example](#multi-asset).                                               |
-| `@graph_asset`       | Outputs a single asset from multiple operations without making each operation itself an asset. [See an example](#graph-asset). |
-| `@graph_multi_asset` | Outputs multiple assets from multiple operations                                                                               |
+| Decorator            | Description                                                          |
+| -------------------- | -------------------------------------------------------------------- |
+| `@asset`             | 単一のアセットを定義します。[例を参照](#single-asset)。                 |
+| `@multi_asset`       | 1 回の操作で複数のアセットを出力します。[例を参照](#multi-asset)。       |
+| `@graph_asset`       | 各操作自体をアセットにせずに、複数の操作から単一のアセットを出力します。[例を参照](#graph-asset)。 |
+| `@graph_multi_asset` | 複数の操作から複数の資産を出力する                                      |
 
-## Defining operations that create a single asset \{#single-asset}
+## 単一のアセットを作成する操作の定義 \{#single-asset}
 
-The simplest way to define a data asset in Dagster is by using the <PyObject section="assets" module="dagster" object="asset" decorator />  decorator. This decorator marks a Python function as an asset.
+Dagster でデータ アセットを定義する最も簡単な方法は、<PyObject section="assets" module="dagster" object="asset" decorator /> デコレータを使用することです。このデコレータは、Python 関数をアセットとしてマークします。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/asset_decorator.py" language="python" title="Using @dg.asset decorator" />
 
-In this example, `weekly_sales_report` is an asset that logs its output. Dagster automatically tracks its dependencies and handles its execution within the pipeline.
+この例では、`weekly_sales_report` は出力をログに記録するアセットです。Dagster は依存関係を自動的に追跡し、パイプライン内で実行を処理します。
 
-## Defining operations that create multiple assets \{#multi-asset}
+## 複数のアセットを作成する操作の定義 \{#multi-asset}
 
-When you need to generate multiple assets from a single operation, you can use the <PyObject section="assets" module="dagster" object="multi_asset" decorator />  decorator. This allows you to output multiple assets while maintaining a single processing function, which could be useful for:
+1 回の操作で複数のアセットを生成する必要がある場合は、<PyObject section="assets" module="dagster" object="multi_asset" decorator /> デコレータを使用できます。これにより、単一の処理関数を維持しながら複数のアセットを出力できるため、次のような場合に役立ちます:
 
-- Making a single call to an API that updates multiple tables
-- Using the same in-memory object to compute multiple assets
+- 複数のテーブルを更新する API を 1 回呼び出す
+- 同じメモリ内オブジェクトを使用して複数のアセットを計算する
 
-In this example, `my_multi_asset` produces two assets: `asset_one` and `asset_two`. Each is derived from the same function, which makes it easier to handle related data transformations together:
+この例では、`my_multi_asset` は `asset_one` と `asset_two` の 2 つのアセットを生成します。それぞれは同じ関数から派生しているため、関連するデータ変換をまとめて処理しやすくなります。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/multi_asset_decorator.py" language="python" title="Using @dg.multi_asset decorator" />
 
-This example could be expressed as:
+この例は次のように表現できます:
 
 ```mermaid
 %%{
@@ -70,15 +70,15 @@ flowchart LR
   multi(my_multi_asset) --> two(asset_two)
 ```
 
-## Defining multiple operations that create a single asset \{#graph-asset}
+## 単一のアセットを作成する複数の操作を定義する \{#graph-asset}
 
-For cases where you need to perform multiple operations to produce a single asset, you can use the <PyObject section="assets" module="dagster" object="graph_asset" decorator /> decorator. This approach encapsulates a series of operations and exposes them as a single asset, allowing you to model complex pipelines while only exposing the final output.
+複数の操作を実行して単一のアセットを生成する必要がある場合は、<PyObject section="assets" module="dagster" object="graph_asset" decorator /> デコレータを使用できます。このアプローチでは、一連の操作をカプセル化して単一のアセットとして公開するため、最終出力のみを公開しながら複雑なパイプラインをモデル化できます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/graph_asset_decorator.py" language="python" title="Using @dg.graph_asset decorator" />
 
-In this example, `complex_asset` is an asset that's the result of two operations: `step_one` and `step_two`. These steps are combined into a single asset, abstracting away the intermediate representations.
+この例では、`complex_asset` は `step_one` と `step_two` の 2 つの操作の結果であるアセットです。これらのステップは 1 つのアセットに結合され、中間表現が抽象化されます。
 
-This example could be expressed as:
+この例は次のように表現できます:
 
 ```mermaid
 %%{
@@ -103,9 +103,9 @@ flowchart LR
 
 ## Asset context
 
-When defining an asset, you can optionally provide a first parameter, `context`. When this parameter is supplied, Dagster will supply an <PyObject section="execution" module="dagster" object="AssetExecutionContext" /> object to the body of the asset which provides access to system information like loggers and the current run ID.
+アセットを定義するときに、オプションで最初のパラメータ `context` を指定できます。このパラメータを指定すると、Dagster は <PyObject section="execution" module="dagster" object="AssetExecutionContext" /> オブジェクトをアセットの本体に提供し、ロガーや現在の実行 ID などのシステム情報へのアクセスを提供します。
 
-For example, to access the logger and log an info message:
+たとえば、ロガーにアクセスして情報メッセージを記録するには、次のようにします:
 
 ```python
 from dagster import AssetExecutionContext, asset
@@ -120,7 +120,7 @@ def context_asset(context: AssetExecutionContext):
 
 ## Asset code versions
 
-Assets may be assigned a `code_version`. Versions let you help Dagster track what assets haven't been re-materialized since their code has changed, and avoid performing redundant computation.
+アセットには `code_version` が割り当てられる場合があります。バージョンを使用すると、コードが変更されてから再マテリアライズされていないアセットを Dagster が追跡し、冗長な計算の実行を回避できます。
 
 ```python
 
@@ -131,16 +131,16 @@ def asset_with_version():
 
 ```
 
-When an asset with a code version is materialized, the generated `AssetMaterialization` is tagged with the version. The UI will indicate when an asset has a different code version than the code version used for its most recent materialization.
+コード バージョンを持つアセットがマテリアライズされると、生成された `AssetMaterialization` にバージョンがタグ付けされます。アセットのコード バージョンが、最新のマテリアライズに使用されたコード バージョンと異なる場合、UI にそのことが示されます。
 
-## Assets with multi-part keys
+## マルチパートキーを持つアセット
 
-Assets are often objects in systems with hierarchical namespaces, like filesystems. Because of this, it often makes sense for an asset key to be a list of strings, instead of just a single string. To define an asset with a multi-part asset key, use the `key_prefix` argument with a list of strings. The full asset key is formed by prepending the `key_prefix` to the asset name (which defaults to the name of the decorated function).
+アセットは、多くの場合、ファイルシステムのような階層的な名前空間を持つシステム内のオブジェクトです。このため、アセット キーは、単一の文字列ではなく、文字列のリストであることが理にかなっています。複数の部分から成るアセット キーを持つアセットを定義するには、文字列のリストを指定した `key_prefix` 引数を使用します。完全なアセット キーは、アセット名 (デフォルトでは、装飾された関数の名前) の前に `key_prefix` を追加することで形成されます。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/multi_component_asset_key.py" startAfter="start_marker" endBefore="end_marker" />
 
-## Next steps
+## 次は
 
-- Enrich Dagster's built-in data catalog with [asset metadata](/guides/build/assets/metadata-and-tags/)
-- Learn to [pass data between assets](/guides/build/assets/passing-data-between-assets)
-- Learn to use a [factory pattern](/guides/build/assets/creating-asset-factories) to create multiple, similar assets
+- Dagster の組み込みデータカタログを [アセットメタデータ](/guides/build/assets/metadata-and-tags/)で強化します。
+- [アセット間でデータを渡す](/guides/build/assets/passing-data-between-assets)方法を学ぶ
+- [ファクトリーパターン](/guides/build/assets/creating-asset-factories)を使用して、複数の類似したアセットを作成する方法を学びます。

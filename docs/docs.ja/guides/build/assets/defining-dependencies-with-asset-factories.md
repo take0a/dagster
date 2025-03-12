@@ -1,35 +1,35 @@
 ---
-title: 'Defining dependencies with asset factories'
+title: 'アセットファクトリーによる依存関係の定義'
 sidebar_position: 800
 ---
 
-In data engineering, it's often helpful to reuse code to define similar assets. For example, you may want to represent every file in a directory as an asset.
+データエンジニアリングでは、コードを再利用して類似のアセットを定義すると便利なことがよくあります。たとえば、ディレクトリ内のすべてのファイルをアセットとして表したい場合があります。
 
-Additionally, you may be serving stakeholders who aren't familiar with Python or Dagster. They may prefer interacting with assets using a domain-specific language (DSL) built on top of a configuration language such as YAML.
+さらに、Python や Dagster に慣れていない利害関係者にサービスを提供する場合もあります。そのような利害関係者は、YAML などの構成言語上に構築されたドメイン固有言語 (DSL) を使用してアセットを操作することを好む場合があります。
 
-Using an asset factory reduces complexity and creates a pluggable entry point to define additional assets.
+アセット ファクトリを使用すると複雑さが軽減され、追加のアセットを定義するためのプラグ可能なエントリ ポイントが作成されます。
 
 :::note
 
-This guide assumes familiarity with [asset factories](creating-asset-factories).
-
+このガイドでは、[アセットファクトリ](creating-asset-factories) に精通していることを前提としています。
 :::
 
 ---
 
-## Building an asset factory in Python
+## Python でアセットファクトリーを構築する
 
-Imagine a data analytics team that maintains a large number of tables. To support analytics needs, the team runs queries and constructs new tables from the results.
+多数のテーブルを管理するデータ分析チームを想像してください。分析のニーズをサポートするために、チームはクエリを実行し、結果から新しいテーブルを構築します。
 
-Each table can be represented in YAML by a name, upstream asset dependencies, and a query:
+各テーブルは、名前、アップストリーム アセットの依存関係、およびクエリによって YAML で表すことができます。
+
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/table_definitions.yaml" language="yaml" title="YAML Definition for ETL tables" />
 
-Here's how you might add Python logic to define these assets in Dagster.
+Dagster でこれらのアセットを定義するために Python ロジックを追加する方法は次のとおりです。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/asset-factory-with-deps.py" language="python" title="Programmatically defining asset dependencies" />
 
-## Defining dependencies between factory assets and regular assets
+## ファクトリーアセットと通常のアセット間の依存関係を定義する
 
-Here's how you might add Python logic to define a Dagster asset downstream of factory assets:
+ファクトリアセットの下流に Dagster アセットを定義する Python ロジックを追加する方法は次のとおりです。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/asset_downstream_of_factory_assets.py" language="python" title="Defining dependencies between factory assets and regular assets" />

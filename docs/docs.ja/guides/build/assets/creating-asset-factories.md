@@ -1,74 +1,75 @@
 ---
-title: Creating asset factories
+title: アセットファクトリーの作成
 sidebar_position: 700
 ---
 
-Often in data engineering, you'll find yourself needing to create a large number of similar assets. For example:
+データ エンジニアリングでは、多くの場合、類似したアセットを大量に作成する必要があります。例:
 
-- A set of database tables all have the same schema
-- A set of files in a directory all have the same format
+- データベーステーブルのセットはすべて同じスキーマを持つ
+- ディレクトリ内のファイルのセットはすべて同じ形式である
 
-It's also possible you're serving stakeholders who aren't familiar with Python or Dagster. They may prefer interacting with assets using a domain-specific language (DSL) built on top of a configuration language such as YAML.
+Python や Dagster に慣れていない利害関係者にサービスを提供している可能性もあります。彼らは、YAML などの構成言語上に構築されたドメイン固有言語 (DSL) を使用してアセットを操作することを好むかもしれません。
 
-The asset factory pattern can solve both of these problems.
+アセットファクトリパターンは、これらの問題の両方を解決できます。
 
 :::note
 
-This article assumes familiarity with:
+この記事は、以下の知識があることを前提としています:
+
   - [Assets](/guides/build/assets/defining-assets)
   - [Resources](/guides/build/external-resources/)
-  - SQL, YAML, and Amazon Web Services (AWS) S3
-  - [Pydantic](https://docs.pydantic.dev/latest/) and [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/)
+  - SQL, YAML と Amazon Web Services (AWS) S3
+  - [Pydantic](https://docs.pydantic.dev/latest/) と [Jinja2](https://jinja.palletsprojects.com/en/3.1.x/)
 
 :::
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To run the code in this article, you'll need to create and activate a Python virtual environment and install the following dependencies:
+この記事のコードを実行するには、Python 仮想環境を作成してアクティブ化し、次の依存関係をインストールする必要があります:
 
    ```bash
    pip install dagster dagster-aws duckdb pyyaml pydantic
    ```
 </details>
 
-## Building an asset factory in Python
+## Python でアセットファクトリーを構築する
 
-Let's imagine a team that often has to perform the same repetitive ETL task: download a CSV file from S3, run a basic SQL query on it, and then upload the result as a new file back to S3.
+同じ繰り返しの ETL タスクを頻繁に実行する必要があるチームを想像してみましょう。S3 から CSV ファイルをダウンロードし、それに対して基本的な SQL クエリを実行し、その結果を新しいファイルとして S3 にアップロードします。
 
-To automate this process, you might define an asset factory in Python like the following:
+このプロセスを自動化するには、次のように Python でアセットファクトリを定義します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/python-asset-factory.py" language="python" />
 
-The asset factory pattern is essentially a function that takes in some configuration and returns `dg.Definitions`.
+アセットファクトリパターンは、基本的に、何らかの構成を受け取り、`dg.Definitions` を返す関数です。
 
-## Configuring an asset factory with YAML
+## YAML を使用したアセットファクトリーの設定
 
-Now, the team wants to be able to configure the asset factory using YAML instead of Python, with a file like this:
+現在、チームは次のようなファイルを使用して、Python ではなく YAML を使用してアセット ファクトリーを構成できるようにしたいと考えています。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/etl_jobs.yaml" language="yaml" title="etl_jobs.yaml" />
 
-To implement this, parse the YAML file and use it to create the S3 resource and ETL jobs:
+これを実装するには、YAML ファイルを解析し、それを使用して S3 リソースと ETL ジョブを作成します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/simple-yaml-asset-factory.py" language="python" />
 
-## Improving usability with Pydantic and Jinja
+## PydanticとJinjaでユーザビリティを向上
 
-There are a few problems with the current approach:
+現在のアプローチにはいくつか問題があります:
 
-1. **The YAML file isn't type-checked**, so it's easy to make mistakes that will cause cryptic `KeyError`s
-2. **The YAML file contains secrets**. Instead, it should reference environment variables.
+1. **YAMLファイルは型チェックされていない**ため、不可解な`KeyError`を引き起こす間違いを犯しやすい。
+2. **YAML ファイルにはシークレットが含まれています**。代わりに、環境変数を参照する必要があります。
 
-To solve these problems, you can use Pydantic to define a schema for the YAML file and Jinja to template the YAML file with environment variables.
+これらの問題を解決するには、Pydantic を使用して YAML ファイルのスキーマを定義し、Jinja を使用して環境変数を使用して YAML ファイルをテンプレート化します。
 
-Here's what the new YAML file might look like. Note how Jinja templating is used to reference environment variables:
+新しい YAML ファイルは次のようになります。環境変数を参照するために Jinja テンプレートがどのように使用されているかに注意してください。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/etl_jobs_with_jinja.yaml" language="yaml" title="etl_jobs.yaml" />
 
-And the Python implementation:
+Python 実装は次のとおりです:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/advanced-yaml-asset-factory.py" language="python" />
 
-## Next steps
+## 次は
 
 TODO

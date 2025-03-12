@@ -1,120 +1,115 @@
 ---
-title: Passing data between assets
+title: アセット間でのデータの受け渡し
 description: Learn how to pass data between assets in Dagster
 sidebar_position: 300
 ---
 
-In Dagster, assets are the building blocks of your data pipeline and it's common to want to pass data between them. This guide will help you understand how to pass data between assets.
+Dagster では、アセットはデータ パイプラインの構成要素であり、アセット間でデータを渡すことが一般的です。このガイドは、アセット間でデータを渡す方法を理解するのに役立ちます。
 
-There are three ways of passing data between assets:
+アセット間でデータを渡す方法は 3 つあります:
 
-- Explicitly managing data, by using external storage
-- Implicitly managing data, using I/O managers
-- Avoiding passing data between assets altogether by combining several tasks into a single asset
+- 外部ストレージを使用してデータを明示的に管理する
+- I/Oマネージャを使用してデータを暗黙的に管理する
+- 複数のタスクを1つのアセットにまとめることで、アセット間でのデータの受け渡しを完全に回避する
 
-This guide walks through all three methods.
+このガイドでは、3 つの方法すべてについて説明します。
 
 :::note
 
-This article assumes familiarity with [assets](/guides/build/assets/defining-assets) and[resources](/guides/build/external-resources/)
+この記事は、[アセット](/guides/build/assets/defining-assets)と[リソース](/guides/build/external-resources/)に精通していることを前提としています。
 
 :::
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To run the code in this article, you'll need to create and activate a Python virtual environment and install the following dependencies:
+この記事のコードを実行するには、Python 仮想環境を作成してアクティブ化し、次の依存関係をインストールする必要があります:
 
    ```bash
    pip install dagster dagster-duckdb-pandas
    ```
 </details>
 
-## Move data assets explicitly using external storage
+## 外部ストレージを使用してデータアセットを明示的に移動する
 
-A common and recommended approach to passing data between assets is explicitly managing data using external storage. This example pipeline uses a SQLite database as external storage:
+アセット間でデータを渡すための一般的な推奨アプローチは、外部ストレージを使用してデータを明示的に管理することです。このサンプル パイプラインでは、外部ストレージとして SQLite データベースを使用します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-explicit.py" language="python" title="Using External Storage" />
 
-In this example, the first asset opens a connection to the SQLite database and writes data to it. The second asset opens a connection to the same database and reads data from it. The dependency between the first asset and the second asset is made explicit through the asset's `deps` argument.
+この例では、最初のアセットは SQLite データベースへの接続を開き、そこにデータを書き込みます。2 番目のアセットは同じデータベースへの接続を開き、そこからデータを読み取ります。最初のアセットと 2 番目のアセット間の依存関係は、アセットの `deps` 引数によって明示的に示されます。
 
-The benefits of this approach are:
+このアプローチの利点は次のとおりです:
 
-- It's explicit and easy to understand how data is stored and retrieved
-- You have maximum flexibility in terms of how and where data is stored, for example, based on environment
+- データの保存方法と取得方法が明確でわかりやすい
+- 環境に応じてデータの保存方法や場所を柔軟に選択できる
 
-The downsides of this approach are:
+このアプローチの欠点は次のとおりです:
 
-- You need to manage connections and transactions manually
-- You need to handle errors and edge cases, for example, if the database is down or if a connection is closed
+- 接続とトランザクションを手動で管理する必要がある
+- データベースがダウンしている場合や接続が閉じている場合など、エラーやエッジケースを処理する必要がある
 
-## Move data between assets implicitly using I/O managers
+## I/O マネージャーを使用してアセット間でデータを暗黙的に移動する
 
-Dagster's I/O managers are a powerful feature that manages data between assets by defining how data is read from and written to external storage. They help separate business logic from I/O operations, reducing boilerplate code and making it easier to change where data is stored.
+Dagster の I/O マネージャーは、外部ストレージからのデータの読み取りと外部ストレージへのデータの書き込み方法を定義することで、アセット間のデータを管理する強力な機能です。ビジネス ロジックを I/O 操作から分離し、定型コードを削減して、データの保存場所の変更を容易にします。
 
-I/O managers handle:
+I/O マネージャーは以下を処理します:
 
-1. **Input**: Reading data from storage and loading it into memory for use by dependent assets.
-2. **Output**: Writing data to the configured storage location.
+1. **入力**: ストレージからデータを読み取り、依存するアセットで使用するためにメモリにロードします。
+2. **出力**: 設定された保存場所にデータを書き込みます。
 
-For a deeper understanding of I/O managers, check out the [Understanding I/O managers](/guides/build/io-managers/) guide.
+I/O マネージャーについてさらに詳しく知りたい場合は、[I/O マネージャーについて](/guides/build/io-managers/) ガイドをご覧ください。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-io-manager.py" language="python" title="Using I/O managers" />
 
-In this example, a `DuckDBPandasIOManager` is instantiated to run using a local file. The I/O manager handles both reading and writing to the database.
+この例では、`DuckDBPandasIOManager` がインスタンス化され、ローカルファイルを使用して実行されます。I/O マネージャーは、データベースの読み取りと書き込みの両方を処理します。
 
 :::warning
 
-This example works for local development, but in a production environment
-each step would execute in a separate environment and would not have access to the same file system. Consider a cloud-hosted environment for production purposes.
+この例はローカル開発では機能しますが、運用環境では各ステップが別の環境で実行され、同じファイルシステムにアクセスすることはできません。運用目的でクラウド ホスト環境を検討してください。
 
 :::
 
-The `people()` and `birds()` assets both write their dataframes to DuckDB
-for persistent storage. The `combined_data()` asset requests data from both assets by adding them as parameters to the function, and the I/O manager handles the reading them from DuckDB and making them available to the `combined_data` function as dataframes. **Note**: When you use I/O managers you don't need to manually add the asset's dependencies through the `deps` argument.
+`people()` アセットと `birds()` アセットは両方とも、永続的なストレージのためにデータフレームを DuckDB に書き込みます。`combined_data()` アセットは、両方のアセットからデータを要求し、それらを関数にパラメータとして追加します。I/O マネージャーは、それらを DuckDB から読み取り、それらをデータフレームとして `combined_data` 関数で使用できるようにします。**注**: I/O マネージャーを使用する場合、`deps` 引数を使用してアセットの依存関係を手動で追加する必要はありません。
 
-The benefits of this approach are:
+このアプローチの利点は次のとおりです:
 
-- The reading and writing of data is handled by the I/O manager, reducing boilerplate code
-- It's easy to swap out different I/O managers based on environments without changing the underlying asset computation
+- データの読み取りと書き込みはI/Oマネージャによって処理され、定型コードが削減されます。
+- 基盤となるアセット計算を変更することなく、環境に基づいて異なるI/Oマネージャーを簡単に交換できます。
 
-The downsides of this approach are:
+このアプローチの欠点は次のとおりです:
 
-- The I/O manager approach is less flexible should you need to customize how data is read or written to storage
-- Some decisions may be made by the I/O manager for you, such as naming conventions that can be hard to override.
+- I/Oマネージャのアプローチは、データの読み取りやストレージへの書き込み方法をカスタマイズする必要がある場合、柔軟性が低くなります。
+- 上書きするのが難しい命名規則など、一部の決定は I/O マネージャーによって自動的に行われる場合があります。
 
-## Avoid passing data between assets by combining assets
+## アセットを組み合わせることでアセット間のデータの受け渡しを回避する
 
-In some cases, you may find that you can avoid passing data between assets by
-carefully considering how you have modeled your pipeline:
+場合によっては、パイプラインのモデル化方法を慎重に検討することで、アセット間でのデータの受け渡しを回避できることがあります:
 
-Consider this example:
+次の例を考えてみましょう:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-avoid.py" language="python" title="Avoid Passing Data Between Assets" />
 
-This example downloads a zip file from Google Drive, unzips it, and loads the data into a Pandas DataFrame. It relies on each asset running on the same file system to perform these operations.
+この例では、Google ドライブから zip ファイルをダウンロードし、解凍して、データを Pandas DataFrame に読み込みます。これらの操作を実行するには、同じファイル システムで実行されている各アセットに依存します。
 
-The assets are modeled as tasks, rather than as data assets. For more information on the difference between tasks and data assets, check out the [assets guide](/guides/build/assets/).
+アセットは、データアセットではなく、タスクとしてモデル化されます。タスクとデータアセットの違いの詳細については、[アセットガイド](/guides/build/assets/) を参照してください。
 
-In this refactor, the `download_files`, `unzip_files`, and `load_data` assets are combined into a single asset, `my_dataset`. This asset downloads the files, unzips them, and loads the data into a data warehouse.
+このリファクタリングでは、`download_files`、`unzip_files`、および `load_data` アセットが 1 つのアセット `my_dataset` に結合されます。このアセットは、ファイルをダウンロードして解凍し、データをデータ ウェアハウスに読み込みます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-rewrite-assets.py" language="python" title="Avoid Passing Data Between Assets" />
 
-This approach still handles passing data explicitly, but no longer does it across assets,
-instead within a single asset. This pipeline still assumes enough disk and
-memory available to handle the data, but for smaller datasets, it can work well.
+このアプローチでは、データの受け渡しは引き続き明示的に処理されますが、アセット間で行われるのではなく、単一のアセット内で行われます。このパイプラインでは、依然としてデータを処理するために十分なディスクとメモリが利用可能であると想定されますが、データセットが小さい場合はうまく機能します。
 
-The benefits of this approach are:
+このアプローチの利点は次のとおりです:
 
-- All the computation that defines how an asset is created is contained within a single asset, making it easier to understand and maintain
-- It can be faster than relying on external storage, and doesn't require the overhead of setting up additional compute instances.
+- アセットの作成方法を定義するすべての計算が単一のアセット内に含まれているため、理解と維持が容易になる
+- 外部ストレージに依存するよりも高速であり、追加のコンピューティング インスタンスをセットアップするオーバーヘッドも必要ない
 
-The downsides of this approach are:
+このアプローチの欠点は次のとおりです:
 
-- It makes certain assumptions about how much data is being processed
-- It can be difficult to reuse functions across assets, since they're tightly coupled to the data they produce
-- It may not always be possible to swap functionality based on the environment you are running in. For example, if you are running in a cloud environment, you may not have access to the local file system.
+- 処理されるデータ量について一定の仮定を立てている
+- 関数は生成するデータと密接に結びついているため、アセット間で関数を再利用するのは難しい場合がある
+- 実行している環境によっては、機能を交換できない場合があります。たとえば、クラウド環境で実行している場合は、ローカルファイルシステムにアクセスできない可能性があります。
 
-## Related resources
+## 関連するリソース
 
 {/* TODO: add links to relevant API documentation here. */}

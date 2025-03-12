@@ -1,164 +1,164 @@
 ---
-title: "Asset metadata"
+title: "アセットメタデータ"
 ---
 
-[Assets](/guides/build/assets/) feature prominently in the Dagster UI. Attaching information to assets allows you to understand where they're stored, what they contain, and how they should be organized.
+[アセット](/guides/build/assets/) は Dagster UI で重要な位置を占めています。アセットに情報を添付すると、アセットがどこに保存されているか、何が含まれているか、どのように整理するかを理解できます。
 
-Using metadata in Dagster, you can:
+Dagsterのメタデータを使用すると:
 
-- Attach ownership information
-- Organize assets with tags
-- Attach rich, complex information such as a Markdown description, a table schema, or a time series
-- Link assets with their source code
+- 所有者情報を付与する
+- タグでアセットを整理する
+- Markdownの説明、テーブルスキーマ、時系列などのリッチで複雑な情報を添付する
+- アセットをソースコードにリンクする
 
-## Adding owners to assets \{#owners}
+## アセットへの所有者の追加 \{#owners}
 
-In a large organization, it's important to know which individuals and teams are responsible for a given data asset.
+大規模な組織では、特定のデータ資産に対してどの個人とチームが責任を負っているかを把握することが重要です。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/owners.py" language="python" />
 
 :::note
 
-`owners` must either be an email address or a team name prefixed by `team:` (e.g. `team:data-eng`).
+`owners` は、電子メール アドレスか、`team:` で始まるチーム名 (例: `team:data-eng`) のいずれかである必要があります。
 
 :::
 
 :::tip
-With Dagster+ Pro, you can create asset-based alerts that automatically notify an asset's owners when triggered. Refer to the [Dagster+ alert documentation](/dagster-plus/features/alerts) for more information.
+Dagster+ Pro を使用すると、トリガーされるとアセットの所有者に自動的に通知するアセットベースのアラートを作成できます。詳細については、[Dagster+ アラートのドキュメント](/dagster-plus/features/alerts)を参照してください。
 :::
 
-## Organizing assets with tags \{#tags}
+## タグによるアセットの整理 \{#tags}
 
-[**Tags**](tags) are the primary way to organize assets in Dagster. You can attach several tags to an asset when it's defined, and they will appear in the UI. You can also use tags to search and filter for assets in the Asset catalog. They're structured as key-value pairs of strings.
+[**タグ**](tags) は、Dagster でアセットを整理するための主な方法です。アセットを定義するときに複数のタグを添付することができ、それらは UI に表示されます。また、タグを使用してアセットカタログ内のアセットを検索およびフィルタリングすることもできます。タグは、文字列のキーと値のペアとして構造化されています。
 
-Here's an example of some tags you might apply to an asset:
+アセットに適用できるタグの例を次に示します:
 
 ```python
 {"domain": "marketing", "pii": "true"}
 ```
 
-As with `owners`, you can pass a dictionary of tags to the `tags` argument when defining an asset:
+`owners` と同様に、アセットを定義するときに、`tags` 引数にタグの辞書を渡すことができます:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/tags.py" language="python" />
 
-Keep in mind that tags must contain only strings as keys and values. Additionally, the Dagster UI will render tags with the empty string as a "label" rather than a key-value pair.
+タグにはキーと値として文字列のみを含める必要があることに注意してください。また、Dagster UI は、空の文字列を含むタグをキーと値のペアではなく「ラベル」としてレンダリングします。
 
-## Attaching metadata to assets \{#attaching-metadata}
+## アセットにメタデータを添付する \{#attaching-metadata}
 
-**Metadata** allows you to attach rich information to the asset, like a Markdown description, a table schema, or a time series. Metadata is more flexible than tags, as it can store more complex information.
+**メタデータ** を使用すると、Markdown の説明、テーブル スキーマ、時系列などの豊富な情報をアセットに添付できます。メタデータはタグよりも柔軟性が高く、より複雑な情報を保存できます。
 
-Metadata can be attached to an asset at definition time, when the code is first imported, or at runtime when an asset is materialized.
+メタデータは、定義時、コードが最初にインポートされたとき、または実行時にアセットが実体化されたときにアセットに添付できます。
 
-### At definition time \{#definition-time-metadata}
+### 定義時 \{#definition-time-metadata}
 
-Using definition metadata to describe assets can make it easy to provide context for you and your team. This metadata could be descriptions of the assets, the types of assets, or links to relevant documentation.
+定義メタデータを使用してアセットを記述すると、自分やチームにコンテキストを簡単に提供できます。このメタデータには、アセットの説明、アセットの種類、または関連するドキュメントへのリンクなどがあります。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/definition-metadata.py" language="python" />
 
-To learn more about the different types of metadata you can attach, see the <PyObject section="metadata" module="dagster" object="MetadataValue" /> API docs.
+添付できるさまざまな種類のメタデータの詳細については、<PyObject section="metadata" module="dagster" object="MetadataValue" /> API ドキュメントを参照してください。
 
-Some metadata keys will be given special treatment in the Dagster UI. See the [Standard metadata types](#standard-metadata-types) section for more information.
+一部のメタデータキーは、Dagster UI で特別な扱いを受けます。詳細については、[標準メタデータ タイプ](#standard-metadata-types) セクションを参照してください。
 
-### At runtime \{#runtime-metadata}
+### 実行時 \{#runtime-metadata}
 
-With runtime metadata, you can surface information about an asset's materialization, such as how many records were processed or when the materialization occurred. This allows you to update an asset's information when it changes and track historical metadata as a time series.
+ランタイム メタデータを使用すると、処理されたレコードの数やマテリアライズが発生した時期など、アセットのマテリアライズに関する情報を表示できます。これにより、アセットの情報が変更されたときに更新し、履歴メタデータを時系列として追跡できます。
 
-To attach materialization metadata to an asset, returning a <PyObject section="assets" module="dagster" object="MaterializeResult" /> object containing a `metadata` parameter. This parameter accepts a dictionary of key/value pairs, where keys must be a string.
+アセットにマテリアライゼーション メタデータを添付するには、メタデータ パラメータを含む <PyObject section="assets" module="dagster" object="MaterializeResult" /> オブジェクトを返します。このパラメータは、キーと値のペアの辞書を受け入れます。キーは文字列である必要があります。
 
-When specifying values, use the <PyObject section="metadata" module="dagster" object="MetadataValue" /> utility class to wrap the data to ensure it displays correctly in the UI. Values can also be primitive Python types, which Dagster will convert to the appropriate `MetadataValue`.
+値を指定するときは、<PyObject section="metadata" module="dagster" object="MetadataValue" /> ユーティリティ クラスを使用してデータをラップし、UI に正しく表示されるようにします。値は Python のプリミティブ型にすることもでき、Dagster はそれを適切な `MetadataValue` に変換します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/runtime-metadata.py" language="python" />
 
 :::note
 
-Numerical metadata is treated as a time series in the Dagster UI.
+数値メタデータは、Dagster UI では時系列として扱われます。
 
 :::
 
-## Standard metadata types \{#standard-metadata-types}
+## 標準メタデータ型 \{#standard-metadata-types}
 
-The following metadata keys are given special treatment in the Dagster UI.
+次のメタデータ キーは、Dagster UI で特別な処理が行われます。
 
-| Key                           | Description                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dagster/uri`                 | **Type:** `str` <br/><br/> The URI for the asset, for example: "s3://my_bucket/my_object"                                                                                                                                                                                                                                                                               |
-| `dagster/column_schema`       | **Type:** <PyObject section="metadata" module="dagster" object="TableSchema" /> <br/><br/> For an asset that's a table, the schema of the columns in the table. Refer to the [Table and column metadata](#table-column) section for details.                                                                                                                                                      |
-| `dagster/column_lineage`      | **Type:** <PyObject section="metadata" module="dagster" object="TableColumnLineage" /><br/><br/> For an asset that's a table, the lineage of column inputs to column outputs for the table. Refer to the [Table and column metadata](#table-column) section for details.                                                                                                                         |
-| `dagster/row_count`           | **Type:** `int` <br/><br/> For an asset that's a table, the number of rows in the table. Refer to the Table metadata documentation for details.                                                                                                                                                                                                                 |
-| `dagster/partition_row_count` | **Type:** `int` <br/><br/> For a partition of an asset that's a table, the number of rows in the partition.                                                                                                                                                                                                                                                     |
-| `dagster/table_name`          | **Type:** `str` <br/><br/> A unique identifier for the table/view, typically fully qualified. For example, my_database.my_schema.my_table                                                                                                                                                                                                                       |
-| `dagster/code_references`     | **Type:** <PyObject section="metadata" module="dagster" object="CodeReferencesMetadataValue" /><br/><br/> A list of [code references](#source-code) for the asset, such as file locations or references to GitHub URLs. Should only be provided in definition-level metadata, not materialization metadata. |
+| Key                           | Description                                |
+| ----------------------------- | ------------------------------------------ |
+| `dagster/uri`                 | **Type:** `str` <br/><br/> アセットの URI。例: "s3://my_bucket/my_object"|
+| `dagster/column_schema`       | **Type:** <PyObject section="metadata" module="dagster" object="TableSchema" /> <br/><br/> テーブルであるアセットの場合、テーブル内の列のスキーマ。詳細については、[テーブルと列のメタデータ](#table-column)セクションを参照してください。             |
+| `dagster/column_lineage`      | **Type:** <PyObject section="metadata" module="dagster" object="TableColumnLineage" /><br/><br/> テーブルであるアセットの場合、テーブルの列入力から列出力までの系統。詳細については、[テーブルと列のメタデータ](#table-column)セクションを参照してください。  |
+| `dagster/row_count`           | **Type:** `int` <br/><br/> テーブルであるアセットの場合、テーブル内の行数。詳細については、テーブル メタデータのドキュメントを参照してください。   |
+| `dagster/partition_row_count` | **Type:** `int` <br/><br/> テーブルであるアセットのパーティションの場合、パーティション内の行数。   |
+| `dagster/table_name`          | **Type:** `str` <br/><br/>テーブル/ビューの一意の識別子。通常は完全修飾です。例: my_database.my_schema.my_table    |
+| `dagster/code_references`     | **Type:** <PyObject section="metadata" module="dagster" object="CodeReferencesMetadataValue" /><br/><br/> ファイルの場所や GitHub URL への参照など、アセットの [コード参照](#source-code) のリスト。マテリアライゼーション メタデータではなく、定義レベルのメタデータでのみ提供する必要があります。 |
 
-## Table and column metadata \{#table-column}
+## テーブルと列のメタデータ \{#table-column}
 
-Two of the most powerful metadata types are <PyObject section="metadata" module="dagster" object="TableSchema" /> and <PyObject section="metadata" module="dagster" object="TableColumnLineage" />. These metadata types allow stakeholders to view the schema of a table right within Dagster, and, in Dagster+, navigate to the [Asset catalog](/dagster-plus/features/asset-catalog/) with the column lineage.
+最も強力なメタデータ タイプのうち 2 つは、<PyObject section="metadata" module="dagster" object="TableSchema" /> と <PyObject section="metadata" module="dagster" object="TableColumnLineage" /> です。これらのメタデータ タイプを使用すると、関係者は Dagster 内でテーブルのスキーマを表示し、Dagster+ で列の系統を使用して [Asset カタログ](/dagster-plus/features/asset-catalog/)に移動できます。
 
-### Table schema metadata \{#table-schema}
+### テーブルスキーマメタデータ \{#table-schema}
 
-The following example attaches [table and column schema metadata](table-metadata) at both definition time and runtime:
+次の例では、定義時と実行時の両方で [テーブルと列のスキーマ メタデータ](table-metadata) をアタッチします。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/table-schema-metadata.py" language="python" />
 
-There are several data types and constraints available on <PyObject section="metadata" module="dagster" object="TableColumn" /> objects. For more information, see the API documentation.
+<PyObject section="metadata" module="dagster" object="TableColumn" /> オブジェクトでは、いくつかのデータ型と制約を使用できます。詳細については、API ドキュメントを参照してください。
 
-### Column lineage metadata \{#column-lineage}
+### 列系統メタデータ \{#column-lineage}
 
 :::tip
-Many integrations such as [dbt](/integrations/libraries/dbt/) automatically attach column lineage metadata out-of-the-box.
+[dbt](/integrations/libraries/dbt/) などの多くの統合では、列系統メタデータがすぐに使用できる状態で自動的に添付されます。
 :::
 
-[Column lineage metadata](column-level-lineage) is a powerful way to track how columns in a table are derived from other columns:
+[列系統メタデータ](column-level-lineage)は、テーブル内の列が他の列からどのように派生しているかを追跡するための強力な方法です:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/table-column-lineage-metadata.py" language="python" title="Table column lineage metadata" />
 
 :::tip
-Dagster+ provides rich visualization and navigation of column lineage in the Asset catalog. Refer to the [Dagster+ documentation](/dagster-plus/features/asset-catalog/) for more information.
+Dagster+ は、アセット カタログ内の列の系統の豊富な視覚化とナビゲーションを提供します。詳細については、[Dagster+ のドキュメント](/dagster-plus/features/asset-catalog/)を参照してください。
 :::
 
-## Linking assets with source code \{#source-code}
+## アセットをソースコードにリンクする \{#source-code}
 
 import Beta from '../../../../partials/\_Beta.md';
 
 <Beta />
 
 
-To link assets with their source code, you can attach a code reference. Code references are a type of metadata that allow you to easily view those assets' source code from the Dagster UI, both in local development and in production.
+アセットをソース コードにリンクするには、コード参照を添付します。コード参照は、ローカル開発と本番環境の両方で、Dagster UI からアセットのソース コードを簡単に表示できるようにするメタデータの一種です。
 
 :::tip
 
-Many integrations, such as [dbt](/integrations/libraries/dbt/reference#attaching-code-reference-metadata), support this capability.
+[dbt](/integrations/libraries/dbt/reference#attaching-code-reference-metadata) などの多くの統合がこの機能をサポートしています。
 
 :::
 
-### Attaching Python code references for local development \{#python-references}
+### ローカル開発用の Python コード参照を添付する \{#python-references}
 
-Dagster can automatically attach code references to assets during local development:
+Dagster は、ローカル開発中にアセットにコード参照を自動的に添付できます:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/python-local-references.py" language="python" />
 
-### Customizing code references \{#custom-references}
+### コード参照のカスタマイズ \{#custom-references}
 
-If you want to customize how code references are attached - such as when you are building [domain-specific languages with asset factories](/guides/build/assets/creating-asset-factories) - you can manually add the `dagster/code_references` metadata to asset definitions:
+コード参照の添付方法をカスタマイズしたい場合（[アセットファクトリを使用したドメイン固有言語](/guides/build/assets/creating-asset-factories)を構築する場合など）は、アセット定義に `dagster/code_references` メタデータを手動で追加できます:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/custom-local-references.py" language="python" />
 
-### Attaching code references in production \{#production-references}
+### 本番環境でのコード参照の添付 \{#production-references}
 
 <Tabs>
   <TabItem value="dagster-plus" label="Dagster+">
 
-Dagster+ can automatically annotate assets with code references to source control, such as GitHub or GitLab.
+Dagster+ は、GitHub や GitLab などのソース管理へのコード参照を使用してアセットに自動的に注釈を付けることができます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/plus-references.py" language="python" />
 
 </TabItem>
 <TabItem value="dagster-open-source" label="OSS">
 
-If you aren't using Dagster+, you can annotate your assets with code references to source control, but it requires manual mapping:
+Dagster+ を使用していない場合は、ソースコントロールへのコード参照を使用してアセットに注釈を付けることができますが、手動でのマッピングが必要です。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/oss-references.py" language="python" />
 
-`link_code_references_to_git` currently supports GitHub and GitLab repositories. It also supports customization of how file paths are mapped; see the `AnchorBasedFilePathMapping` API docs for more information.
+`link_code_references_to_git` は現在、GitHub および GitLab リポジトリをサポートしています。また、ファイル パスのマッピング方法のカスタマイズもサポートしています。詳細については、`AnchorBasedFilePathMapping` API ドキュメントを参照してください。
 
 </TabItem>
 </Tabs>

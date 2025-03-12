@@ -1,44 +1,44 @@
 ---
-title: 'Asset selection syntax'
+title: 'アセット選択構文'
 sidebar_position: 1000
 ---
 
-# Asset selection syntax
+# アセット選択構文
 
-This reference contains information about the syntax for asset selections, including a variety of examples for selecting assets and their downstream and upstream dependencies.
+このリファレンスには、アセットの選択の構文に関する情報が含まれており、アセットとそのダウンストリームおよびアップストリームの依存関係を選択するためのさまざまな例が含まれています。
 
-Asset selection may be used to:
+アセット選択は次の目的で使用できます:
 
-- Define a job that targets a selection of assets
-- Select a set of assets to view in the Dagster UI
-- Select a set of assets for an adhoc run
+- 選択したアセットを対象とするジョブを定義する
+- Dagster UIで表示するアセットのセットを選択します
+- アドホック実行のアセットセットを選択する
 
-## Syntax usage
+## 構文の使用法
 
-A query includes a list of clauses. Clauses are separated by commas, except in the case of the `selection` parameter of the following methods. In these cases, each clause is a separate element in a list:
+クエリには句のリストが含まれます。句は、次のメソッドの `selection` パラメータの場合を除き、コンマで区切られます。これらの場合、各句はリスト内の個別の要素になります。
 
 - `define_asset_job`
 - `materialize`
 - `materialize_to_memory`
 
-| Clause syntax         | Description                                                                                                                                                                                                                                                                                                               |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ASSET_KEY`           | Selects a single asset by asset key. [See an example](#single-asset).                                                                                                                                                                                                                                                                                       |
-| `COMPONENT/COMPONENT` | Selects an asset key with multiple components, such as a prefix, where slashes (`/`) are inserted between components. [See an example](#multiple-key-components).                    |
-| `*ASSET_KEY`          | Selects an asset and all of its upstream dependencies. [See an example](#all-upstream).                                                                                                                                                                                                                             |
-| `ASSET_KEY*`          | Selects an asset and all of its downstream dependencies. [See an example](#all-downstream).                                                                                                                                                                                                                           |
-| `+ASSET_KEY`          | Selects an asset and one layer upstream of the asset. Including multiple `+`s will select that number of upstream layers from the asset. Any number of `+`s is supported. [See an example](#specific-upstream).    |
-| `ASSET_KEY+`          | Selects an asset and one layer downstream of the asset. Including multiple `+`s will select that number of downstream layers from the asset. Any number of `+`s is supported. [See an example](#specific-downstream). |
+| Clause syntax         | Description               |
+| --------------------- | ----------------------------- |
+| `ASSET_KEY`           | アセット キーで単一のアセットを選択します。[例を参照](#single-asset)。 |
+| `COMPONENT/COMPONENT` | プレフィックスなどの複数のコンポーネントを持つアセット キーを選択します。コンポーネント間にはスラッシュ (`/`) が挿入されます。[例を参照](#multiple-key-components)。  |
+| `*ASSET_KEY`          | アセットとそのすべての上流依存関係を選択します。[例を参照](#all-upstream)。  |
+| `ASSET_KEY*`          | アセットとその下流の依存関係すべてを選択します。[例を参照](#all-downstream)。 |
+| `+ASSET_KEY`          | アセットとそのアセットの上流レイヤーを 1 つ選択します。複数の `+` を含めると、その数の上流レイヤーがアセットから選択されます。任意の数の `+` がサポートされています。[例を参照](#specific-upstream)。 |
+| `ASSET_KEY+`          | アセットとそのアセットの下流の 1 つのレイヤーを選択します。複数の `+` を含めると、その数の下流レイヤーがアセットから選択されます。任意の数の `+` がサポートされています。[例を参照](#specific-downstream)。 |
 
-## Examples
+## 例
 
-The examples in this section use the following asset graph from the [Dagster University Essentials project](https://github.com/dagster-io/project-dagster-university) to demonstrate how to use the selection syntax:
+このセクションの例では、[Dagster University Essentials プロジェクト](https://github.com/dagster-io/project-dagster-university) の次のアセットグラフを使用して、選択構文の使用方法を示します:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/asset-selection-syntax-dag.png)
 
-### Selecting a single asset \{#single-asset}
+### 単一のアセットを選択する \{#single-asset}
 
-To select a single asset, use the asset's asset key. This example selects the `taxi_zones_file` asset:
+単一のアセットを選択するには、アセットのアセット キーを使用します。この例では、`taxi_zones_file` アセットを選択します:
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -62,7 +62,7 @@ dagster asset materialize --select taxi_zones_file
 taxi_zones_file
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-single-asset.png)
 
@@ -71,11 +71,11 @@ Which would result in the following asset graph:
 
 ---
 
-### Selecting assets with multiple key components \{#multiple-key-components}
+### 複数のキーコンポーネントを持つアセットの選択 \{#multiple-key-components}
 
-To select an asset with a key containing multiple components, such as a prefix, insert slashes (`/`) between the components.
+プレフィックスなどの複数のコンポーネントを含むキーを持つアセットを選択するには、コンポーネント間にスラッシュ (`/`) を挿入します。
 
-This example selects the `manhattan/manhattan_stats` asset, which is defined below:
+この例では、以下のように定義されている `manhattan/manhattan_stats` アセットを選択します:
 
 ```python
 @asset(
@@ -107,7 +107,7 @@ dagster asset materialize --select manhattan/manhattan_stats
 manhattan/manhattan_stats
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-multiple-components.png)
 
@@ -116,11 +116,11 @@ Which would result in the following asset graph:
 
 ---
 
-### Selecting multiple assets \{#multiple-assets}
+### 複数のアセットを選択する \{#multiple-assets}
 
-To select multiple assets, use a list of the assets' asset keys. The assets don't have to be dependent on each other.
+複数のアセットを選択するには、アセットのアセット キーのリストを使用します。アセットは相互に依存している必要はありません。
 
-This example selects the `taxi_zones_file` and `taxi_trips_file` assets, which are defined below:
+この例では、以下のように定義されている `taxi_zones_file` アセットと `taxi_trips_file` アセットを選択します:
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -134,7 +134,7 @@ raw_data_job = define_asset_job(
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting multiple assets, enclose the list of asset keys in double quotes (`"`) and separate each asset key with a comma:
+複数のアセットを選択する場合は、アセット キーのリストを二重引用符 (`"`) で囲み、各アセット キーをコンマで区切ります:
 
 ```shell
 dagster asset list --select "taxi_zones_file,taxi_trips_file"
@@ -148,7 +148,7 @@ dagster asset materialize --select "taxi_zones_file,taxi_trips_file"
 taxi_zones_file taxi_trips_file
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-disjointed-lineages.png)
 
@@ -157,11 +157,11 @@ Which would result in the following asset graph:
 
 ---
 
-### Selecting an asset's entire lineage \{#full-lineage}
+### アセットの系統全体を選択する \{#full-lineage}
 
-To select an asset's entire lineage, add an asterisk (`*`) before and after the asset key in the query.
+資産の系統全体を選択するには、クエリ内の資産キーの前後にアスタリスク (`*`) を追加します。
 
-This example selects the entire lineage for the `taxi_zones` asset.
+この例では、`taxi_zones` アセットの系統全体を選択します。
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -173,7 +173,7 @@ taxi_zones_job = define_asset_job(name="taxi_zones_job", selection="*taxi_zones*
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting an asset's entire lineage using the CLI, enclose the asterisk (`*`) and the asset key in double quotes (`"`):
+CLI を使用してアセットの系統全体を選択する場合は、アスタリスク (`*`) とアセット キーを二重引用符 (`"`) で囲みます:
 
 ```shell
 dagster asset list --select "*taxi_zones*"
@@ -187,7 +187,7 @@ dagster asset materialize --select "*taxi_zones*"
 *taxi_zones*
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます。
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-entire-lineage.png)
 
@@ -196,13 +196,13 @@ Which would result in the following asset graph:
 
 ---
 
-### Selecting upstream dependencies
+### 上流依存関係の選択
 
-#### Selecting all upstream dependencies \{#all-upstream}
+#### すべての上流依存関係を選択 \{#all-upstream}
 
-To select an asset and all its upstream dependencies, add an asterisk (`*`) before the asset key in the query.
+アセットとそのすべての上流依存関係を選択するには、クエリ内のアセット キーの前にアスタリスク (`*`) を追加します。
 
-This example selects the `manhattan_map` asset and all its upstream dependencies.
+この例では、`manhattan_map` アセットとそのすべての上流依存関係を選択します。
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -214,7 +214,7 @@ manhattan_job = define_asset_job(name="manhattan_job", selection="*manhattan_map
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting an asset's dependencies using the CLI, enclose the asterisk (`*`) and the asset key in double quotes (`"`):
+CLI を使用してアセットの依存関係を選択する場合は、アスタリスク (`*`) とアセット キーを二重引用符 (`"`) で囲みます:
 
 ```shell
 dagster asset list --select "*manhattan_map"
@@ -228,18 +228,18 @@ dagster asset materialize --select "*manhattan_map"
 *manhattan_map
 ```
 
-Which would result in the following asset graph:
+結果として、次の資産グラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-upstream-dependencies.png)
 
 </TabItem>
 </Tabs>
 
-#### Selecting a specific number of upstream layers \{#specific-upstream}
+#### 特定の数の上流レイヤーを選択する \{#specific-upstream}
 
-To select an asset and multiple upstream layers, add a plus sign (`+`) for each layer you want to select before the asset key in the query.
+アセットと複数の上流レイヤーを選択するには、クエリ内のアセット キーの前に、選択するレイヤーごとにプラス記号 (`+`) を追加します。
 
-This example selects the `manhattan_map` asset and two upstream layers.
+この例では、`manhattan_map` アセットと 2 つの上流レイヤーを選択します。
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -251,7 +251,7 @@ manhattan_job = define_asset_job(name="manhattan_job", selection="++manhattan_ma
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting an asset's dependencies using the CLI, enclose the plus sign (`+`) and the asset key in double quotes (`"`):
+CLI を使用してアセットの依存関係を選択する場合は、プラス記号 (`+`) とアセット キーを二重引用符 (`"`) で囲みます:
 
 ```shell
 dagster asset list --select "++manhattan_map"
@@ -265,7 +265,7 @@ dagster asset materialize --select "++manhattan_map"
 ++manhattan_map
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます。
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-two-upstream-layers.png)
 
@@ -274,13 +274,13 @@ Which would result in the following asset graph:
 
 ---
 
-### Selecting downstream dependencies
+### 下流の依存関係の選択
 
-#### Selecting all downstream dependencies \{#all-downstream}
+#### すべての下流依存関係を選択 \{#all-downstream}
 
-To select an asset and all its downstream dependencies, add an asterisk (`*`) after the asset key in the query.
+アセットとその下流の依存関係をすべて選択するには、クエリ内のアセット キーの後にアスタリスク (`*`) を追加します。
 
-This example selects the `taxi_zones_file` asset and all its downstream dependencies.
+この例では、`taxi_zones_file` アセットとそのすべての下流依存関係を選択します。
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -292,7 +292,7 @@ taxi_zones_job = define_asset_job(name="taxi_zones_job", selection="taxi_zones_f
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting an asset's dependencies using the CLI, enclose the asterisk (`*`) and the asset key in double quotes (`"`):
+CLI を使用してアセットの依存関係を選択する場合は、アスタリスク (`*`) とアセット キーを二重引用符 (`"`) で囲みます:
 
 ```shell
 dagster asset list --select "taxi_zones_file*"
@@ -306,18 +306,18 @@ dagster asset materialize --select "taxi_zones_file*"
 taxi_zones_file*
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-downstream-dependencies.png)
 
 </TabItem>
 </Tabs>
 
-#### Selecting a specific number of downstream layers \{#specific-downstream}
+#### 特定の数の下流レイヤーを選択する \{#specific-downstream}
 
-To select an asset and multiple downstream layers, add plus sign (`+`) for each layer you want to select after the asset key in the query.
+アセットと複数の下流レイヤーを選択するには、クエリ内のアセット キーの後に、選択するレイヤーごとにプラス記号 (`+`) を追加します。
 
-This example selects the `taxi_trips_file` asset and two downstream layers.
+この例では、`taxi_trips_file` アセットと 2 つの下流レイヤーを選択します。
 
 <Tabs>
 <TabItem value="python" label="Python">
@@ -329,7 +329,7 @@ taxi_zones_job = define_asset_job(name="taxi_zones_job", selection="taxi_zones_f
 </TabItem>
 <TabItem value="cli" label="CLI">
 
-When selecting an asset's dependencies using the CLI, enclose the plus sign (`+`) and the asset key in double quotes (`"`):
+CLI を使用してアセットの依存関係を選択する場合は、プラス記号 (`+`) とアセット キーを二重引用符 (`"`) で囲みます:
 
 ```shell
 dagster asset list --select "taxi_zones_file++"
@@ -343,7 +343,7 @@ dagster asset materialize --select "taxi_zones_file++"
 taxi_zones_file++
 ```
 
-Which would result in the following asset graph:
+結果として、次のアセットグラフが作成されます:
 
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-two-downstream-layers.png)
 

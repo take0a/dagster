@@ -1,25 +1,25 @@
 ---
-title: Defining assets that depend on other assets
+title: 他のアセットに依存するアセットの定義
 sidebar_position: 200
 ---
 
-Asset definitions can depend on other asset definitions. The dependent asset is called the **downstream asset**, and the asset it depends on is the **upstream asset**.
+アセット定義は、他のアセット定義に依存できます。依存するアセットは **ダウンストリームアセット** と呼ばれ、依存するアセットは **アップストリームアセット** と呼ばれます。
 
-## Defining basic dependencies
+## 基本的な依存関係の定義
 
-You can define a dependency between two assets by passing the upstream asset to the `deps` parameter in the downstream asset's `@asset` decorator.
+上流アセットを下流アセットの `@asset` デコレータの `deps` パラメータに渡すことで、2 つのアセット間の依存関係を定義できます。
 
-In this example, the asset `sugary_cereals` creates a new table (`sugary_cereals`) by selecting records from the `cereals` table. Then the asset `shopping_list` creates a new table (`shopping_list`) by selecting records from `sugary_cereals`:
+この例では、アセット `sugary_cereals` は `cereals` テーブルからレコードを選択して新しいテーブル (`sugary_cereals`) を作成します。次に、アセット `shopping_list` は `sugary_cereals` からレコードを選択して新しいテーブル (`shopping_list`) を作成します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-dependencies/asset-dependencies.py" language="python" lineStart="6" lineEnd="20"/>
 
-## Defining asset dependencies across code locations
+## コードの場所をまたがるアセットの依存関係の定義
 
-Assets can depend on assets in different [code locations](/guides/deploy/code-locations/). In the following example, the `code_location_1_asset` asset produces a JSON string from a file in `code_location_1`:
+アセットは、異なる [コードの場所](/guides/deploy/code-locations/) にあるアセットに依存する場合があります。次の例では、`code_location_1_asset` アセットは `code_location_1` にあるファイルから JSON 文字列を生成します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-dependencies/asset-dependencies.py" language="python" lineStart="21" lineEnd="34"/>
 
-In `code_location_2`, we can reference `code_location_1_asset` it via its asset key:
+`code_location_2` では、アセット キーを介して `code_location_1_asset` を参照できます:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-dependencies/asset-dependencies.py" language="python" lineStart="34" lineEnd="46"/>
 
