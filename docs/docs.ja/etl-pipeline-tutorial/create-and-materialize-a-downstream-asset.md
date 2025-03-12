@@ -1,29 +1,29 @@
 ---
-title: Create and materialize a downstream asset
+title: 下流のアセットの作成と実体化
 description: Reference Assets as dependencies to other assets
 last_update:
   author: Alex Noonan
 sidebar_position: 20
 ---
 
-Now that we have the raw data loaded into DuckDB, we need to create a [downstream asset](/guides/build/assets/defining-assets-with-asset-dependencies) that combines the upstream assets together. In this step, you will:
+DuckDB に生のデータが読み込まれたので、上流のアセットを結合する [下流のアセット](/guides/build/assets/defining-assets-with-asset-dependencies) を作成する必要があります。このステップでは、次の操作を行います:
 
-- Create a downstream asset
-- Materialize that asset
+- 下流のアセットを作成する
+- そのアセットを実体化する
 
-## 1. Create a downstream asset
+## 1. 下流のアセットを作成する
 
-Now that we have all of our raw data loaded into DuckDB, our next step is to merge it together in a view composed of data from all three source tables.
+すべての生データが DuckDB に読み込まれたので、次のステップでは、3 つのソース テーブルすべてのデータで構成されるビューにデータを結合します。
 
-To accomplish this in SQL, we will bring in our `sales_data` table and then left join on `sales_reps` and `products` on their respective id columns. Additionally, we will keep this view concise and only have relevant columns for analysis.
+これを SQL で実現するには、`sales_data` テーブルを取り込み、`sales_reps` と `products` のそれぞれの ID 列を左結合します。さらに、このビューは簡潔に保ち、分析に関連する列のみにします。
 
-As you can see, the new `joined_data` asset looks a lot like our previous ones, with a few small changes. We put this asset into a different group. To make this asset dependent on the raw tables, we add the asset keys to the `deps` parameter in the asset definition.
+ご覧のとおり、新しい `joined_data` アセットは、いくつかの小さな変更を除いて、以前のものとよく似ています。このアセットを別のグループに配置します。このアセットを生のテーブルに依存させるには、アセット定義の `deps` パラメータにアセット キーを追加します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="89" lineEnd="132"/>
 
-## 2. Materialize the asset
+## 2. そのアセットを実体化する
 
-1. Add the joined_data asset to the Definitions object
+1. joined_data アセットを定義オブジェクトに追加する
 
   ```python
   defs = dg.Definitions(
@@ -36,8 +36,8 @@ As you can see, the new `joined_data` asset looks a lot like our previous ones, 
   )
   ```
 
-2. In the Dagster UI, reload definitions and materialize the `joined_data` asset.
+2. Dagster UI で定義を再読み込みし、`joined_data` アセットを実体化します。
 
-## Next steps
+## 次は
 
-- Continue this tutorial with [ensuring data quality with asset checks](ensure-data-quality-with-asset-checks).
+- このチュートリアルを続けて、[アセット チェックによるデータ品質の確保](ensure-data-quality-with-asset-checks) に進みます。

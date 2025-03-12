@@ -18,12 +18,12 @@ sidebar_class_name: hidden
 ## 以下の内容を学びます:
 
 - 推奨プロジェクト構造でDagsterプロジェクトを設定する
-- アセットの作成と実装
-- 依存アセットの作成と実装
+- アセットの作成と実体化
+- 依存アセットの作成と実体化
 - アセットチェックでデータ品質を確保
-- パーティション化したアセットの作成と実装
+- パーティション化したアセットの作成と実体化
 - パイプラインを自動化する
-- センサーアセットの作成と実装
+- センサーアセットの作成と実体化
 - プロジェクトが複雑になったらリファクタリングする
 
 <details>
@@ -74,13 +74,14 @@ sidebar_class_name: hidden
 
 ## Step 2: Dagsterプロジェクト構造を作成する
 
-Run the following command to create the project directories and files for this tutorial:
+次のコマンドを実行して、このチュートリアルのプロジェクトディレクトリとファイルを作成します:
 
    ```bash 
       dagster project from-example --example getting_started_etl_tutorial
    ```
 
-Your project should have this structure:
+プロジェクトはこのような構造にする必要があります:
+
 {/* vale off */}
 ```
 dagster-etl-tutorial/
@@ -99,39 +100,41 @@ dagster-etl-tutorial/
 {/* vale on */}
 
 :::info
-Dagster has several example projects you can install depending on your use case. To see the full list, run `dagster project list-examples`. For more information on the `dagster project` command, see the [API documentation](https://docs-preview.dagster.io/api/cli#dagster-project).
+Dagster には、ユースケースに応じてインストールできるサンプル プロジェクトがいくつかあります。完全なリストを表示するには、`dagster project list-examples` を実行します。`dagster project` コマンドの詳細については、[API ドキュメント](https://docs-preview.dagster.io/api/cli#dagster-project) を参照してください。
 ::: 
 
-### Dagster project structure
+### Dagster プロジェクトの構造
 
-#### dagster-etl-tutorial root directory
+#### dagster-etl-tutorial ルートディレクトリ
 
-In the `dagster-etl-tutorial` root directory, there are three configuration files that are common in Python package management. These files manage dependencies and identify the Dagster modules in the project.
+`dagster-etl-tutorial` ルート ディレクトリには、Python パッケージ管理でよく使用される 3 つの構成ファイルがあります。これらのファイルは依存関係を管理し、プロジェクト内の Dagster モジュールを識別します。
+
 | File | Purpose |
 |------|---------|
-| pyproject.toml | This file is used to specify build system requirements and package metadata for Python projects. It is part of the Python packaging ecosystem. |
-| setup.cfg | This file is used for configuration of your Python package. It can include metadata about the package, dependencies, and other configuration options. |
-| setup.py | This script is used to build and distribute your Python package. It is a standard file in Python projects for specifying package details. |
+| pyproject.toml | このファイルは、Python プロジェクトのビルド システム要件とパッケージ メタデータを指定するために使用されます。これは、Python パッケージ エコシステムの一部です。 |
+| setup.cfg | このファイルは、Python パッケージの構成に使用されます。パッケージ、依存関係、その他の構成オプションに関するメタデータを含めることができます。 |
+| setup.py | このスクリプトは、Python パッケージをビルドして配布するために使用されます。これは、パッケージの詳細を指定するための Python プロジェクトの標準ファイルです。 |
 
-#### etl_tutorial directory
+#### etl_tutorial ディレクトリ
 
-This is the main directory where you will define your assets, jobs, schedules, sensors, and resources.
+これは、アセット、ジョブ、スケジュール、センサー、リソースを定義するメインのディレクトリです。
+
 | File | Purpose |
 |------|---------|
-| definitions.py | This file is typically used to define jobs, schedules, and sensors. It organizes the various components of your Dagster project. This allows Dagster to load the definitions in a module. |
+| definitions.py | このファイルは通常、ジョブ、スケジュール、センサーを定義するために使用されます。このファイルは、Dagster プロジェクトのさまざまなコンポーネントを整理します。これにより、Dagster はモジュール内の定義を読み込むことができます。 |
 
-#### data directory
+#### data ディレクトリ
 
-The data directory contains the raw data files for the project. We will reference these files in our software-defined assets in the next step of the tutorial.
+データ ディレクトリには、プロジェクトの生データ ファイルが含まれています。チュートリアルの次の手順で、ソフトウェア定義アセット内のこれらのファイルを参照します。
 
-## Step 3: Launch the Dagster webserver
+## Step 3: Dagster ウェブサーバーを起動する
 
-To make sure Dagster and its dependencies were installed correctly, navigate to the project root directory and start the Dagster webserver:"
+Dagsterとその依存関係が正しくインストールされていることを確認するには、プロジェクトのルートディレクトリに移動し、Dagsterウェブサーバーを起動します:
 
    ```bash
    dagster dev
    ```
 
-## Next steps
+## 次は
 
-- Continue this tutorial by [creating and materializing assets](create-and-materialize-assets)
+- このチュートリアルを続けるには、[アセットの作成と実体化](create-and-materialize-assets)へ進んでください。

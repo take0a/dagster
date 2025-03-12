@@ -1,5 +1,5 @@
 ---
-title: Create and materialize assets
+title: アセットの作成と実体化
 description: Load project data and create and materialize assets
 last_update:
   author: Alex Noonan
@@ -7,17 +7,18 @@ sidebar_position: 10
 ---
 
 
-In the first step of the tutorial, you created your Dagster project with the raw data files. In this step, you will:
-- Create your initial Definitions object
-- Add a DuckDB resource
-- Build software-defined assets
-- Materialize your assets
+チュートリアルの最初のステップでは、生データのファイルを使用して Dagster プロジェクトを作成しました。このステップでは、次の操作を行います:
 
-## 1. Create a definitions object
+- 最初の定義オブジェクトを作成する
+- DuckDBリソースを追加する
+- ソフトウェア定義アセットの構築
+- アセットの実体化
 
-In Dagster, the <PyObject section="definitions" module="dagster" object="Definitions" /> object is where you define and organize various components within your project, such as assets and resources.
+## 1. 定義オブジェクトを作成する
 
-Open the `definitions.py` file in the `etl_tutorial` directory and copy the following code into it:
+Dagster では、 <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトは、アセットやリソースなど、プロジェクト内のさまざまなコンポーネントを定義および整理します。
+
+`etl_tutorial` ディレクトリの `definitions.py` ファイルを開き、次のコードをコピーします:
 
   ```python
   import json
@@ -33,9 +34,9 @@ Open the `definitions.py` file in the `etl_tutorial` directory and copy the foll
   )
   ```
 
-## 2. Define the DuckDB resource
+## 2. DuckDB リソースを定義する
 
-In Dagster, [Resources](/api/python-api/resources) are the external services, tools, and storage backends you need to do your job. For the storage backend in this project, we'll use [DuckDB](https://duckdb.org/), a fast, in-process SQL database that runs inside your application. We'll define it once in the definitions object, making it available to all assets and objects that need it.
+Dagster では、[リソース](/api/python-api/resources)は、ジョブを実行するために必要な外部サービス、ツール、およびストレージ バックエンドです。このプロジェクトのストレージ バックエンドには、アプリケーション内で実行される高速なインプロセス SQL データベースである [DuckDB](https://duckdb.org/) を使用します。これを定義オブジェクトで 1 回定義すると、必要なすべてのアセットとオブジェクトで使用できるようになります。
 
   ```python
   defs = dg.Definitions(
@@ -44,39 +45,39 @@ In Dagster, [Resources](/api/python-api/resources) are the external services, to
   )
   ```
 
-## 3. Create assets
+## 3. アセットを作成する
 
-Software defined <PyObject section="assets" module="dagster" object="asset" pluralize /> are the main building blocks in Dagster. An asset is composed of three components:
-1. Asset key or unique identifier.
-2. An op which is a function that is invoked to produce the asset.
-3. Upstream dependencies that the asset depends on. 
+ソフトウェア定義 <PyObject section="assets" module="dagster" object="asset" pluralize /> は、Dagster の主要な構成要素です。資産は次の 3 つのコンポーネントで構成されます:
 
-You can read more about our philosophy behind the [asset centric approach](https://dagster.io/blog/software-defined-assets).
+1. アセットキーまたは一意の識別子。
+2. アセットを生成するために呼び出される関数である op。
+3. アセットが依存する上流の依存関係。
 
-### Products asset
+[アセット中心のアプローチ](https://dagster.io/blog/software-defined-assets)の背後にある我々の哲学について詳しく読むことができます。
 
-First, we will create an asset that creates a DuckDB table to hold data from the products CSV. This asset takes the `duckdb` resource defined earlier and returns a <PyObject section="assets" module="dagster" object="MaterializeResult" /> object.
-Additionally, this asset contains metadata in the <PyObject section="assets" module="dagster" object="asset" decorator /> decorator parameters to help categorize the asset, and in the `return` block to give us a preview of the asset in the Dagster UI.
+### 製品アセット
 
-To create this asset, open the `definitions.py` file and copy the following code into it:
+まず、製品 CSV からのデータを保持するための DuckDB テーブルを作成するアセットを作成します。このアセットは、前に定義した `duckdb` リソースを取得し、<PyObject section="assets" module="dagster" object="MaterializeResult" /> オブジェクトを返します。さらに、このアセットには、アセットを分類するための <PyObject section="assets" module="dagster" object="asset" decorator /> デコレータパラメータと、Dagster UI でアセットのプレビューを表示するための `return` ブロックにメタデータが含まれています。
+
+このアセットを作成するには、`definitions.py` ファイルを開き、次のコードをコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="8" lineEnd="33"/>
 
-### Sales reps asset
+### 営業担当者アセット
 
-The code for the sales reps asset is similar to the product asset code. In the `definitions.py` file, copy the following code below the product asset code:
+営業担当者アセットのコードは、製品アセット コードと似ています。`definitions.py` ファイルで、製品アセット コードの下に次のコードをコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="35" lineEnd="61"/>
 
-### Sales data asset
+### 販売データアセット
 
-To add the sales data asset, copy the following code into your `definitions.py` file below the sales reps asset:
+販売データアセットを追加するには、次のコードを `definitions.py` ファイルの営業担当者アセットの下にコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="62" lineEnd="87"/>
 
-## 4. Add assets to the definitions object
+## 4. 定義オブジェクトにアセットを追加する
 
-Now to pull these assets into our Definitions object. Adding them to the Definitions object makes them available to the Dagster project. Add them to the empty list in the assets parameter.
+次に、これらのアセットを Definitions オブジェクトに取り込みます。これらを Definitions オブジェクトに追加すると、Dagster プロジェクトで使用できるようになります。これらを、assets パラメータの空のリストに追加します。
 
   ```python
   defs = dg.Definitions(
@@ -88,21 +89,22 @@ Now to pull these assets into our Definitions object. Adding them to the Definit
   )
   ```
 
-## 5. Materialize assets
+## 5. アセットを実体化する
 
-To materialize your assets:
-1. In a browser, navigate to the URL of the Dagster server that you started earlier.
-2. Navigate to **Deployment**.
-3. Click Reload definitions.
-4. Click **Assets**, then click "View global asset lineage" to see all of your assets.
+アセットを実体化するには:
+
+1. ブラウザで、先ほど起動した Dagster サーバーの URL に移動します。
+2. **Deployment** に移動します。
+3. Reload definitions をクリックします。
+4. **Assets** をクリックして、すべてのアセットを見るため、"View global asset lineage" をクリックします。
 
    ![2048 resolution](/images/tutorial/etl-tutorial/etl-tutorial-first-asset-lineage.png)
 
-5. Click materialize all.
-6. Navigate to the runs tab and select the most recent run. Here you can see the logs from the run. 
+5. materialize all をクリックします。
+6. runs タブに移動し、 the most recent run を選択します。ここで、実行のログを確認できます。
+
    ![2048 resolution](/images/tutorial/etl-tutorial/first-asset-run.png)
 
+## 次は
 
-## Next steps
-
-- Continue this tutorial with your [asset dependencies](create-and-materialize-a-downstream-asset)
+- [アセットの依存関係](create-and-materialize-a-downstream-asset)を使用してこのチュートリアルを続行します。

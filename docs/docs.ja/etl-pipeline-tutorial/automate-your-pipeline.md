@@ -1,45 +1,43 @@
 ---
-title: Automate your pipeline
+title: パイプラインの自動化
 description: Set schedules and utilize asset based automation
 last_update:
   author: Alex Noonan
 sidebar_position: 50
 ---
 
-There are several ways to automate pipelines and assets [in Dagster](/guides/automate). 
+[Dagster では](/guides/automate)、パイプラインとアセットを自動化する方法がいくつかあります。
 
-In this step you will:
+このステップでは次の操作を行います:
 
-- Add automation to assets to run when upstream assets are materialized.
-- Create a schedule to run a set of assets on a cron schedule.
+- 上流のアセットが実体化されるときに実行されるように、アセットに自動化を追加します。
+- cron スケジュールで一連のアセットを実行するスケジュールを作成します。
 
-## 1. Scheduled jobs
+## 1. スケジュールされたジョブ
 
-Cron-based schedules are common in data orchestration. For our pipeline, assume that updated CSVs are uploaded to a file location at a specific time every week by an external process.
+データ オーケストレーションでは、Cron ベースのスケジュールが一般的です。パイプラインでは、更新された CSV が毎週特定の時間に外部プロセスによってファイルの場所にアップロードされると想定します。
 
-Copy the following code underneath the `product performance` asset:
+`product performance` アセットの下に次のコードをコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="268" lineEnd="273"/>
 
-## 2. Automate asset materialization 
+## 2. アセットの実体化を自動化する
 
-Now, `monthly_sales_performance` should be executed once a month, but setting up an independent monthly schedule for this asset isn't exactly what we want -- if we do it naively, then this asset will execute exactly on the month boundary before the last week's data has had a chance to complete. We could delay the monthly schedule by a couple of hours to give the upstream assets a chance to finish, but what if the upstream computation fails or takes too long to complete? This is where we can use [declarative automation](/guides/automate/declarative-automation), which understands the status of an asset and all of its dependencies. 
+これで、`monthly_sales_performance` は月に 1 回実行されるはずですが、このアセットに独立した月次スケジュールを設定するのは、まさに私たちが望んでいることではありません。単純に設定すると、このアセットは、先週のデータが完了する前に、ちょうど月の境界で実行されます。月次スケジュールを数時間遅らせて上流のアセットが完了する時間を与えることもできますが、上流の計算が失敗したり、完了までに時間がかかりすぎたりする場合はどうなるでしょうか。ここで、アセットの状態とそのすべての依存関係を理解する [宣言型自動化](/guides/automate/declarative-automation) を使用できます。
 
-For `monthly_sales_performance`, we want it to update when all the dependencies are updated. To accomplish this, we will use the `eager` automation condition. Update the `monthly_sales_performance` asset to add the automation condition to the decorator:
+`monthly_sales_performance` については、すべての依存関係が更新されたときに更新されるようにします。これを実現するには、`eager` 自動化条件を使用します。`monthly_sales_performance` アセットを更新して、自動化条件をデコレータに追加します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="155" lineEnd="209"/>
 
-Do the same thing for `product_performance`:
+`product_performance` に対しても同じことを行います:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="216" lineEnd="267"/>
 
+## 3. 自動化を有効にしてテストする
 
+スケジュールができたので、それを Definitions オブジェクトに追加しましょう。
 
-## 3. Enable and test automations
-
-Now that we have our schedule, let's add it to our Definitions object.
-
-Your Definitions object should look like this:
+定義オブジェクトは次のようになります:
 
   ```python
   defs = dg.Definitions(
@@ -56,22 +54,23 @@ Your Definitions object should look like this:
   )
   ```
 
-The final step is to enable the automations in the UI.
+最後のステップは、UI で自動化を有効にすることです。
 
-To accomplish this:
-1. Navigate to the Automation page.
-2. Select all automations. 
-3. Using actions, start all automations. 
-4. Select the `analysis_update_job`.
-5. Test the schedule and evaluate for any time in the dropdown menu. 
-6. Open in Launchpad.
+これを実現するには:
 
-The job is now executing. 
+1. Automation ページへ遷移します。
+2. すべての自動化を選択します。
+3. アクションを使用して、すべての自動化を開始します。
+4. `analysis_update_job` を選択します。
+5. スケジュールをテストし、ドロップダウンメニューで任意の時間を評価します。
+6. Launchpad で開きます。
 
-Additionally, if you navigate to the Runs tab, you should see that materializations for `monthly_sales_performance` and `product_performance` have run as well. 
+ジョブは現在実行中です。
+
+さらに、Runs タブに移動すると、`monthly_sales_performance` と `product_performance` のマテリアライゼーションも実行されていることがわかります。
 
    ![2048 resolution](/images/tutorial/etl-tutorial/automation-final.png)
 
-## Next steps
+## 次は
 
-- Continue this tutorial with adding a [sensor based asset](create-a-sensor-asset)
+- このチュートリアルを続けて、[センサーベースのアセット](create-a-sensor-asset)を追加します。

@@ -1,31 +1,31 @@
 ---
-title: Ensure data quality with asset checks
+title: アセットチェックによるデータ品質の確保
 description: Ensure assets are correct with asset checks
 last_update:
   author: Alex Noonan
 sidebar_position: 30
 ---
 
-Data quality is critical in data pipelines. Inspecting individual assets ensures that data quality issues are caught before they affect the entire pipeline.
+データ パイプラインではデータ品質が重要です。個々のアセットを検査することで、データ品質の問題がパイプライン全体に影響する前に検出されます。
 
-In Dagster, you define [asset checks](/guides/test/asset-checks) like you define assets. Asset checks run when an asset is materialized. In this step you will:
+Dagster では、アセットを定義するのと同じように [アセットチェック](/guides/test/asset-checks) を定義します。アセットチェックは、アセットが実体化されたときに実行されます。このステップでは、次の操作を行います:
 
-- Define an asset check
-- Execute that asset check in the UI
+- アセットチェックを定義する
+- UIでアセットチェックを実行する
 
-## 1. Define an asset check
+## 1. アセットチェックを定義する
 
-In this case we want to create a check to identify if there are any rows in `joined_data` that are missing a value for `rep_name` or `product_name`. 
+この場合、`joined_data` 内に `rep_name` または `product_name` の値が欠落している行があるかどうかを識別するチェックを作成します。
 
-Copy the following code beneath the `joined_data` asset.
+`joined_data` アセットの下に次のコードをコピーします。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="134" lineEnd="150"/>
 
-## 2. Run the asset check
+## 2. アセットチェックを実行する
 
-Before you can run the asset check, you need to add it to the Definitions object. Like assets, asset checks are added to their own list.
+アセットチェックを実行する前に、それを定義オブジェクトに追加する必要があります。アセットと同様に、アセットチェックも独自のリストに追加されます。
 
-Your Definitions object should look like this now:
+定義オブジェクトは次のようになります:
 
 ```python
 defs = dg.Definitions(
@@ -38,15 +38,16 @@ defs = dg.Definitions(
     resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
 )
 ```
-Asset checks will run when an asset is materialized, but asset checks can also be executed manually in the UI:
 
-1. Reload your Definitions.
-2. Navigate to the Asset Details page for the `joined_data` asset.
-3. Select the "Checks" tab.
-4. Click the **Execute** button for `missing_dimension_check`.
+アセットチェックはアセットが実体化されたときに実行されますが、UI でアセットチェックを手動で実行することもできます。
+
+1. Definitions をリロードします。
+2. `joined_data` アセットの Asset Details ページへ遷移します。
+3. "Checks" タブを選択します。
+4. `missing_dimension_check` の **Execute** ボタンをクリックします。
 
   ![2048 resolution](/images/tutorial/etl-tutorial/asset-check.png)
 
-## Next steps
+## 次は
 
-- Continue this tutorial with [creating and materializing partitioned assets](create-and-materialize-partitioned-asset)
+- このチュートリアルを続けて、[パーティション化されたアセットの作成と実体化](create-and-materialize-partitioned-asset) に進みます。

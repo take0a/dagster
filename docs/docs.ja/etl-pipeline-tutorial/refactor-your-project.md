@@ -1,23 +1,24 @@
 ---
-title: Refactor your project
+title: プロジェクトをリファクタリングする
 description: Refactor your completed project into a structure that is more organized and scalable. 
 last_update:
   author: Alex Noonan
 sidebar_position: 70
 ---
 
-Many engineers generally leave something alone once it's working as expected. But the first time you do something is rarely the best implementation of a use case and all projects benefit from incremental improvements.
+多くのエンジニアは、期待通りに動作するようになったら、通常はそのままにしておきます。しかし、何かを初めて実行したときにユースケースが最適に実装されることはめったになく、すべてのプロジェクトは段階的な改善から恩恵を受けます。
 
 ## Splitting up project structure
 
-Currently, your project is contained in one definitions file. However, this file has gotten fairly complex, and adding to it would only increase its complexity. To fix that, we will create separate files for each core Dagster concept:
+現在、プロジェクトは 1 つの定義ファイルに含まれています。ただし、このファイルはかなり複雑になっており、追加すると複雑さが増すだけです。これを修正するには、コアとなる Dagster コンセプトごとに個別のファイルを作成します:
 
 - Assets
 - Schedules
 - Sensors
 - Partitions
 
-The final project structure should look like this:
+最終的なプロジェクト構造は次のようになります:
+
 ```
 dagster-etl-tutorial/
 ├── data/
@@ -39,51 +40,51 @@ dagster-etl-tutorial/
 
 ### Assets
 
-Assets make up a majority of our project and this will be our largest file. 
+アセットはプロジェクトの大部分を占めており、これが最大のファイルになります。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/assets.py" language="python"/>
 
 ### Partitions
 
-The partitions file will have `monthly_partition` and `product_category_partition`.
+パーティション ファイルには、`monthly_partition` と `product_category_partition` が含まれます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/partitions.py" language="python" />
 
 ### Schedules
 
-The schedules file will only contain the `weekly_update_schedule`.
+スケジュール ファイルには `weekly_update_schedule` のみが含まれます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/schedules.py" language="python" />
 
 ### Sensors
 
-The sensors file will have the job and sensor for the `adhoc_request` asset. 
+センサー ファイルには、`adhoc_request` アセットのジョブとセンサーが含まれます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/sensors.py" language="python" />
 
-## Refactoring the Definitions object
+## 定義オブジェクトのリファクタリング
 
-Now that we have separate files, we need to adjust how the different elements are added to the Definitions object.
+個別のファイルができたので、さまざまな要素を Definitions オブジェクトに追加する方法を調整する必要があります。
 
 :::note
-The Dagster project runs from the root directory, so whenever you reference files in your project, you need to use the root as the starting point.
-Additionally, Dagster has functions to load all assets and asset checks from a module (load_assets_from_modules and load_asset_checks_from_modules, respectively).
+Dagster プロジェクトはルート ディレクトリから実行されるため、プロジェクト内のファイルを参照するときは常に、ルートを開始点として使用する必要があります。
+さらに、Dagster には、モジュールからすべてのアセットとアセット チェックをロードする関数 (それぞれ load_assets_from_modules と load_asset_checks_from_modules) があります。
 :::
 
-To bring your project together, copy the following code into your `definitions.py` file:
+プロジェクトをまとめるには、次のコードを `definitions.py` ファイルにコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/definitions.py" language="python" />
 
-## Quick validation
+## 迅速な検証
 
-To validate that your definitions file loads and validates, you can run `dagster definitions validate` in the same directory that you would run `dagster dev`. This command is useful for CI/CD pipelines and allows you to check that your project loads correctly without starting the web server. 
+定義ファイルが読み込まれて検証されることを確認するには、`dagster dev` を実行するのと同じディレクトリで `dagster definitions validate` を実行します。このコマンドは CI/CD パイプラインに役立ち、Web サーバーを起動せずにプロジェクトが正しく読み込まれることを確認できます。 
 
-## Thats it!
+## おしまい！
 
-Congratulations! You have completed your first project with Dagster and have an example of how to use the building blocks to build your own data pipelines. 
+おめでとうございます。Dagster を使用した最初のプロジェクトが完了し、ビルディングブロックを使用して独自のデータ パイプラインを構築する方法の例がわかりました。
 
-## Recommended next steps
+## 推奨される次のステップ
 
-- Join our [Slack community](https://dagster.io/slack).
-- Continue learning with [Dagster University](https://courses.dagster.io/) courses.
-- Start a [free trial of Dagster+](https://dagster.cloud/signup) for your own project.
+- [Slack コミュニティ](https://dagster.io/slack)に参加してください。
+- [Dagster University](https://courses.dagster.io/) コースで学習を続けましょう。
+- 独自のプロジェクトで [Dagster+ の無料トライアル](https://dagster.cloud/signup) を開始してください。

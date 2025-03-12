@@ -1,69 +1,70 @@
 ---
-title: Create a sensor asset
+title: センサーアセットを作成する
 description: Use sensors to create event driven pipelines
 last_update:
   author: Alex Noonan
 sidebar_position: 60
 ---
 
-[Sensors](/guides/automate/sensors) allow you to automate workflows based on external events or conditions, making them useful for event-driven automation, especially in situations where jobs occur at irregular cadences or in rapid succession.
+[センサー](/guides/automate/sensors) を使用すると、外部のイベントや条件に基づいてワークフローを自動化できるため、特にジョブが不規則な頻度で、または連続して発生する状況でのイベント駆動型の自動化に役立ちます。
 
-Consider using sensors in the following situations:
-- **Event-driven workflows**: When your workflow depends on external events, such as the arrival of a new data file or a change in an API response.
-- **Conditional execution**: When you want to execute jobs only if certain conditions are met, reducing unnecessary computations.
-- **Real-time processing**: When you need to process data as soon as it becomes available, rather than waiting for a scheduled time.
+次の状況ではセンサーの使用を検討してください。
 
-In this step you will:
+- **イベント駆動型ワークフロー**: ワークフローが、新しいデータファイルの到着や API 応答の変更などの外部イベントに依存する場合。
+- **条件付き実行**: 特定の条件が満たされた場合にのみジョブを実行し、不要な計算を削減します。
+- **リアルタイム処理**: スケジュールされた時間を待つのではなく、データが利用可能になったらすぐに処理する必要がある場合。
 
-- Create an asset that runs based on a event-driven workflow
-- Create a sensor to listen for conditions to materialize the asset
+このステップでは次の操作を行います:
 
-## 1. Create an event-driven asset
+- イベント駆動型ワークフローに基づいて実行されるアセットを作成する
+- アセットを実体化するための条件を監視するセンサーを作成する
 
-For our pipeline, we want to model a situation where an executive wants a pivot table report of sales results by department and product. They want that processed in real time from their request.
+## 1. イベント駆動型アセットを作成する
 
-For this asset, we need to define the structure of the request that it is expecting in the materialization context. 
+私たちのパイプラインでは、幹部が部門別および製品別の売上結果のピボット テーブル レポートを希望する状況をモデル化します。幹部は、要求に応じてリアルタイムで処理されることを望んでいます。
 
-Other than that, defining this asset is the same as our previous assets. Copy the following code beneath `product_performance`.
+このアセットについては、実体化のコンテキストで期待されるリクエストの構造を定義する必要があります。
+
+それ以外は、このアセットの定義は以前のアセットと同じです。次のコードを `product_performance` の下にコピーします。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="275" lineEnd="312"/>
 
-## 2. Build the sensor
+## 2. センサーを構築する
 
-To define a sensor in Dagster, use the `@sensor` decorator. This decorator is applied to a function that evaluates whether the conditions for triggering a job are met.
+Dagster でセンサーを定義するには、`@sensor` デコレータを使用します。このデコレータは、ジョブをトリガーするための条件が満たされているかどうかを評価する関数に適用されます。
 
-Sensors include the following elements:
+センサーには次の要素が含まれます:
 
-- **Job**: The job that the sensor will trigger when the conditions are met.
-- **RunRequest**: An object that specifies the configuration for the job run. It includes a `run_key` to ensure idempotency and a `run_config` for job-specific settings.
+- **Job**: 条件が満たされたときにセンサーがトリガーするジョブ。
+- **RunRequest**: ジョブ実行の構成を指定するオブジェクト。これには、冪等性を保証する `run_key` と、ジョブ固有の設定用の `run_config` が含まれます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="314" lineEnd="355"/>
 
-## 3. Materialize the sensor asset
+## 3. センサーアセットの実体化
 
-1. Update your Definitions object to the following:
+1. 定義オブジェクトを次のように更新します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="357" lineEnd="373"/>
 
-2. Reload your Definitions.
+2. 定義を再読み込みします。
 
-3. Navigate to the Automation page.
+3. Automation ページへ遷移します。
 
-4. Turn on the `adhoc_request_sensor`.
+4. `adhoc_request_sensor` をオンにします。
 
-5. Click on the `adhoc_request_sensor` details.
+5. `adhoc_request_sensor` の詳細をクリックします。
 
    ![2048 resolution](/images/tutorial/etl-tutorial/sensor-evaluation.png)
 
-6. Add `request.json` from the `data/sample_request` folder to `data/requests` folder.
+6. `data/sample_request` フォルダから `request.json` を `data/requests` フォルダに追加します。
 
-7. Click on the green tick to see the run for this request. 
+7. このリクエストの実行を確認するには、緑色のチェックマークをクリックします。
 
    ![2048 resolution](/images/tutorial/etl-tutorial/sensor-asset-run.png)
 
 
-## Next steps
+## 次は
 
-Now that we have our complete project, the next step is to refactor the project into a more manageable structure so we can add to it as needed.
+これでプロジェクトが完成したので、次のステップでは、必要に応じて追加できるように、プロジェクトをより管理しやすい構造にリファクタリングします。
 
-Finish the tutorial by [refactoring your project](refactor-your-project).
+[プロジェクトをリファクタリング](refactor-your-project)してチュートリアルを終了します。

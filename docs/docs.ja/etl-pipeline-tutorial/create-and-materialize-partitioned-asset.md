@@ -1,5 +1,5 @@
 ---
-title: Create and materialize partitioned assets
+title: パーティション化されたアセットの作成と実体化
 description: Partitioning Assets by datetime and categories
 last_update:
   date: 2024-11-25
@@ -7,26 +7,25 @@ last_update:
 sidebar_position: 40
 ---
 
-[Partitions](/guides/build/partitions-and-backfills/partitioning-assets) are a core abstraction in Dagster, that allow you to manage large datasets, process incremental updates, and improve pipeline performance. You can partition assets the following ways:
+[パーティション](/guides/build/partitions-and-backfills/partitioning-assets)は、Dagster のコア抽象化であり、大規模なデータセットの管理、増分更新の処理、パイプラインのパフォーマンスの向上を可能にします。アセットは、次の方法でパーティション分割できます:
 
-- Time-based: Split data by time periods (e.g., daily, monthly)
-- Category-based: Divide by known categories (e.g., country, product type)
-- Two-dimensional: Combine two partition types (e.g., country + date)
-- Dynamic: Create partitions based on runtime conditions
+- 時間ベース: 期間別にデータを分割します (例: 日次、月次)
+- カテゴリベース: 既知のカテゴリ (国、製品タイプなど) ごとに分割します
+- 2次元: 2つのパーティションタイプを組み合わせる（例：国 + 日付）
+- 動的: 実行時の条件に基づいてパーティションを作成する
 
-In this step, you will:
+このステップでは、次の操作を行います:
 
-- Create a time-based asset partitioned by month
-- Create a category-based asset partitioned by product category
+- 月ごとに分割された時間ベースのアセットを作成する
+- 製品カテゴリごとに分割されたカテゴリベースのアセットを作成する
 
-## 1. Create a time-based partitioned asset
+## 1. 時間ベースで分割されたアセットを作成する
 
-Dagster natively supports partitioning assets by datetime groups. We want to create an asset that calculates the monthly performance for each sales rep. To create the monthly partition copy the following code below the `missing_dimension_check` asset check.
+Dagster は、日時グループによるアセットのパーティション分割をネイティブにサポートしています。各営業担当者の月間パフォーマンスを計算するアセットを作成したいと考えています。月間パーティションを作成するには、次のコードを `missing_dimension_check` アセット チェックの下にコピーします。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="152" lineEnd="153"/>
 
-Partition data are accessed within an asset by context. We want to create an asset that does this calculation for a given month from the partition
- and deletes any previous value for that month. Copy the following asset under the `monthly_partition` we just created.
+パーティション データは、コンテキストによってアセット内でアクセスされます。パーティションから特定の月に対してこの計算を実行し、その月の以前の値を削除するアセットを作成します。作成したばかりの `monthly_partition` の下に次のアセットをコピーします。
 
   ```python
   @dg.asset(
@@ -83,15 +82,15 @@ Partition data are accessed within an asset by context. We want to create an ass
       )
   ```
 
-## 2. Create a category-based partitioned asset
+## 2. カテゴリベースの分割アセットを作成する
 
-Using known defined partitions is a simple way to break up your dataset when you know the different groups you want to subset it by. In our pipeline, we want to create an asset that represents the performance of each product category.
+既知の定義済みパーティションを使用すると、データセットをサブセット化するさまざまなグループがわかっている場合に、データセットを分割する簡単な方法になります。パイプラインでは、各製品カテゴリのパフォーマンスを表すアセットを作成します。
 
-1. To create the statically-defined partition for the product category, copy this code beneath the `monthly_sales_performance` asset:
+1. 製品カテゴリの静的に定義されたパーティションを作成するには、次のコードを `monthly_sales_performance` アセットの下にコピーします:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="211" lineEnd="214"/>
 
-2. Now that the partition has been defined, we can use that in an asset that calculates the product category performance:
+2. パーティションが定義されたので、製品カテゴリのパフォーマンスを計算するアセットでそれを使用できます:
 
 ```python
 @dg.asset(
@@ -145,13 +144,11 @@ def product_performance(context: dg.AssetExecutionContext, duckdb: DuckDBResourc
     )
 ```
 
+## 3. パーティション化されたアセットを実体化する
 
+パーティション化されたアセットができたので、それを Definitions オブジェクトに追加しましょう:
 
-## 3. Materialize partitioned assets
-
-Now that we have our partitioned assets, let's add them to our Definitions object:
-
-Your Definitions object should look like this:
+定義オブジェクトは次のようになります:
 
 ```python
 defs = dg.Definitions(
@@ -167,14 +164,15 @@ defs = dg.Definitions(
 )
 ```
 
-To materialize these assets:
-1. Navigate to the assets page.
+これらのアセットを実体化するには:
+
+1. assets ページに移動します。
 2. Reload definitions.
-3. Select the `monthly_sales_performance` asset, then **Materialize selected**.
-4. Ensure all partitions are selected, then launch a backfill. 
-5. Select the `product_performance` asset, then **Materialize selected**. 
-6. Ensure all partitions are selected, then launch a backfill.
+3. `monthly_sales_performance` アセットを選択し、**Materialize selected** します。 .
+4. すべてのパーティションが選択されていることを確認してから、バックフィルを開始します。
+5. `product_performance` アセットを選択し、 **Materialize selected** します。
+6. すべてのパーティションが選択されていることを確認してから、バックフィルを開始します。
 
-## Next steps
+## 次は
 
-Now that we have the main assets in our ETL pipeline, it's time to add [automation to our pipeline](automate-your-pipeline)
+ETL パイプラインに主要なアセットが揃ったので、[パイプラインに自動化](automate-your-pipeline)を追加します。
