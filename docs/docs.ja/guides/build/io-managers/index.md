@@ -1,84 +1,84 @@
 ---
-title: "I/O managers"
+title: "I/O マネージャー"
 sidebar_position: 50
 ---
 
-I/O managers in Dagster allow you to keep the code for data processing separate from the code for reading and writing data. This reduces repetitive code and makes it easier to change where your data is stored.
+Dagster の I/O マネージャーを使用すると、データ処理用のコードとデータの読み取りおよび書き込み用のコードを分離できます。これにより、繰り返しコードが削減され、データの保存場所の変更が容易になります。
 
-In many Dagster pipelines, assets can be broken down as the following steps:
+多くの Dagster パイプラインでは、アセットは次の手順で分類できます:
 
-1. Reading data a some data store into memory
-2. Applying in-memory transform
-3. Writing the transformed data to a data store
+1. データストアからメモリにデータを読み込む
+2. メモリ内の変換の適用
+3. 変換されたデータをデータストアに書き込む
 
-For assets that follow this pattern, an I/O manager can streamline the code that handles reading and writing data to and from a source.
+このパターンに従うアセットの場合、I/O マネージャーはソースとの間のデータの読み取りと書き込みを処理するコードを合理化できます。
 
 :::note
 
-This article assumes familiarity with: [assets](/guides/build/assets/) and [resources](/guides/build/external-resources/)
+この記事は、[アセット](/guides/build/assets/)と[リソース](/guides/build/external-resources/)を理解していることを前提としています。
 
 :::
 
-## Before you begin
+## 始める前に
 
-**I/O managers aren't required to use Dagster, nor are they the best option in all scenarios.** If you find yourself writing the same code at the start and end of each asset to load and store data, an I/O manager may be useful. For example:
+**I/O マネージャーは Dagster を使用するために必須ではなく、すべてのシナリオで最適なオプションでもありません。** 各アセットの最初と最後に同じコードを記述してデータをロードおよび保存する場合は、I/O マネージャーが役立つ場合があります。例:
 
-- You have assets that are stored in the same location and follow a consistent set of rules to determine the storage path
-- You have assets that are stored differently in local, staging, and production environments
-- You have assets that load upstream dependencies into memory to do the computation
+- 同じ場所に保管されているアセットがあり、保管パスを決定するために一貫した一連のルールに従っている
+- ローカル、ステージング、本番環境で異なる方法で保存されているアセットがある
+- 計算を行うために上流の依存関係をメモリにロードするアセットがある
 
-**I/O managers may not be the best fit if:**
+**I/O マネージャーは、次の場合には最適ではない可能性があります:**
 
-- You want to run SQL queries that create or update a table in a database
-- Your pipeline manages I/O on its own by using other libraries/tools that write to storage
-- Your assets won't fit in memory, such as a database table with billions of rows
+- データベース内のテーブルを作成または更新するSQLクエリを実行したい
+- パイプラインが、ストレージに書き込む他のライブラリ/ツールを使用して、独自にI/Oを管理する
+- 数十億行のデータベーステーブルなど、アセットがメモリに収まらない
 
-As a general rule, if your pipeline becomes more complicated in order to use I/O managers, it's likely that I/O managers aren't a good fit. In these cases you should use `deps` to [define dependencies](/guides/build/assets/passing-data-between-assets).
+一般的なルールとして、I/O マネージャーを使用するためにパイプラインが複雑になる場合は、I/O マネージャーは適していない可能性があります。このような場合は、`deps` を使用して [依存関係を定義](/guides/build/assets/passing-data-between-assets) する必要があります。
 
-## Using I/O managers in assets \{#io-in-assets}
+## アセットでの I/O マネージャーの使用 \{#io-in-assets}
 
-Consider the following example, which contains assets that construct a DuckDB connection object, read data from an upstream table, apply some in-memory transform, and write the result to a new table in DuckDB:
+次の例を検討してください。この例には、DuckDB 接続オブジェクトを構築し、上流テーブルからデータを読み取り、メモリ内変換を適用し、その結果を DuckDB の新しいテーブルに書き込むアセットが含まれています:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-without-io-managers.py" language="python" />
 
-Using an I/O manager would remove the code that reads and writes data from the assets themselves, instead delegating it to the I/O manager. The assets would be left only with the code that applies transformations or retrieves the initial CSV file.
+I/O マネージャーを使用すると、アセット自体からデータを読み書きするコードが削除され、代わりに I/O マネージャーに委任されます。アセットには、変換を適用するコードや初期 CSV ファイルを取得するコードのみが残ります。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-with-io-managers.py" language="python" />
 
-To load upstream assets using an I/O manager, specify the asset as an input parameter to the asset function. In this example, the `DuckDBPandasIOManager` I/O manager will read the DuckDB table with the same name as the upstream asset (`raw_sales_data`) and pass the data to `clean_sales_data` as a Pandas DataFrame.
+I/O マネージャーを使用して上流アセットをロードするには、アセット関数への入力パラメーターとしてアセットを指定します。この例では、`DuckDBPandasIOManager` I/O マネージャーは、上流アセット (`raw_sales_data`) と同じ名前の DuckDB テーブルを読み取り、そのデータを Pandas DataFrame として `clean_sales_data` に渡します。
 
-To store data using an I/O manager, return the data in the asset function. The returned data must be a valid type. This example uses Pandas DataFrames, which the `DuckDBPandasIOManager` will write to a DuckDB table with the same name as the asset.
+I/O マネージャーを使用してデータを保存するには、アセット関数でデータを返します。返されるデータは有効な型である必要があります。この例では Pandas DataFrames を使用し、`DuckDBPandasIOManager` はアセットと同じ名前で DuckDB テーブルに書き込みます。
 
-Refer to the individual I/O manager documentation for details on valid types and how they store data.
+有効なタイプとデータの保存方法の詳細については、個々の I/O マネージャーのドキュメントを参照してください。
 
-## Swapping data stores \{#swap-data-stores}
+## データストアのスワップ \{#swap-data-stores}
 
-With I/O managers, swapping data stores consists of changing the implementation of the I/O manager. The asset definitions, which only contain transformational logic, won't need to change.
+I/O マネージャーでは、データストアのスワッピングは、I/O マネージャーの実装の変更で構成されます。変換ロジックのみを含むアセット定義を変更する必要はありません。
 
-In the following example, a Snowflake I/O manager replaced the DuckDB I/O manager.
+次の例では、Snowflake I/O マネージャーが DuckDB I/O マネージャーに置き換えられました。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-with-snowflake-io-manager.py" language="python" />
 
-## Built-in I/O managers \{#built-in}
+## 組み込み I/O マネージャー \{#built-in}
 
-Dagster offers built-in library implementations for I/O managers for popular data stores and in-memory formats.
+Dagster は、一般的なデータ ストアとメモリ内形式用の I/O マネージャー用の組み込みライブラリ実装を提供します。
 
 | Name                                                                                       | Description                                                                   |
 | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| <PyObject section="io-managers" module="dagster" object="FilesystemIOManager" />                                 | Default I/O manager. Stores outputs as pickle files on the local file system. |
-| <PyObject section="io-managers" module="dagster" object="InMemoryIOManager" />                                   | Stores outputs in memory. Primarily useful for unit testing.                  |
-| <PyObject section="libraries" module="dagster_aws" object="s3.S3PickleIOManager" />                            | Stores outputs as pickle files in Amazon Web Services S3.                     |
-| <PyObject section="libraries" module="dagster_azure" object="adls2.ConfigurablePickledObjectADLS2IOManager" /> | Stores outputs as pickle files in Azure ADLS2.                                |
-| <PyObject section="libraries" module="dagster_gcp" object="GCSPickleIOManager" />                              | Stores outputs as pickle files in Google Cloud Platform GCS.                  |
-| <PyObject section="libraries" module="dagster_gcp_pandas" object="BigQueryPandasIOManager" />                  | Stores Pandas DataFrame outputs in Google Cloud Platform BigQuery.            |
-| <PyObject section="libraries" module="dagster_gcp_pyspark" object="BigQueryPySparkIOManager" />                | Stores PySpark DataFrame outputs in Google Cloud Platform BigQuery.           |
-| <PyObject section="libraries" module="dagster_snowflake_pandas" object="SnowflakePandasIOManager" />           | Stores Pandas DataFrame outputs in Snowflake.                                 |
-| <PyObject section="libraries" module="dagster_snowflake_pyspark" object="SnowflakePySparkIOManager" />         | Stores PySpark DataFrame outputs in Snowflake.                                |
-| <PyObject section="libraries" module="dagster_duckdb_pandas" object="DuckDBPandasIOManager" />                 | Stores Pandas DataFrame outputs in DuckDB.                                    |
-| <PyObject section="libraries" module="dagster_duckdb_pyspark" object="DuckDBPySparkIOManager" />               | Stores PySpark DataFrame outputs in DuckDB.                                   |
-| <PyObject section="libraries" module="dagster_duckdb_polars" object="DuckDBPolarsIOManager" />                 | Stores Polars DataFrame outputs in DuckDB.                                    |                                       |
+| <PyObject section="io-managers" module="dagster" object="FilesystemIOManager" />                                 | デフォルトの I/O マネージャー。出力をローカル ファイル システムに pickle ファイルとして保存します。|
+| <PyObject section="io-managers" module="dagster" object="InMemoryIOManager" />                                   | 出力をメモリに保存します。主にユニット テストに役立ちます。                  |
+| <PyObject section="libraries" module="dagster_aws" object="s3.S3PickleIOManager" />                            | 出力をピクルファイルとして Amazon Web Services S3 に保存します。                    |
+| <PyObject section="libraries" module="dagster_azure" object="adls2.ConfigurablePickledObjectADLS2IOManager" /> | 出力を Azure ADLS2 に pickle ファイルとして保存します。                                |
+| <PyObject section="libraries" module="dagster_gcp" object="GCSPickleIOManager" />                              | 出力を Google Cloud Platform GCS に pickle ファイルとして保存します。              |
+| <PyObject section="libraries" module="dagster_gcp_pandas" object="BigQueryPandasIOManager" />                  | Pandas DataFrame 出力を Google Cloud Platform BigQuery に保存します。          |
+| <PyObject section="libraries" module="dagster_gcp_pyspark" object="BigQueryPySparkIOManager" />                | PySpark DataFrame 出力を Google Cloud Platform BigQuery に保存します。           |
+| <PyObject section="libraries" module="dagster_snowflake_pandas" object="SnowflakePandasIOManager" />           | Pandas DataFrame 出力を Snowflake に保存します。                             |
+| <PyObject section="libraries" module="dagster_snowflake_pyspark" object="SnowflakePySparkIOManager" />         | PySpark DataFrame 出力を Snowflake に保存します。                              |
+| <PyObject section="libraries" module="dagster_duckdb_pandas" object="DuckDBPandasIOManager" />                 | SPandas DataFrame 出力を DuckDB に保存します。                                  |
+| <PyObject section="libraries" module="dagster_duckdb_pyspark" object="DuckDBPySparkIOManager" />               | PySpark DataFrame 出力を DuckDB に保存します。                                 |
+| <PyObject section="libraries" module="dagster_duckdb_polars" object="DuckDBPolarsIOManager" />                 | Polars DataFrame 出力を DuckDB に保存します。                                   |                                       |
 
-## Next steps
+## 次は
 
-- Learn to [connect databases](/guides/build/external-resources/connecting-to-databases) with resources
-- Learn to [connect APIs](/guides/build/external-resources/connecting-to-apis) with resources
+- リソースを使用して[データベースに接続](/guides/build/external-resources/connecting-to-databases)する方法を学ぶ
+- リソースを使用して [API を接続する](/guides/build/external-resources/connecting-to-apis) 方法を学ぶ

@@ -1,60 +1,60 @@
 ---
-title: Configuring resources
+title: リソースの構成
 sidebar_position: 200
 ---
 
-You can configure resources with environment variables or at launch time. Additionally, you can define resources that depend on other resources to manage common configuration.
+リソースは、環境変数で、または、起動時に構成できます。さらに、他のリソースに依存するリソースを定義して、共通の構成を管理することもできます。
 
-## Using environment variables with resources
+## リソースでの環境変数の使用
 
-Resources can be configured using environment variables, which is useful for secrets or other environment-specific configuration. If you're using [Dagster+](/dagster-plus/), environment variables can be [configured directly in the UI](/dagster-plus/deployment/management/environment-variables).
+リソースは環境変数を使用して設定できます。これは、シークレットやその他の環境固有の設定に役立ちます。[Dagster+](/dagster-plus/) を使用している場合は、環境変数を [UI で直接設定](/dagster-plus/deployment/management/environment-variables) できます。
 
-To use environment variables, pass an <PyObject section="resources" module="dagster" object="EnvVar" /> when constructing the resource. `EnvVar` inherits from `str` and can be used to populate any string config field on a resource. The value of the environment variable will be evaluated when a run is launched.
+環境変数を使用するには、リソースの構築時に <PyObject section="resources" module="dagster" object="EnvVar" /> を渡します。`EnvVar` は `str` から継承され、リソースの任意の文字列構成フィールドに入力するために使用できます。環境変数の値は、実行が開始されたときに評価されます。
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resources_env_vars" endBefore="end_new_resources_env_vars" />
 
 :::note
 
-**What about `os.getenv()`?** When `os.getenv()` is used, the value of the variable is retrieved when Dagster loads the code location. Using `EnvVar` not only tells Dagster to retrieve the value at runtime, but also not to display the value in the UI.
+**`os.getenv()` はどうでしょうか?** `os.getenv()` を使用すると、Dagster がコードの場所をロードするときに変数の値が取得されます。`EnvVar` を使用すると、実行時に値を取得するように Dagster に指示するだけでなく、UI に値を表示しないようにも指示します。
 
 <!-- Lives in /next/components/includes/EnvVarsBenefits.mdx -->
 
-For more information on using environment variables with Dagster, refer to the [Environment variables guide](/guides/deploy/using-environment-variables-and-secrets).
+Dagster で環境変数を使用する方法の詳細については、[環境変数ガイド](/guides/deploy/using-environment-variables-and-secrets)を参照してください。
 
 :::
 
-## Configuring resources at launch time
+## 起動時にリソースを構成する
 
-In some cases, you may want to specify configuration for a resource at launch time, in the Launchpad or in a <PyObject section="schedules-sensors" module="dagster" object="RunRequest" /> for a [schedule](/guides/automate/schedules/) or [sensor](/guides/automate/sensors/). For example, you may want a sensor-triggered run to specify a different target table in a database resource for each run.
+場合によっては、起動時に、Launchpad または [スケジュール](/guides/automate/schedules/) または [センサー](/guides/automate/sensors/) の <PyObject section="schedules-sensors" module="dagster" object="RunRequest" /> でリソースの構成を指定する必要があることがあります。たとえば、センサーによってトリガーされる実行で、実行ごとにデータベース リソース内の異なるターゲット テーブルを指定する必要がある場合があります。
 
-You can use the `configure_at_launch()` method to defer the construction of a configurable resource until launch time:
+`configure_at_launch()` メソッドを使用すると、構成可能なリソースの構築を起動時まで延期できます:
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_runtime" endBefore="end_new_resource_runtime" />
 
-### Providing resource launch time configuration in Python code
+### Pythonコードでリソース起動時間の設定を提供する
 
-Then, configuration for the resource can be provided at launch time in the Launchpad or in Python code using the `config` parameter of the <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />:
+次に、Launchpad での起動時にリソースの構成を指定するか、<PyObject section="schedules-sensors" module="dagster" object="RunRequest" /> の `​​config` パラメータを使用して Python コードで指定できます。
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_runtime_launch" endBefore="end_new_resource_runtime_launch" />
 
-## Resources that depend on other resources
+## 他のリソースに依存するリソース
 
-In some situations, you may want to define a resource that depends on other resources. This is useful for common configuration. For example, separate resources for a database and for a filestore may both depend on credentials for a particular cloud provider. Defining these credentials as a separate, nested resource allows you to specify configuration in a single place. It also makes it easier to test resources, since the nested resource can be mocked.
+状況によっては、他のリソースに依存するリソースを定義したい場合があります。これは、共通の構成に役立ちます。たとえば、データベースとファイルストアの個別のリソースは、どちらも特定のクラウド プロバイダーの資格情報に依存している可能性があります。これらの資格情報を個別のネストされたリソースとして定義すると、1 か所で構成を指定できます。また、ネストされたリソースをモックできるため、リソースのテストも簡単になります。
 
-In this case, you can list that nested resource as an attribute of the resource class:
+この場合、ネストされたリソースをリソース クラスの属性としてリストできます:
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resources_nesting" endBefore="end_new_resources_nesting" />
 
-If you prefer to provide the configuration for credentials at launch time, use the `configure_at_launch()` method to defer the construction of the `CredentialsResource` until launch time.
+起動時に資格情報の構成を提供する場合は、`configure_at_launch()` メソッドを使用して、`CredentialsResource` の構築を起動時まで延期します。
 
-Because `credentials` requires launch time configuration through the launchpad, it must also be passed to the <PyObject section="definitions" module="dagster" object="Definitions" /> object, so that configuration can be provided at launch time. Nested resources only need to be passed to the <PyObject section="definitions" module="dagster" object="Definitions" /> object if they require launch time configuration.
+`credentials` は、Launchpad を介した起動時の構成を必要とするため、起動時に構成を提供できるように、<PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトにも渡す必要があります。ネストされたリソースは、起動時の構成が必要な場合のみ、<PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに渡す必要があります。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_dep_job_runtime" endBefore="end_new_resource_dep_job_runtime" />
 
-## Next steps
+## 次は
 
-Resources are a powerful way to encapsulate reusable logic in your assets and ops. For more information on the supported config types for resources, see [the advanced config types documentation](/guides/operate/configuration/advanced-config-types). For information on the Dagster config system, which you can use to parameterize assets and ops, refer to the [run configuration documentation](/guides/operate/configuration/run-configuration).
+リソースは、アセットとオペレーションに再利用可能なロジックをカプセル化する強力な方法です。リソースでサポートされている構成タイプの詳細については、[高度な構成タイプのドキュメント](/guides/operate/configuration/advanced-config-types)を参照してください。アセットとオペレーションをパラメータ化するために使用できる Dagster 構成システムの詳細については、[実行構成のドキュメント](/guides/operate/configuration/run-configuration)を参照してください。

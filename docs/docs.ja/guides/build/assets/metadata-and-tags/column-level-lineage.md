@@ -1,68 +1,68 @@
 ---
-title: "Column-level lineage"
+title: "列レベルの系統"
 description: "Column lineage enables data and analytics engineers alike to understand how a column is created and used in your data platform."
 sidebar_position: 400
 ---
 
-# Column-level lineage
+# 列レベルの系統
 
-For assets that produce database tables, column-level lineage can be a powerful tool for improving collaboration and debugging issues. Column lineage enables data and analytics engineers alike to understand how a column is created and used in your data platform.
+データベース テーブルを生成するアセットの場合、列レベルの系統は、コラボレーションの改善や問題のデバッグに役立つ強力なツールとなります。列の系統により、データ エンジニアと分析エンジニアは、データ プラットフォームで列がどのように作成され、使用されるかを理解できます。
 
-## How it works
+## 仕組み
 
-Emitted as materialization metadata, column lineage can be:
+マテリアライゼーション メタデータとして発行される列の系統は次のようになります:
 
-- Specified on assets defined in Dagster
-- Enabled for assets loaded from integrations like dbt
+- Dagster で定義されたアセットに指定
+- dbt などの統合から読み込まれたアセットに対して有効
 
-Dagster uses this metadata to display the column's upstream and downstream dependencies, accessible via the asset's details page in the Dagster UI. **Note**: Viewing column-level lineage in the UI is a Dagster+ feature.
+Dagster はこのメタデータを使用して、Dagster UI のアセットの詳細ページからアクセスできる列の上流および下流の依存関係を表示します。**注**: UI で列レベルの系統を表示するのは、Dagster+ の機能です。
 
-## Enabling column-level lineage
+## 列レベルの系統化を有効にする
 
-### For assets defined in Dagster
+### Dagsterで定義されたアセットの場合
 
-To enable column-level lineage on Dagster assets that produce database tables, you'll need to:
+データベーステーブルを生成する Dagster アセットで列レベルの系統を有効にするには、次の操作を行う必要があります:
 
-1. Return a <PyObject section="assets" module="dagster" object="MaterializeResult" /> object containing a `metadata` parameter
-2. In `metadata`, use the `dagster/column_lineage` key to create a <PyObject section="metadata" module="dagster" object="TableColumnLineage" /> object
-3. In this object, use <PyObject section="metadata" module="dagster" object="TableColumnLineage" displayText="TableColumnLineage.deps_by_column" /> to define a list of columns
-4. For each column, use <PyObject section="metadata" module="dagster" object="TableColumnDep" /> to define its dependencies. This object accepts `asset_key` and `column_name` arguments, allow you to specify the name of the asset and column that make up the dependency.
+1. `metadata`パラメータを含む <PyObject section="assets" module="dagster" object="MaterializeResult" /> オブジェクトを返します。
+2. `metadata` では、`dagster/column_lineage` キーを使用して <PyObject section="metadata" module="dagster" object="TableColumnLineage" /> オブジェクトを作成します。
+3. このオブジェクトでは、<PyObject section="metadata" module="dagster" object="TableColumnLineage" displayText="TableColumnLineage.deps_by_column" /> を使用して列のリストを定義します。
+4. 各列について、<PyObject section="metadata" module="dagster" object="TableColumnDep" /> を使用して依存関係を定義します。このオブジェクトは `asset_key` および `column_name` 引数を受け入れ、依存関係を構成するアセットと列の名前を指定できます。
 
-Let's take a look at an example:
+例を見てみましょう:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/asset_column_lineage.py" />
 
-When materialized, the `my_asset` asset will create two columns: `new_column_foo` and `new_column_qux`.
+マテリアライズされると、`my_asset` アセットは `new_column_foo` と `new_column_qux` の 2 つの列を作成します。
 
-The `new_column_foo` column is dependent on two other columns:
+`new_column_foo` 列は他の 2 つの列に依存しています:
 
-1. `column_bar` from the `source_bar` asset
-2. `column_baz` from the `source_baz` asset
+1. `source_bar` アセットの `column_bar`
+2. `source_baz` アセットの `column_baz`
 
-And the second column, `new_column_qux` has is dependent on `column_quuz` from the `source_bar` asset.
+そして、2 番目の列である `new_column_qux` は、`source_bar` アセットの `column_quuz` に依存しています。
 
-If using Dagster+, you can view the column-level lineage in the Dagster UI.
+Dagster+ を使用している場合は、Dagster UI で列レベルの系統を表示できます。
 
-### For assets loaded from integrations
+### 統合で読み込まれたアセットの場合
 
-Column-level lineage is currently supported for the dbt integration. Refer to the [dbt documentation](/integrations/libraries/dbt/reference) for more information.
+列レベルの系統は現在、dbt 統合でサポートされています。詳細については、[dbt ドキュメント](/integrations/libraries/dbt/reference)を参照してください。
 
-## Viewing column-level lineage in the Dagster UI
+## Dagster UI で列レベルの系統を表示する
 
 :::note
 
-Viewing column lineage in the UI is a Dagster+ feature.
+UI で列の系統を表示するのは Dagster+ の機能です。
 
 :::
 
-1. In the Dagster UI, open the **Asset details** page for an asset with column-level lineage enabled.
-2. Navigate to the **Overview** tab if it isn't already open.
-3. In the **Columns** section, click the **branch** icon in the row of the column you want to view. The icon is on the far right side of the row:
+1. Dagster UI で、列レベルの系統が有効になっているアセットの **Asset details** ページを開きます。
+2. まだ開いていない場合は、**Overview** タブに移動します。
+3. **Columns** セクションで、表示する列の行にある **分岐** アイコンをクリックします。アイコンは行の右端にあります。
 
     ![Highlighted column lineage icon in the Asset details page of the Dagster UI](/images/guides/build/assets/metadata-tags/column-lineage-icon.png)
 
-The graph will display the column's column dependencies, grouped by asset:
+グラフには、アセットごとにグループ化された列の列依存関係が表示されます。
 
 ![Column lineage for a credit_utilization column in the Dagster UI](/images/guides/build/assets/metadata-tags/column-level-lineage.png)
 
-To view another column's lineage, click the **Column** dropdown and select another column.
+別の列の系統を表示するには、**Column** ドロップダウンをクリックして別の列を選択します。

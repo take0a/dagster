@@ -1,65 +1,66 @@
 ---
-title: Connecting to APIs
+title: APIへの接続
 sidebar_position: 500
 ---
 
-When building a data pipeline, you'll likely need to connect to several external APIs, each with its own specific configuration and behavior. This guide demonstrates how to standardize your API connections and customize their configuration using Dagster resources.
+データ パイプラインを構築する場合、それぞれ独自の構成と動作を持つ複数の外部 API に接続する必要がある可能性があります。このガイドでは、Dagster リソースを使用して API 接続を標準化し、その構成をカスタマイズする方法を説明します。
 
 :::note
 
-This guide assumes familiarity with [assets](/guides/build/assets/) and [resources](/guides/build/external-resources/).
+このガイドでは、[アセット](/guides/build/assets/)と[リソース](/guides/build/external-resources/)に精通していることを前提としています。
 
 :::
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To run the example code in this article, you will need to install the `requests` library:
+この記事のサンプル コードを実行するには、`requests` ライブラリをインストールする必要があります:
+
     ```bash
     pip install requests
     ```
 
 </details>
 
-## Step 1: Write a resource that connects to an API
+## Step 1: APIに接続するリソースを作成する
 
-This example fetches the sunrise time for a given location from a REST API.
+この例では、REST API から指定された場所の日の出時刻を取得します。
 
-Using `ConfigurableResource`, define a Dagster resource with a method that returns the sunrise time for a location. In the first version of this resource, the location is hard-coded to San Francisco International Airport.
+`ConfigurableResource` を使用して、場所の日の出時刻を返すメソッドを持つ Dagster リソースを定義します。このリソースの最初のバージョンでは、場所はサンフランシスコ国際空港にハードコードされています。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/minimal_resource.py" language="python" />
 
-## Step 2: Use the resource in an asset
+## Step 2: アセット内のリソースを使用する
 
-To use the resource, provide it as a parameter to an asset and include it in the `Definitions` object:
+リソースを使用するには、それをアセットのパラメータとして提供し、`Definitions` オブジェクトに含めます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/use_minimal_resource_in_asset.py" language="python" />
 
-When you materialize `sfo_sunrise`, Dagster will provide an initialized `SunResource` to the `sun_resource` parameter.
+`sfo_sunrise` を具体化すると、Dagster は初期化された `SunResource` を `sun_resource` パラメータに提供します。
 
-## Step 3: Configure the resource
+## Step 3: リソースを構成する
 
-Many APIs have configuration you can set to customize your usage. The following example updates the resource with configuration to allow for setting the query location:
+多くの API には、使用方法をカスタマイズするために設定できる構成があります。次の例では、クエリの場所を設定できるように構成でリソースを更新します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/use_configurable_resource_in_asset.py" language="python" />
 
-The configurable resource can be provided to an asset exactly as before. When the resource is initialized, you can pass values for each of the configuration options.
+構成可能なリソースは、これまでとまったく同じようにアセットに提供できます。リソースが初期化されると、各構成オプションの値を渡すことができます。
 
-When you materialize `sfo_sunrise`, Dagster will provide a `SunResource` initialized with the configuration values to the `sun_resource` parameter.
+`sfo_sunrise` を具体化すると、Dagster は `sun_resource` パラメータの設定値で初期化された `SunResource` を提供します。
 
-## Step 4: Source configuration using environment variables
+## Step 4: 環境変数を使用したソース構成
 
-Resources can also be configured with environment variables. You can use Dagster's built-in `EnvVar` class to source configuration values from environment variables at materialization time.
+リソースは環境変数を使用して設定することもできます。Dagster の組み込み `EnvVar` クラスを使用して、マテリアライズ時に環境変数から設定値を取得できます。
 
-In this example, there's a new `home_sunrise` asset. Rather than hard-coding the location of your home, you can set it in environment variables and configure the `SunResource` by reading those values:
+この例では、新しい `home_sunrise` アセットがあります。自宅の場所をハードコーディングするのではなく、環境変数に設定し、その値を読み取って `SunResource` を構成することができます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/env_var_configuration.py" language="python" />
 
-When you materialize `home_sunrise`, Dagster will read the values set for the `HOME_LATITUDE`, `HOME_LONGITUDE`, and `HOME_TIMZONE` environment variables and initialize a `SunResource` with those values.
+`home_sunrise` を具体化すると、Dagster は `HOME_LATITUDE`、`HOME_LONGITUDE`、および `HOME_TIMZONE` 環境変数に設定された値を読み取り、それらの値で `SunResource` を初期化します。
 
-The initialized `SunResource` will be provided to the `sun_resource` parameter.
+初期化された `SunResource` は `sun_resource` パラメータに提供されます。
 
 :::note
-You can also fetch environment variables using the `os` library. Dagster treats each approach to fetching environment variables differently, such as when they're fetched or how they display in the UI. Refer to the [Environment variables guide](/guides/deploy/using-environment-variables-and-secrets) for more information.
+`os` ライブラリを使用して環境変数を取得することもできます。Dagster は、環境変数を取得するタイミングや UI での表示方法など、環境変数を取得する各アプローチを異なる方法で処理します。詳細については、[環境変数ガイド](/guides/deploy/using-environment-variables-and-secrets)を参照してください。
 :::
 

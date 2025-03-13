@@ -1,68 +1,67 @@
 ---
-title: "Defining a custom I/O manager"
+title: "カスタムI/Oマネージャーの定義"
 sidebar_position: 100
 ---
 
-If you have specific requirements for where and how your outputs should be stored and retrieved, you can define a custom I/O manager. This boils down to implementing two functions: one that stores outputs and one that loads inputs.
+出力を保存および取得する場所と方法について特定の要件がある場合は、カスタム I/O マネージャーを定義できます。これは、出力を保存する関数と入力を読み込む関数の 2 つの関数を実装することになります。
 
-To define an I/O manager, extend the <PyObject section="io-managers" module="dagster" object="IOManager" /> class. Often, you will want to extend the <PyObject section="io-managers" module="dagster" object="ConfigurableIOManager"/> class (which subclasses `IOManager`) to attach a config schema to your I/O manager.
+I/O マネージャーを定義するには、<PyObject section="io-managers" module="dagster" object="IOManager" /> クラスを拡張します。多くの場合、<PyObject section="io-managers" module="dagster" object="ConfigurableIOManager"/> クラス (`IOManager` のサブクラス) を拡張して、I/O マネージャーに設定スキーマをアタッチする必要があります。
 
-Here, we define a simple I/O manager that reads and writes CSV values to the filesystem. It takes an optional prefix path through config.
+ここでは、ファイルシステムに CSV 値を読み書きする単純な I/O マネージャーを定義します。これは、config を通じてオプションのプレフィックス パスを受け取ります。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/custom_io_manager.py" startAfter="start_io_manager_marker" endBefore="end_io_manager_marker" />
 
-The provided `context` argument for `handle_output` is an <PyObject section="io-managers" module="dagster" object="OutputContext" />. The provided `context` argument for `load_input` is an <PyObject section="io-managers" module="dagster" object="InputContext" />. The linked API documentation lists all the fields that are available on these objects.
+`handle_output` に指定された `context` 引数は <PyObject section="io-managers" module="dagster" object="OutputContext" /> です。 `load_input` に指定された `context` 引数は <PyObject section="io-managers" module="dagster" object="InputContext" /> です。 リンクされた API ドキュメントには、これらのオブジェクトで使用できるすべてのフィールドがリストされています。
 
-### Using an I/O manager factory
+### I/Oマネージャーファクトリーの使用
 
-If your I/O manager is more complex, or needs to manage internal state, it may make sense to split out the I/O manager definition from its configuration. In this case, you can use <PyObject section="io-managers" module="dagster" object="ConfigurableIOManagerFactory"/>, which specifies config schema and implements a factory function that takes the config and returns an I/O manager.
+I/O マネージャーがより複雑であるか、内部状態を管理する必要がある場合は、I/O マネージャーの定義をその構成から分離することが合理的です。この場合、<PyObject section="io-managers" module="dagster" object="ConfigurableIOManagerFactory"/> を使用できます。これは、構成スキーマを指定し、構成を取得して I/O マネージャーを返すファクトリー関数を実装します。
 
-In this case, we implement a stateful I/O manager which maintains a cache:
+この場合、キャッシュを維持するステートフル I/O マネージャーを実装します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/custom_io_manager.py" startAfter="start_io_manager_factory_marker" endBefore="end_io_manager_factory_marker" />
 
-### Defining Pythonic I/O managers
+### Python の I/O マネージャーの定義
 
-Pythonic I/O managers are defined as subclasses of <PyObject section="io-managers" module="dagster" object="ConfigurableIOManager"/>, and similarly to [Pythonic resources](/guides/build/external-resources/) specify any configuration fields as attributes. Each subclass must implement a `handle_output` and `load_input` method, which are called by Dagster at runtime to handle the storing and loading of data.
+Pythonic I/O マネージャーは <PyObject section="io-managers" module="dagster" object="ConfigurableIOManager"/> のサブクラスとして定義され、[Pythonic リソース](/guides/build/external-resources/) と同様に、任意の構成フィールドを属性として指定します。各サブクラスは、実行時に Dagster によって呼び出され、データの保存と読み込みを処理する `handle_output` メソッドと `load_input` メソッドを実装する必要があります。
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_io_manager" endBefore="end_new_io_manager" />
 
-### Handling partitioned assets
+### パーティション化されたアセットの取り扱い
 
-I/O managers can be written to handle [partitioned](/guides/build/partitions-and-backfills/partitioning-assets) assets. For a partitioned asset, each invocation of `handle_output` will (over)write a single partition, and each invocation of `load_input` will load one or more partitions. When the I/O manager is backed by a filesystem or object store, then each partition will typically correspond to a file or object. When it's backed by a database, then each partition will typically correspond to a range of rows in a table that fall within a particular window.
+I/O マネージャーは、[パーティション化された](/guides/build/partitions-and-backfills/partitioning-assets) アセットを処理するように記述できます。パーティション化されたアセットの場合、`handle_output` の各呼び出しは単一のパーティションを (上書き) 書き込み、`load_input` の各呼び出しは 1 つ以上のパーティションをロードします。I/O マネージャーがファイルシステムまたはオブジェクト ストアによってサポートされている場合、各パーティションは通常、ファイルまたはオブジェクトに対応します。データベースによってサポートされている場合、各パーティションは通常、特定のウィンドウ内にあるテーブル内の行の範囲に対応します。
 
-The default I/O manager has support for loading a partitioned upstream asset for a downstream asset with matching partitions out of the box (see the section below for loading multiple partitions). The <PyObject section="io-managers" module="dagster" object="UPathIOManager" /> can be used to handle partitions in custom filesystem-based I/O managers.
+デフォルトの I/O マネージャーは、すぐに使用できる、一致するパーティションを持つ下流アセットのパーティション化された上流アセットのロードをサポートしています (複数のパーティションのロードについては、以下のセクションを参照してください)。<PyObject section="io-managers" module="dagster" object="UPathIOManager" /> を使用すると、カスタム ファイル システム ベースの I/O マネージャーでパーティションを処理できます。
 
-To handle partitions in an custom I/O manager, you'll need to determine which partition you're dealing with when you're storing an output or loading an input. For this, <PyObject section="io-managers" module="dagster" object="OutputContext" /> and <PyObject section="io-managers" module="dagster" object="InputContext" /> have a `asset_partition_key` property:
+カスタム I/O マネージャーでパーティションを処理するには、出力を保存するときや入力を読み込むときに、どのパーティションを処理するかを決定する必要があります。このために、<PyObject section="io-managers" module="dagster" object="OutputContext" /> と <PyObject section="io-managers" module="dagster" object="InputContext" /> には `asset_partition_key` プロパティがあります:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/custom_io_manager.py" startAfter="start_partitioned_marker" endBefore="end_partitioned_marker" />
 
-If you're working with time window partitions, you can also use the `asset_partitions_time_window` property, which will return a <PyObject section="partitions" module="dagster" object="TimeWindow" /> object.
+時間ウィンドウ パーティションを使用している場合は、`asset_partitions_time_window` プロパティも使用できます。このプロパティは、<PyObject section="partitions" module="dagster" object="TimeWindow" /> オブジェクトを返します。
 
-#### Handling partition mappings
+#### パーティションマッピングの処理
 
-A single partition of one asset might depend on a range of partitions of an upstream asset.
+1 つのアセットの単一のパーティションは、上流のアセットのパーティションの範囲に依存する場合があります。
 
-The default I/O manager has support for loading multiple upstream partitions. In this case, the downstream asset should use `Dict[str, ...]` (or leave it blank) type for the upstream `DagsterType`. Here is an example of loading multiple upstream partitions using the default partition mapping:
-
+デフォルトの I/O マネージャーは、複数の上流パーティションの読み込みをサポートしています。この場合、下流アセットは、上流の `DagsterType` に `Dict[str, ...]` (または空白のまま) タイプを使用する必要があります。デフォルトのパーティション マッピングを使用して複数の上流パーティションを読み込む例を次に示します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/loading_multiple_upstream_partitions.py" />
 
-The `upstream_asset` becomes a mapping from partition keys to partition values. This is a property of the default I/O manager or any I/O manager inheriting from the <PyObject section="io-managers" module="dagster" object="UPathIOManager" />.
+`upstream_asset` は、パーティション キーからパーティション値へのマッピングになります。これは、デフォルトの I/O マネージャー、または <PyObject section="io-managers" module="dagster" object="UPathIOManager" /> から継承する任意の I/O マネージャーのプロパティです。
 
-A <PyObject section="partitions" module="dagster" object="PartitionMapping" /> can be provided to <PyObject section="assets" module="dagster" object="AssetIn" /> to configure the mapped upstream partitions.
+<PyObject section="partitions" module="dagster" object="PartitionMapping" /> を <PyObject section="assets" module="dagster" object="AssetIn" /> に提供して、マップされた上流パーティションを構成できます。
 
-When writing a custom I/O manager for loading multiple upstream partitions, the mapped keys can be accessed using <PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partition_keys" />, <PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partition_key_range" />, or <PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partitions_time_window" />.
+複数のアップストリーム パーティションをロードするためのカスタム I/O マネージャーを作成する場合、マップされたキーには、<PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partition_keys" />、<PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partition_key_range" />、または <PyObject section="io-managers" module="dagster" object="InputContext" method="asset_partitions_time_window" /> を使用してアクセスできます。
 
-### Writing a per-input I/O manager
+### 入力ごとのI/Oマネージャの作成
 
-In some cases you may find that you need to load an input in a way other than the `load_input` function of the corresponding output's I/O manager. For example, let's say Team A has an op that returns an output as a Pandas DataFrame and specifies an I/O manager that knows how to store and load Pandas DataFrames. Your team is interested in using this output for a new op, but you are required to use PySpark to analyze the data. Unfortunately, you don't have permission to modify Team A's I/O manager to support this case. Instead, you can specify an input manager on your op that will override some of the behavior of Team A's I/O manager.
+場合によっては、対応する出力の I/O マネージャーの `load_input` 関数以外の方法で入力をロードする必要があることがあります。たとえば、チーム A に、出力を Pandas DataFrame として返すオペレーションがあり、Pandas DataFrame を保存およびロードする方法を知っている I/O マネージャーを指定しているとします。チームはこの出力を新しいオペレーションに使用することに興味がありますが、データを分析するには PySpark を使用する必要があります。残念ながら、このケースをサポートするためにチーム A の I/O マネージャーを変更する権限がありません。代わりに、チーム A の I/O マネージャーの動作の一部をオーバーライドする入力マネージャーをオペレーションに指定できます。
 
-Since the method for loading an input is directly affected by the way the corresponding output was stored, we recommend defining your input managers as subclasses of existing I/O managers and just updating the `load_input` method. In this example, we load an input as a NumPy array rather than a Pandas DataFrame by writing the following:
+入力をロードする方法は、対応する出力の保存方法に直接影響されるため、入力マネージャーを既存の I/O マネージャーのサブクラスとして定義し、`load_input` メソッドを更新することを推奨します。この例では、次のように記述して、入力を Pandas DataFrame ではなく NumPy 配列としてロードします。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/input_managers.py" startAfter="start_plain_input_manager" endBefore="end_plain_input_manager" />
 
-This may quickly run into issues if the owner of `PandasIOManager` changes the path at which they store outputs. We recommend splitting out path defining logic (or other computations shared by `handle_output` and `load_input`) into new methods that are called when needed.
+`PandasIOManager` の所有者が出力を保存するパスを変更すると、すぐに問題が発生する可能性があります。パス定義ロジック (または `handle_output` と `load_input` で共有されるその他の計算) を、必要に応じて呼び出される新しいメソッドに分割することをお勧めします。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/io_management/input_managers.py" startAfter="start_better_input_manager" endBefore="end_better_input_manager" />

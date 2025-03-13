@@ -1,68 +1,68 @@
 ---
-title: "Table metadata"
+title: "テーブルメタデータ"
 description: "Table metadata can be used to provide additional context about a tabular asset, such as its schema, row count, and more."
 sidebar_position: 300
 ---
 
-Table metadata provides additional context about a tabular asset, such as its schema, row count, and more. This metadata can be used to improve collaboration, debugging, and data quality in your data platform.
+テーブルメタデータは、スキーマ、行数など、表形式のアセットに関する追加のコンテキストを提供します。このメタデータを使用すると、データプラットフォームでのコラボレーション、デバッグ、データ品質を向上させることができます。
 
-Dagster supports attaching different types of table metadata to assets, including:
+Dagster は、次のようなさまざまな種類のテーブルメタデータをアセットに添付することをサポートしています:
 
-- [**Column schema**](#attaching-column-schema), which describes the structure of the table, including column names and types
-- [**Row count**](#attaching-row-count), which describes the number of rows in a materialized table
-- [**Column-level lineage**](#attaching-column-level-lineage), which describes how a column is created and used by other assets
+- [**Column schema**](#attaching-column-schema)、列名や型など、テーブルの構造を記述します。
+- [**Row count**](#attaching-row-count)、マテリアライズされたテーブル内の行数を表します。
+- [**Column-level lineage**](#attaching-column-level-lineage)、列が他のアセットによってどのように作成され、使用されるかを説明します。
 
-## Attaching column schema
+## 列スキーマを添付する
 
-### For assets defined in Dagster
+### Dagsterで定義されたアセットの場合
 
-Column schema metadata can be attached to Dagster assets either as [definition metadata](index.md#definition-time-metadata) or [runtime metadata](index.md#runtime-metadata), which will then be visible in the Dagster UI. For example:
+列スキーマ メタデータは、[定義メタデータ](index.md#definition-time-metadata) または [ランタイム メタデータ](index.md#runtime-metadata) として Dagster アセットに添付することができ、Dagster UI に表示されます。例:
 
 ![Column schema for an asset in the Dagster UI](/images/guides/build/assets/metadata-tags/metadata-table-schema.png)
 
-If the schema of your asset is pre-defined, you can attach it as definition metadata. If the schema is only known when an asset is materialized, you can attach it as metadata to the materialization.
+アセットのスキーマが事前に定義されている場合は、それを定義メタデータとして添付できます。アセットが実体化されたときにのみスキーマがわかる場合は、それを実体化した際にメタデータとして添付できます。
 
-To attach schema metadata to an asset, you will need to:
+アセットにスキーマ メタデータを添付するには、次の手順を実行する必要があります:
 
-1. Construct a <PyObject section="metadata" module="dagster" object="TableSchema"/> object with <PyObject section="metadata" module="dagster" object="TableColumn"  /> entries describing each column in the table
-2. Attach the `TableSchema` object to the asset as part of the `metadata` parameter under the `dagster/column_schema` key. This can be attached to your asset definition, or to the <PyObject section="assets" module="dagster" object="MaterializeResult" /> object returned by the asset function.
+1. テーブル内の各列を記述する <PyObject section="metadata" module="dagster" object="TableColumn"  /> エントリを持つ <PyObject section="metadata" module="dagster" object="TableSchema"/> オブジェクトを構築します。
+2. `TableSchema` オブジェクトを、`dagster/column_schema` キーの下の `metadata` パラメータの一部としてアセットに添付します。これは、アセット定義に添付することも、アセット関数によって返される <PyObject section="assets" module="dagster" object="MaterializeResult" /> オブジェクトに添付することもできます。
 
-Below are two examples of how to attach column schema metadata to an asset, one as definition metadata and one as runtime metadata:
+以下に、列スキーマメタデータをアセットに添付する方法の 2 つの例を示します。1 つは定義メタデータとして、もう 1 つはランタイムメタデータとしてです:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/asset_column_schema.py" />
 
-The schema for `my_asset` will be visible in the Dagster UI.
+`my_asset` のスキーマは Dagster UI に表示されます。
 
-### For assets loaded from integrations
+### 統合で読み込まれたアセットの場合
 
-Dagster's dbt integration enables automatically attaching column schema metadata to assets loaded from dbt models. For more information, see the [dbt documentation](/integrations/libraries/dbt/reference#fetching-column-level-metadata).
+Dagster の dbt 統合により、dbt モデルから読み込まれたアセットに列スキーマ メタデータを自動的に添付できるようになります。詳細については、[dbt ドキュメント](/integrations/libraries/dbt/reference#fetching-column-level-metadata) を参照してください。
 
-## Attaching row count
+## 行数を添付する
 
-Row count metadata can be attached to Dagster assets as [runtime metadata](index.md#runtime-metadata) to provide additional context about the number of rows in a materialized table. This will be highlighted in the Dagster UI. For example:
+行数メタデータは、[ランタイム メタデータ](index.md#runtime-metadata) として Dagster アセットに添付され、マテリアライズド テーブル内の行数に関する追加のコンテキストを提供できます。これは Dagster UI で強調表示されます。たとえば:
 
 ![Row count for an asset in the Dagster UI](/images/guides/build/assets/metadata-tags/metadata-row-count.png)
 
-In addition to showing the latest row count, Dagster will let you track changes in the row count over time, and you can use this information to monitor data quality.
+Dagster では、最新の行数を表示するだけでなく、時間の経過に伴う行数の変化を追跡し、この情報を使用してデータの品質を監視することができます。
 
-To attach row count metadata to an asset, you will need to attach a numerical value to the `dagster/row_count` key in the metadata parameter of the <PyObject section="assets" module="dagster" object="MaterializeResult" /> object returned by the asset function. For example:
+アセットに行数メタデータを添付するには、アセット関数によって返される <PyObject section="assets" module="dagster" object="MaterializeResult" /> オブジェクトのメタデータ パラメータの `dagster/row_count` キーに数値を添付する必要があります。たとえば:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/asset_row_count.py" />
 
-## Attaching column-level lineage
+## 列レベルの系統の添付
 
-Column lineage enables data and analytics engineers alike to understand how a column is created and used in your data platform. For more information, see the [column-level lineage documentation](column-level-lineage).
+列の系統により、データ エンジニアと分析エンジニアは、データ プラットフォームで列がどのように作成され、使用されるかを理解できます。詳細については、[列レベルの系統のドキュメント](column-level-lineage) を参照してください。
 
-## Ensuring table schema consistency
+## テーブルスキーマの一貫性の確保
 
-When column schemas are defined at runtime through runtime metadata, it can be helpful to detect and alert on schema changes between materializations. Dagster provides <PyObject section="asset-checks" module="dagster" object="build_column_schema_change_checks"/> API to help detect these changes.
+実行時に実行時メタデータを通じて列スキーマが定義される場合、マテリアライゼーション間のスキーマ変更を検出して警告することが役立ちます。Dagster は、これらの変更を検出するために <PyObject section="asset-checks" module="dagster" object="build_column_schema_change_checks"/> API を提供します。
 
-This function creates asset checks which compare the current materialization's schema against the schema from the previous materialization. These checks can detect:
+この関数は、現在のマテリアライゼーションのスキーマを以前のマテリアライゼーションのスキーマと比較するアセット チェックを作成します。これらのチェックでは、次のことを検出できます。
 
-- Added columns
-- Removed columns
-- Changed column types
+- 追加された列
+- 削除された列
+- 列の型の変更
 
-Let's define a column schema change check for our asset from the example above that defines table schema at runtime, `my_other_asset`.
+実行時にテーブル スキーマを定義する上記の例で、`my_other_asset` アセットの列スキーマ変更チェックを定義しましょう。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/schema_change_checks.py" startAfter="start_check" endBefore="end_check" />

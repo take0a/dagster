@@ -1,84 +1,84 @@
 ---
-title: Partitioning assets
+title: アセットの分割
 description: Learn how to partition your data in Dagster.
 sidebar_position: 100
 ---
 
-In Dagster, partitioning is a powerful technique for managing large datasets, improving pipeline performance, and enabling incremental processing. This guide will help you understand how to implement data partitioning in your Dagster projects.
+Dagster では、パーティショニングは大規模なデータセットの管理、パイプラインのパフォーマンスの向上、増分処理の有効化を実現する強力な手法です。このガイドは、Dagster プロジェクトでデータ パーティショニングを実装する方法を理解するのに役立ちます。
 
-There are several ways to partition your data in Dagster:
+Dagster でデータをパーティション分割する方法はいくつかあります:
 
-- [Time-based partitioning](#time-based), for processing data in specific time intervals
-- [Static partitioning](#static-partitions), for dividing data based on predefined categories
-- [Two-dimensional partitioning](#two-dimensional-partitions), for partitioning data along two different axes simultaneously
-- [Dynamic partitioning](#dynamic-partitions), for creating partitions based on runtime information
+- [時間ベースのパーティショニング](#time-based)、特定の時間間隔でデータを処理します
+- [静的パーティション分割](#static-partitions)、定義済みのカテゴリに基づいてデータを分割します
+- [２次元分割](#two-dimensional-partitions)は、2つの異なる軸に沿って同時にデータを分割します
+- [動的パーティション分割](#dynamic-partitions) は、実行時情報に基づいてパーティションを作成するためのものです。
 
 :::note
 
-We recommend limiting the number of partitions for each asset to 25,000 or fewer. Assets with partition counts exceeding this limit will likely have slower load times in the UI.
+各アセットのパーティション数を 25,000 以下に制限することをお勧めします。パーティション数がこの制限を超えるアセットでは、UI での読み込み時間が遅くなる可能性があります。
 
 :::
 
-## Time-based partitions \{#time-based}
+## 時間ベースのパーティション \{#time-based}
 
-A common use case for partitioning is to process data that can be divided into time intervals, such as daily logs or monthly reports.
+パーティショニングの一般的な使用例は、日次ログや月次レポートなど、時間間隔に分割できるデータを処理することです。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
 
-## Partitions with predefined categories \{#static-partitions}
+## 定義済みカテゴリを持つパーティション \{#static-partitions}
 
-Sometimes you have a set of predefined categories for your data. For instance, you might want to process data separately for different regions.
+データに事前定義されたカテゴリのセットがある場合があります。たとえば、異なる地域ごとにデータを個別に処理したい場合があります。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/static_partitioning.py" language="python" />
 
 {/* TODO: Link to Backfill page to explain how to backfill regional sales data */}
 
-## Two-dimensional partitions \{#two-dimensional-partitions}
+## ２次元パーティション \{#two-dimensional-partitions}
 
-Two-dimensional partitioning allows you to partition data along two different axes simultaneously. This is useful when you need to process data that can be categorized in multiple ways. For example:
+2 次元パーティション分割では、2 つの異なる軸に沿って同時にデータをパーティション分割できます。これは、複数の方法で分類できるデータを処理する必要がある場合に便利です。例:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/two_dimensional_partitioning.py" language="python" />
 
-In this example:
+この例では:
 
-- Using `MultiPartitionsDefinition`, the `two_dimensional_partitions` is defined with two dimensions: `date` and `region`
-- The partition key would be: `2024-08-01|us`
-- The `daily_regional_sales_data` and `daily_regional_sales_summary` assets are defined with the same two-dimensional partitioning scheme
-- The `daily_regional_sales_schedule` runs daily at 1:00 AM, processing the previous day's data for all regions. It uses `MultiPartitionKey` to specify partition keys for both date and region dimensions, resulting in three runs per day, one for each region.
+- `MultiPartitionsDefinition` を使用すると、`two_dimensional_partitions` は `date` と `region` の 2 つのディメンションで定義されます。
+- パーティションキーは次のようになります: `2024-08-01|us`
+- `daily_regional_sales_data` と `daily_regional_sales_summary` アセットは、同じ2次元パーティションスキームで定義されています。
+- `daily_regional_sales_schedule` は毎日午前 1 時に実行され、すべての地域の前日のデータを処理します。`MultiPartitionKey` を使用して日付と地域の両方のディメンションのパーティション キーを指定すると、1 日に 3 回 (地域ごとに 1 回) 実行されます。
 
-## Partitions with dynamic categories \{#dynamic-partitions}
+## 動的カテゴリを持つパーティション \{#dynamic-partitions}
 
-Sometimes you don't know the partitions in advance. For example, you might want to process new regions that are added in your system. In these cases, you can use dynamic partitioning to create partitions based on runtime information.
+場合によっては、パーティションが事前にわからないことがあります。たとえば、システムに追加された新しい領域を処理したい場合があります。このような場合は、動的パーティション分割を使用して、ランタイム情報に基づいてパーティションを作成できます。
 
-Consider this example:
+次の例を考えてみましょう:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/dynamic_partitioning.py" language="python" title="Dynamic partitioning" />
 
-In this example:
+この例では:
 
-- Because the partition values are unknown in advance, `DynamicPartitionsDefinition` is used to define `region_partitions`
-- When triggered, the `all_regions_sensor` will dynamically add all regions to the partition set. Once it kicks off runs, it will dynamically kick off runs for all regions. In this example, that would be six times; one for each region.
+- パーティションの値は詳細には不明なので、`動的パーティション定義`を使用して`リージョンパーティション`を定義します。
+- トリガーされると、`all_regions_sensor` はすべてのリージョンをパーティション セットに動的に追加します。実行が開始されると、すべてのリージョンの実行が動的に開始されます。この例では、リージョンごとに 1 回ずつ、合計 6 回実行されます。
 
-## Materializing partitioned assets
+## パーティション化されたアセットの実体化
 
-When you materialize a partitioned asset, you choose which partitions to materialize and Dagster will launch a run for each partition. 
+パーティション化されたアセットをマテリアライズするときに、マテリアライズするパーティションを選択すると、Dagster はパーティションごとに実行を開始します。
 
 :::note
 
-If you choose more than one partition, the [Dagster daemon](/guides/deploy/execution/dagster-daemon) needs to be running to queue the multiple runs.
+複数のパーティションを選択する場合、複数の実行をキューに入れるために [Dagster デーモン](/guides/deploy/execution/dagster-daemon) が実行されている必要があります。
 
 :::
 
-The following image shows the **Launch runs** dialog on an asset's **Details** page, where you'll be prompted to select a partition to materialize:
+次の画像は、アセットの **Details** ページの **Launch runs** ダイアログを示しています。ここでは、実体化するパーティションを選択するように求められます:
 
 ![Rematerialize partition](/images/guides/build/partitions-and-backfills/rematerialize-partition.png)
 
-After a partition has been successfully materialized, it will display as green in the partitions bar:
+パーティションが正常にマテリアライズされると、パーティション バーに緑色で表示されます:
 
 ![Successfully materialized partition](/images/guides/build/partitions-and-backfills/materialized-partitioned-asset.png)
 
-## Viewing materializations by partition
+## パーティション別にマテリアライゼーションを表示する
 
-To view materializations by partition for a specific asset, navigate to the **Activity** tab of the asset's **Details** page:
+特定のアセットのパーティション別のマテリアライゼーションを表示するには、アセットの **Details** ページの **Activity** タブに移動します:
 
 ![Asset activity section of asset details page](/images/guides/build/partitions-and-backfills/materialized-partitioned-asset-activity.png)

@@ -1,25 +1,25 @@
 ---
-title: Connecting to databases
+title: データベースへの接続
 sidebar_position: 400
 ---
 
-When building a data pipeline, you may need to extract data from or load data into a database. In Dagster, resources can be used to connect to a database by acting as a wrapper around a database client.
+データ パイプラインを構築する場合、データベースからデータを抽出したり、データベースにデータをロードしたりする必要がある場合があります。Dagster では、リソースはデータベース クライアントのラッパーとして動作することで、データベースに接続するために使用できます。
 
-This guide demonstrates how to standardize database connections and customize their configuration using Dagster resources.
+このガイドでは、Dagster リソースを使用してデータベース接続を標準化し、その構成をカスタマイズする方法を説明します。
 
 :::note
 
-This guide assumes familiarity with [assets](/guides/build/assets/).
+このガイドでは、[assets](/guides/build/assets/) に精通していることを前提としています。
 
 :::
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To run the example code in this article, you'll need:
+この記事のサンプル コードを実行するには、次のものが必要です:
 
-- Connection information for a Snowflake database
-- To install the following:
+- Snowflakeデータベースの接続情報
+- 以下をインストールするには:
 
    ```bash
    pip install dagster dagster-snowflake pandas
@@ -27,37 +27,37 @@ To run the example code in this article, you'll need:
 
 </details>
 
-## Step 1: Write a resource \{#step-one}
+## Step 1: リソースを書く \{#step-one}
 
-This example creates a resource that represents a Snowflake database. Using `SnowflakeResource`, define a Dagster resource that connects to a Snowflake database:
+この例では、Snowflake データベースを表すリソースを作成します。`SnowflakeResource` を使用して、Snowflake データベースに接続する Dagster リソースを定義します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/snowflake-resource.py" language="python" />
 
-## Step 2: Use the resource in an asset \{#step-two}
+## Step 2: アセット内のリソースを使用する \{#step-two}
 
-To use the resource, provide it as a parameter to an asset and include it in the `Definitions` object:
+リソースを使用するには、それをアセットのパラメータとして提供し、`Definitions` オブジェクトに含めます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/use-in-asset.py" language="python" />
 
-When you materialize these assets, Dagster will provide an initialized `SnowflakeResource` to the assets' `iris_db` parameter.
+これらのアセットを具体化すると、Dagster は初期化された `SnowflakeResource` をアセットの `iris_db` パラメータに提供します。
 
-## Step 3: Source configuration with environment variables \{#step-three}
+## Step 3: 環境変数を使用したソース構成 \{#step-three}
 
-Resources can be configured using environment variables, allowing you to connect to environment-specific databases, swap credentials, and so on. You can use Dagster's built-in `EnvVar` class to source configuration values from environment variables at asset materialization time.
+リソースは環境変数を使用して構成できるため、環境固有のデータベースに接続したり、資格情報を交換したりすることができます。Dagster の組み込み `EnvVar` クラスを使用して、アセットの実現時に環境変数から構成値を取得できます。
 
-In this example, a second instance of the Snowflake resource, named `production` has been added:
+この例では、`production` という名前の Snowflake リソースの 2 番目のインスタンスが追加されています:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/use-envvars.py" language="python" />
 
-When the assets are materialized, Dagster will use the `deployment_name` environment variable to determine which Snowflake resource to use (`local` or `production`). Then, Dagster will read the values set for each resource's environment variables (ex: `DEV_SNOWFLAKE_PASSWORD`) and initialize a `SnowflakeResource` with those values.
+アセットが実体化されると、Dagster は `deployment_name` 環境変数を使用して、使用する Snowflake リソース (`local` または `production`) を決定します。次に、Dagster は各リソースの環境変数に設定された値 (例: `DEV_SNOWFLAKE_PASSWORD`) を読み取り、それらの値で `SnowflakeResource` を初期化します。
 
-The initialized `SnowflakeResource` will be provided to the assets' `iris_db` parameter.
+初期化された `SnowflakeResource` は、アセットの `iris_db` パラメータに提供されます。
 
 :::note
-You can also fetch environment variables using the `os` library. Dagster treats each approach to fetching environment variables differently, such as when they're fetched or how they display in the UI. Refer to the [Environment variables guide](/guides/deploy/using-environment-variables-and-secrets) for more information.
+`os` ライブラリを使用して環境変数を取得することもできます。Dagster は、環境変数を取得するタイミングや UI での表示方法など、環境変数を取得する各アプローチを異なる方法で処理します。詳細については、[環境変数ガイド](/guides/deploy/using-environment-variables-and-secrets)を参照してください。
 :::
 
-## Next steps
+## 次は
 
-- Explore how to use resources for [connecting to APIs](connecting-to-apis)
-- Go deeper into understanding [resources](/guides/build/external-resources/)
+- [API への接続](connecting-to-apis) のリソースの使用方法を調べる
+- [リソース](/guides/build/external-resources/) の理解を深める

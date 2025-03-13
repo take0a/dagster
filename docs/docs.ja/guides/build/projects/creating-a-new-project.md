@@ -1,46 +1,44 @@
 ---
-title: "Creating a new Dagster project"
+title: "新しい Dagster プロジェクトの作成"
 description: Dagster comes with a convenient CLI command for creating a new project. This guide explains the role of each generated file and directory.
 sidebar_position: 100
 ---
 
-The easiest way to start building a Dagster project is by using the `dagster project` CLI. This CLI tool helps generate files and folder structures that enable you to quickly get started with Dagster.
+Dagster プロジェクトの構築を開始する最も簡単な方法は、`dagster project` CLI を使用することです。この CLI ツールは、Dagster をすぐに使い始めることができるファイルとフォルダー構造を生成するのに役立ちます。
 
 
-## Step 1: Bootstrap a new project
+## Step 1: 新しいプロジェクトをブートストラップする
 
 :::note
 
-  If you don't already have Dagster installed, verify you meet the{" "}
-  <a href="/getting-started/install">installation requirements</a> before
-  continuing.
+  Dagster がまだインストールされていない場合は、続行する前に、<a href="/getting-started/install">インストール要件</a>を満たしていることを確認してください。
 
 :::
 
-You can scaffold a new project using the default project skeleton, or start with one of the official Dagster examples.
+デフォルトのプロジェクトスケルトンを使用して新しいプロジェクトの土台を作ることも、公式の Dagster のサンプルの 1 つから開始することもできます。
 
-To learn more about the default files in a Dagster project, refer to the [Dagster project file reference](dagster-project-file-reference).
+Dagster プロジェクトのデフォルトファイルの詳細については、[Dagster プロジェクトファイルのリファレンス](dagster-project-file-reference) を参照してください。
 
 <Tabs>
-<TabItem value="Default project skeleton">
+<TabItem value="デフォルトのプロジェクトスケルトン">
 
-### Using the default project skeleton
+### デフォルトのプロジェクトスケルトンを使用する
 
-To get started, run:
+開始するには、次のコマンドを実行します:
 
 ```bash
 pip install dagster
 dagster project scaffold --name my-dagster-project
 ```
 
-The `dagster project scaffold` command generates a folder structure with a single Dagster code location and other files, such as `pyproject.toml` and `setup.py`. This takes care of setting things up with an empty project, enabling you to quickly get started.
+`dagster project scaffold` コマンドは、単一の Dagster コードの場所と、`pyproject.toml` や `setup.py` などのその他のファイルを含むフォルダー構造を生成します。これにより、空のプロジェクトで設定が行われ、すぐに開始できるようになります。
 
 </TabItem>
-<TabItem value="Official example">
+<TabItem value="公式サンプル">
 
-### Using an official example
+### 公式のサンプルを使用する
 
-To get started using an official Dagster example, run:
+公式の Dagster のサンプルを使い始めるには、次のコマンドを実行します:
 
 ```bash
 pip install dagster
@@ -49,18 +47,18 @@ dagster project from-example \
   --example quickstart_etl
 ```
 
-The command `dagster project from-example` downloads one of the official Dagster examples to the current directory. This command enables you to quickly bootstrap your project with an officially maintained example.
+コマンド `dagster project from-example` は、公式の Dagster サンプルの 1 つを現在のディレクトリにダウンロードします。このコマンドを使用すると、公式に管理されているサンプルを使用してプロジェクトをすばやくブートストラップできます。
 
-For more info about the examples, visit the [Dagster GitHub repository](https://github.com/dagster-io/dagster/tree/master/examples) or use `dagster project list-examples`.
+サンプルの詳細については、[Dagster GitHub リポジトリ](https://github.com/dagster-io/dagster/tree/master/examples) にアクセスするか、`dagster project list-examples` を使用してください。
 
 </TabItem>
 </Tabs>
 
-## Step 2: Install project dependencies
+## Step 2: プロジェクトの依存関係をインストールする
 
-The newly generated `my-dagster-project` directory is a fully functioning [Python package](https://docs.python.org/3/tutorial/modules.html#packages) and can be installed with `pip`.
+新しく生成された `my-dagster-project` ディレクトリは完全に機能する [Python パッケージ](https://docs.python.org/3/tutorial/modules.html#packages) であり、 `pip` を使用してインストールできます。
 
-To install it as a package and its Python dependencies, run:
+パッケージとその Python 依存関係としてインストールするには、次を実行します:
 
 ```bash
 pip install -e ".[dev]"
@@ -68,58 +66,57 @@ pip install -e ".[dev]"
 
 :::
 
-  Using the <code>--editable</code> (<code>-e</code>) flag instructs{" "}
-  <code>pip</code> to install your code location as a Python package in{" "}
+  <code>--editable</code> (<code>-e</code>) フラグを使用すると、<code>pip</code>はコードの場所をPythonパッケージとしてインストールするように指示します。
   <a href="https://pip.pypa.io/en/latest/topics/local-project-installs/#editable-installs">
     "editable mode"
   </a>{" "}
-  so that as you develop, local code changes are automatically applied.
+  開発時にローカルコードの変更が自動的に適用されます。
 
 :::
 
-## Step 3: Start the Dagster UI
+## Step 3: Dagster UI を起動する
 
-To start the [Dagster UI](/guides/operate/webserver), run:
+[Dagster UI](/guides/operate/webserver)を起動するには、次を実行します:
 
 ```bash
 dagster dev
 ```
 
-**Note**: This command also starts the [Dagster daemon](/guides/deploy/execution/dagster-daemon). Refer to the [Running Dagster locally guide](/guides/deploy/deployment-options/running-dagster-locally) for more info.
+**注**: このコマンドは、[Dagster デーモン](/guides/deploy/execution/dagster-daemon)も起動します。詳細については、[Dagster をローカルで実行するためのガイド](/guides/deploy/deployment-options/running-dagster-locally)を参照してください。
 
-Use your browser to open [http://localhost:3000](http://localhost:3000) to view the project.
+ブラウザを使用して [http://localhost:3000](http://localhost:3000) を開き、プロジェクトを表示します。
 
-## Step 4: Development
+## Step 4: 開発
 
-- [Adding new Python dependencies](#adding-new-python-dependencies)
-- [Environment variables and secrets](#using-environment-variables-and-secrets)
-- [Unit testing](#adding-and-running-unit-tests)
+- [新しいPython依存関係の追加](#adding-new-python-dependencies)
+- [環境変数とシークレット](#using-environment-variables-and-secrets)
+- [ユニットテスト](#adding-and-running-unit-tests)
 
-### Adding new Python dependencies
+### 新しいPython依存関係の追加
 
-You can specify new Python dependencies in `setup.py`.
+`setup.py` で新しい Python 依存関係を指定できます。
 
-### Using environment variables and secrets
+### 環境変数とシークレットの使用
 
-Environment variables, which are key-value pairs configured outside your source code, allow you to dynamically modify application behavior depending on environment.
+環境変数は、ソース コードの外部で設定されるキーと値のペアであり、環境に応じてアプリケーションの動作を動的に変更できます。
 
-Using environment variables, you can define various configuration options for your Dagster application and securely set up secrets. For example, instead of hard-coding database credentials - which is bad practice and cumbersome for development - you can use environment variables to supply user details. This allows you to parameterize your pipeline without modifying code or insecurely storing sensitive data.
+環境変数を使用すると、Dagster アプリケーションのさまざまな構成オプションを定義し、シークレットを安全に設定できます。たとえば、データベースの資格情報をハードコーディングする代わりに (これは悪い習慣であり、開発には面倒です)、環境変数を使用してユーザーの詳細を提供できます。これにより、コードを変更したり、機密データを安全でない状態で保存したりすることなく、パイプラインをパラメーター化できます。
 
-For more information and examples, see "[Using environment variables and secrets](/guides/deploy/using-environment-variables-and-secrets)".
+詳細と例については、「[環境変数とシークレットの使用](/guides/deploy/using-environment-variables-and-secrets)」を参照してください。
 
-### Adding and running unit tests
+### ユニットテストの追加と実行
 
-Tests can be added in the `my_dagster_project_tests` directory and run using `pytest`:
+テストは `my_dagster_project_tests` ディレクトリに追加し、`pytest` を使用して実行できます:
 
 ```bash
 pytest my_dagster_project_tests
 ```
 
-## Next steps
+## 次は
 
-Once your project is ready to move to production, check out our recommendations for [transitioning data pipelines from development to production](/guides/deploy/dev-to-prod).
+プロジェクトを本番環境に移行する準備ができたら、[データ パイプラインを開発環境から本番環境に移行する](/guides/deploy/dev-to-prod) に関する推奨事項を確認してください。
 
-Check out the following resources to learn more about deployment options:
+展開オプションの詳細については、次のリソースを参照してください:
 
-- [Dagster+](/dagster-plus/) - Deploy using Dagster-managed infrastructure
-- [Your own infrastructure](/guides/deploy/) - Deploy to your infrastructure, such as Docker, Kubernetes, Amazon Web Services, etc.
+- [Dagster+](/dagster-plus/) - Dagsterが管理するインフラを使用してデプロイする
+- [それ以外のインフラ](/guides/deploy/) - Docker、Kubernetes、Amazon Web Services などのインフラにデプロイします。

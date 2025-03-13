@@ -1,78 +1,70 @@
 ---
-title: "Asset observations"
+title: "アセットの監視"
 description: Dagster provides functionality to record metadata about assets.
 sidebar_position: 500
 ---
 
-An asset observation is an event that records metadata about a given asset. Unlike asset materializations, asset observations do not signify that an asset has been mutated.
+アセットの監視は、特定のアセットに関するメタデータを記録するイベントです。アセットの実体化とは異なり、アセットの監視はアセットが変更されたことを意味するものではありません。
 
-## Relevant APIs
+## 関連する API
 
-| Name                                   | Description                                                          |
-| -------------------------------------- | -------------------------------------------------------------------- |
-| <PyObject section="assets" module="dagster" object="AssetObservation" /> | Dagster event indicating that an asset's metadata has been recorded. |
-| <PyObject section="assets" module="dagster" object="AssetKey" />         | A unique identifier for a particular external asset.                 |
+| Name                                   | Description  |
+| -------------------------------------- | ----------------------------------------- |
+| <PyObject section="assets" module="dagster" object="AssetObservation" /> | アセットのメタデータが記録されたことを示す Dagster イベント。 |
+| <PyObject section="assets" module="dagster" object="AssetKey" />         | 特定の外部アセットの一意の識別子。                 |
 
-## Overview
+## 概要
 
-<PyObject section="assets" module="dagster" object="AssetObservation" /> events are used to record metadata in Dagster
-about a given asset. Asset observation events can be logged at runtime within ops and assets. An asset must be defined using the <PyObject section="assets" module="dagster" object="asset" decorator /> decorator or have existing materializations in order for its observations to be displayed.
+<PyObject section="assets" module="dagster" object="AssetObservation" /> イベントは、特定のアセットに関するメタデータを Dagster に記録するために使用されます。アセット監視イベントは、実行時にオペレーションとアセット内でログに記録できます。アセットの監視を表示するには、<PyObject section="assets" module="dagster" object="asset" decorator /> デコレータを使用してアセットを定義するか、既存のマテリアライゼーションが必要です。
 
-## Logging an AssetObservation from an op
+## オペレーションからの AssetObservation のログ記録
 
-To make Dagster aware that we have recorded metadata about an asset, we can log an <PyObject section="assets" module="dagster" object="AssetObservation" /> event from within an op. To do this, we use the method <PyObject section="execution" module="dagster" object="OpExecutionContext.log_event" /> on the context:
+アセットに関するメタデータを記録したことを Dagster に認識させるには、オペレーション内から <PyObject section="assets" module="dagster" object="AssetObservation" /> イベントをログに記録します。これを行うには、コンテキストでメソッド <PyObject section="execution" module="dagster" object="OpExecutionContext.log_event" /> を使用します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/observations.py" startAfter="start_observation_asset_marker_0" endBefore="end_observation_asset_marker_0" />
 
-We should now see an observation event in the event log when we execute this asset.
+このアセットを実行すると、イベントログに監視イベントが表示されるはずです。
 
 ![asset observation](/images/guides/build/assets/asset-observations/observation.png)
 
-### Attaching Metadata to an AssetObservation
+### AssetObservation へのメタデータの添付
 
-There are a variety of types of metadata that can be associated with an observation event, all through the <PyObject section="metadata" module="dagster" object="MetadataValue" /> class. Each observation event optionally takes a dictionary of metadata that is then displayed in the event log and the **Asset Details** page. Check our API docs for <PyObject section="metadata" module="dagster" object="MetadataValue" /> for more details on the types of event metadata available.
+監視イベントに関連付けることができるメタデータにはさまざまな種類があり、すべて <PyObject section="metadata" module="dagster" object="MetadataValue" /> クラスを通じて行われます。各監視イベントはオプションでメタデータの辞書を取得し、イベントログと **Asset Details** ページに表示されます。使用可能なイベントメタデータの種類の詳細については、<PyObject section="metadata" module="dagster" object="MetadataValue" /> の API ドキュメントを参照してください。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/observations.py" startAfter="start_observation_asset_marker_2" endBefore="end_observation_asset_marker_2" />
 
-In the **Asset Details** page, we can see observations in the Asset Activity table:
+**Asset Details** ページで、アセットアクティビティテーブルに観測結果が表示されます:
 
 ![asset activity observation](/images/guides/build/assets/asset-observations/asset-activity-observation.png)
 
-### Specifying a partition for an AssetObservation
+### AssetObservation のパーティションを指定する
 
-If you are observing a single slice of an asset (e.g. a single day's worth of data on a larger table), rather than mutating or creating it entirely, you can indicate this to Dagster by including the `partition` argument on the object.
+アセット全体を変更または作成するのではなく、アセットの単一のスライス（たとえば、大きなテーブル上の 1 日分のデータ）を監視している場合は、オブジェクトに `partition` 引数を含めることで、これを Dagster に示すことができます。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/observations.py" startAfter="start_partitioned_asset_observation" endBefore="end_partitioned_asset_observation" />
 
-### Observable source assets
+### 監視可能なソースアセット
 
-<PyObject section="assets" module="dagster" object="SourceAsset" /> objects may have a user-defined observation function
-that returns a `DataVersion`. Whenever the observation
-function is run, an <PyObject section="assets" module="dagster" object="AssetObservation" /> will be generated for
-the source asset and tagged with the returned data version. When an asset is
-observed to have a newer data version than the data version it had when a
-downstream asset was materialized, then the downstream asset will be given a
-label in the Dagster UI that indicates that upstream data has changed.
+<PyObject section="assets" module="dagster" object="SourceAsset" /> `DataVersion` を返すユーザー定義の監視関数が含まれる場合があります。監視関数が実行されるたびに、ソースアセットの <PyObject section="assets" module="dagster" object="AssetObservation" /> が生成され、返されたデータバージョンでタグ付けされます。アセットのデータバージョンが、下流アセットがマテリアライズされたときよりも新しいことが観察されると、下流アセットには、上流データが変更されたことを示すラベルが Dagster UI で付けられます。
 
-<PyObject section="assets" module="dagster" object="AutomationCondition" pluralize /> can be used to automatically
-materialize downstream assets when this occurs.
+<PyObject section="assets" module="dagster" object="AutomationCondition" pluralize /> を使用すると、このような状況が発生したときに下流のアセットを自動的に実体化できます。
 
-The <PyObject section="assets" module="dagster" object="observable_source_asset" /> decorator provides a convenient way to define source assets with observation functions. The below observable source asset takes a file hash and returns it as the data version. Every time you run the observation function, a new observation will be generated with this hash set as its data version.
+<PyObject section="assets" module="dagster" object="observable_source_asset" /> デコレータは、監視関数を使用してソース アセットを定義する便利な方法を提供します。以下の監視可能なソースアセットは、ファイルハッシュを受け取り、それをデータバージョンとして返します。監視関数を実行するたびに、このハッシュがデータバージョンとして設定された新しい監視が生成されます。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/observable_source_assets.py" startAfter="start_plain" endBefore="end_plain" />
 
-When the file content changes, the hash and therefore the data version will change - this will notify Dagster that downstream assets derived from an older value (i.e. a different data version) of this source asset might need to be updated.
+ファイルの内容が変更されると、ハッシュとデータバージョンが変更されます。これにより、このソースアセットの古い値 (つまり、異なるデータバージョン) から派生した下流アセットを更新する必要がある可能性があることが Dagster に通知されます。
 
-Source asset observations can be triggered via the "Observe sources" button in the UI graph explorer view. Note that this button will only be visible if at least one source asset in the current graph defines an observation function.
+ソースアセットの監視は、UI グラフ エクスプローラー ビューの「Observe sources」ボタンからトリガーできます。このボタンは、現在のグラフ内の少なくとも 1 つのソース アセットが監視関数を定義している場合にのみ表示されることに注意してください。
 
 ![observable source asset](/images/guides/build/assets/asset-observations/observe-sources.png)
 
-Source asset observations can also be run as part of an asset job. This allows you to run source asset observations on a schedule:
+ソース アセットの監視は、アセット ジョブの一部として実行することもできます。これにより、ソース アセットの監視をスケジュールに従って実行できます:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/observable_source_assets.py" startAfter="start_schedule" endBefore="end_schedule" />
 
 :::note
 
-Currently, source asset observations cannot be run as part of a standard asset job that materializes assets. The `selection` argument to <PyObject section="assets" module="dagster" object="define_asset_job" /> must target only observable source assets-- an error will be thrown if a mix of regular assets and observable source assets is selected.
+現在、ソースアセットの監視は、アセットを具体化する標準アセットジョブの一部として実行できません。<PyObject section="assets" module="dagster" object="define_asset_job" /> の `​​selection` 引数は、監視可能なソースアセットのみをターゲットにする必要があります。通常のアセットと監視可能なソースアセットが混在して選択された場合は、エラーが送出されます。
 
 :::

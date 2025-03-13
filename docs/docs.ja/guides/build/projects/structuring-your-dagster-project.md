@@ -1,17 +1,17 @@
 ---
-title: "Structuring your Dagster project"
+title: "Dagster プロジェクトの構造"
 sidebar_position: 200
 ---
 
 :::note
-Refer to the project scaffolding tutorial to learn how to create a new Dagster project.
+新しい Dagster プロジェクトを作成する方法については、プロジェクト スキャフォールディング チュートリアルを参照してください。
 :::
 
-There are many ways to structure your Dagster project, and it can be difficult to know where to start. In this guide, we will walk you through our recommendations for how to organize your Dagster project. As your project grows, you are welcome to deviate from these recommendations.
+Dagster プロジェクトを構成する方法は多数あり、どこから始めればよいか判断が難しい場合があります。このガイドでは、Dagster プロジェクトを整理するための推奨事項について説明します。プロジェクトが拡大するにつれて、これらの推奨事項から逸脱してもかまいません。
 
-## Your initial project structure
+## 初期のプロジェクト構造
 
-When you first scaffold your project using the Dagster command-line tool, an `assets.py` and `definitions.py` are created in the root of your project.
+Dagster コマンドラインツールを使用して最初にプロジェクトの枠組みを作ると、プロジェクトのルートに `assets.py` と `definitions.py` が作成されます。
 
 ```sh
 $ dagster project scaffold --name example-dagster-project
@@ -32,21 +32,21 @@ $ dagster project scaffold --name example-dagster-project
 └── setup.py
 ```
 
-This is a great structure as you are first getting started, however, as you begin to introduce more assets, jobs, resources, sensors, and utility code, you may find that your Python files are growing too large to manage.
+これは、最初に始めるときには最適な構造ですが、アセット、ジョブ、リソース、センサー、ユーティリティコードをさらに導入し始めると、Python ファイルが大きくなりすぎて管理できなくなる場合があります。
 
-## Restructure your project
+## プロジェクトを再構築する
 
-There are several paradigms in which you can structure your project. Choosing one of these structures is often personal preference, and influenced by how you and your team members operate. This guide will outline three possible project structures:
+プロジェクトを構造化できるパラダイムはいくつかあります。これらの構造の 1 つを選択することは、多くの場合、個人の好みであり、あなたとチーム メンバーの作業方法によって左右されます。このガイドでは、考えられる 3 つのプロジェクト構造について概説します。
 
-1. [Option 1: Structured by technology](#option-1-structured-by-technology)
-2. [Option 2: Structured by concept](#option-2-structured-by-concept)
+1. [Option 1: テクノロジーによって構造化](#option-1-テクノロジーによって構造化)
+2. [Option 2: コンセプト別に構成](#option-2-コンセプト別に構成)
 
 
-### Option 1: Structured by technology
+### Option 1: テクノロジーによって構造化
 
-Data engineers often have a strong understanding of the underlying technologies that are used in their data pipelines. Because of that, it's often beneficial to organize your project by technology. This enables engineers to easily navigate the code base and locate files pertaining to the specific technology.
+データエンジニアは、データパイプラインで使用される基盤となるテクノロジーを深く理解していることが多いです。そのため、プロジェクトをテクノロジー別に整理すると効果的です。これにより、エンジニアはコードベースを簡単にナビゲートし、特定のテクノロジーに関連するファイルを見つけることができます。
 
-Within the technology modules, sub-modules can be created to further organize your code.
+テクノロジーモジュール内でサブモジュールを作成して、コードをさらに整理することができます。
 
 ```
 .
@@ -68,11 +68,11 @@ Within the technology modules, sub-modules can be created to further organize yo
     └── definitions.py
 ```
 
-### Option 2: Structured by concept
+### Option 2: コンセプト別に構成
 
-It's also possible to introduce a layer of categorization by the overarching data processing concept. For example, whether the job is performing some kind of transformation, ingestion of data, or processing operation.
+包括的なデータ処理の概念によって分類のレイヤーを導入することもできます。たとえば、ジョブが何らかの変換、データの取り込み、または処理操作を実行しているかどうかなどです。
 
-This provides additional context to the engineers who may not have as strong of a familiarity with the underlying technologies that are being used.
+これにより、使用されている基盤となるテクノロジーにそれほど精通していないエンジニアにも追加のコンテキストが提供されます。
 
 ```
 .
@@ -95,11 +95,11 @@ This provides additional context to the engineers who may not have as strong of 
     └── definitions.py
 ```
 
-## Merging definitions objects
+## 定義オブジェクトのマージ
 
-It's possible to define multiple `Definitions` objects, often with one for each sub-module in your project. These definitions can then be merged at the root of your project using the `Definitions.merge` method.
+複数の `Definitions` オブジェクトを定義することも可能で、多くの場合、プロジェクト内のサブモジュールごとに 1 つずつ定義します。これらの定義は、`Definitions.merge` メソッドを使用してプロジェクトのルートでマージできます。
 
-The benefit of such a structure is that dependencies like resources and partitions can be scoped to their corresponding definitions.
+このような構造の利点は、リソースやパーティションなどの依存関係を、対応する定義にスコープ設定できることです。
 
 ```py title="example-merge-definitions.py"
 from dbt.definitions import dbt_definitions
@@ -112,22 +112,22 @@ defs = Definitions.merge(
 )
 ```
 
-## Configuring multiple code locations
+## 複数のコードの場所の設定
 
-This guide has outlined how to structure a project within a single code location, however, Dagster also allows you to structure a project spanning multiple location.
+このガイドでは、単一のコードの場所内でプロジェクトを構成する方法について概説しましたが、Dagster では複数の場所にまたがるプロジェクトを構成することもできます。
 
-In most cases, one code location should be sufficient. A helpful pattern uses multiple code locations to separate conflicting dependencies, where each definition has its own package requirements and deployment specs.
+ほとんどの場合、コードの場所は 1 つで十分です。便利なパターンでは、複数のコード場所を使用して競合する依存関係を分離し、各定義に独自のパッケージ要件とデプロイメント仕様を設定します。
 
-To include multiple code locations in a single project, you'll need to add a configuration file to your project:
+1 つのプロジェクトに複数のコード ロケーションを含めるには、プロジェクトに構成ファイルを追加する必要があります:
 
-- **If using Dagster+**, add a `dagster_cloud.yaml` file to the root of your project.
-- **If developing locally or deploying to your infrastructure**, add a workspace.yaml file to the root of your project.
+- **Dagster+ を使用する場合**、プロジェクトのルートに `dagster_cloud.yaml` ファイルを追加します。
+- **ローカルで開発する場合、またはインフラストラクチャにデプロイする場合**、プロジェクトのルートにworkspace.yaml ファイルを追加します。
 
-## External projects
+## 外部プロジェクト
 
-As your data platform evolves, Dagster will enable you to orchestrate other data tools, such as dbt, Sling, or Jupyter notebooks.
+データ プラットフォームが進化するにつれて、Dagster を使用すると、dbt、Sling、Jupyter ノートブックなどの他のデータ ツールをオーケストレーションできるようになります。
 
-For these projects, it's recommended to store them outside your Dagster project. See the `dbt_project` example below.
+これらのプロジェクトについては、Dagster プロジェクトの外部に保存することをお勧めします。以下の `dbt_project` の例を参照してください。
 
 ```
 .
@@ -150,6 +150,6 @@ For these projects, it's recommended to store them outside your Dagster project.
 └── example_dagster_project/
 ```
 
-## Next steps
+## 次は
 
-- Explore the <PyObject section="definitions" module="dagster" object="Definitions.merge" /> API docs
+- <PyObject section="definitions" module="dagster" object="Definitions.merge" /> API ドキュメントを調べる

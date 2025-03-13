@@ -1,81 +1,81 @@
 ---
-title: Defining dependencies between partitioned assets
+title: パーティション化されたアセット間の依存関係の定義
 description: Learn how to define dependencies between partitioned and unpartitioned assets in Dagster.
 sidebar_label: Partitioning dependencies
 sidebar_position: 200
 ---
 
-Now that you've seen how to model partitioned assets in different ways, you may want to define dependencies between the partitioned assets, or even between unpartitioned assets.
+パーティション化されたアセットをさまざまな方法でモデル化する方法を確認しました。パーティション化されたアセット間、またはパーティション化されていないアセット間の依存関係を定義する必要があるかもしれません。
 
-Partitioned assets in Dagster can have dependencies on other partitioned assets, allowing you to create complex data pipelines where the output of one partitioned asset feeds into another. Here's how it works:
+Dagster のパーティション化されたアセットは、他のパーティション化されたアセットと依存関係を持つことができるため、1 つのパーティション化されたアセットの出力が別のパーティション化されたアセットに送られる複雑なデータ パイプラインを作成できます。仕組みは次のとおりです:
 
-- A downstream asset can depend on one or more partitions of an upstream asset
-- The partitioning schemes don't need to be identical, but they should be compatible
+- 下流のアセットは上流のアセットの１つ以上のパーティションに依存できる
+- パーティションスキームは同一である必要はありませんが、互換性が必要である
 
-## Default partition dependency rules
+## デフォルトのパーティション依存関係ルール
 
-A few rules govern default partition-to-partition dependencies:
+デフォルトのパーティション間の依存関係には、いくつかのルールが適用されます:
 
-- When the upstream asset and downstream asset have the same <PyObject section="partitions" module="dagster" object="PartitionsDefinition" />, each partition in the downstream asset will depend on the same partition in the upstream asset.
-- When the upstream asset and downstream asset are both [time window-partitioned](partitioning-assets#time-based), each partition in the downstream asset will depend on all partitions in the upstream asset that intersect its time window.
+- 上流アセットと下流アセットに同じ <PyObject section="partitions" module="dagster" object="PartitionsDefinition" /> がある場合、下流アセットの各パーティションは上流アセットの同じパーティションに依存します。
+- 上流アセットと下流アセットの両方が [時間ウィンドウ パーティション分割](partitioning-assets#time-based) されている場合、下流アセット内の各パーティションは、その時間ウィンドウと交差する上流アセット内のすべてのパーティションに依存します。
 
-For example, if an asset with a <PyObject section="partitions" module="dagster" object="DailyPartitionsDefinition" /> depends on an asset with an <PyObject section="partitions" module="dagster" object="HourlyPartitionsDefinition" />, then partition `2024-04-12` of the daily asset would depend on 24 partitions of the hourly asset: `2024-04-12-00:00` through `2024-04-12-23:00`.
+たとえば、<PyObject section="partitions" module="dagster" object="DailyPartitionsDefinition" /> を持つアセットが <PyObject section="partitions" module="dagster" object="HourlyPartitionsDefinition" /> を持つアセットに依存している場合、日次アセットのパーティション `2024-04-12` は、時間別アセットの 24 個のパーティション (`2024-04-12-00:00` から `2024-04-12-23:00`) に依存します。
 
-## Overriding default dependency rules
+## デフォルトの依存関係ルールを上書きする
 
-Default partition dependency rules can be overridden by providing a <PyObject section="partitions" module="dagster" object="PartitionMapping" /> when specifying a dependency on an asset. How this is accomplished depends on the type of dependency the asset has.
+アセットへの依存関係を指定するときに <PyObject section="partitions" module="dagster" object="PartitionMapping" /> を指定すると、デフォルトのパーティション依存関係ルールを上書きできます。これがどのように実現されるかは、アセットが持つ依存関係のタイプによって異なります。
 
-### Basic asset dependencies
+### 基本的なアセットの依存関係
 
-To override partition dependency rules for basic asset dependencies, you can use <PyObject section="assets" module="dagster" object="AssetDep" /> to specify the partition dependency on an upstream asset:
+基本的なアセット依存関係のパーティション依存関係ルールをオーバーライドするには、<PyObject section="assets" module="dagster" object="AssetDep" /> を使用して、上流アセットのパーティション依存関係を指定します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/partitioned_asset_mappings.py" />
 
-### Managed-loading asset dependencies
+### 管理されたロードアセットの依存関係
 
-To override partition dependency rules for managed-loading asset dependencies, you can use a <PyObject section="partitions" module="dagster" object="PartitionMapping" /> to specify that each partition of an asset should depend on a partition in an upstream asset.
+管理読み込みアセットの依存関係のパーティション依存関係ルールをオーバーライドするには、<PyObject section="partitions" module="dagster" object="PartitionMapping" /> を使用して、アセットの各パーティションがアップストリーム アセットのパーティションに依存するように指定します。
 
-In the following code, we use a <PyObject section="partitions" module="dagster" object="TimeWindowPartitionMapping" /> to specify that each partition of a daily-partitioned asset should depend on the prior day's partition in an upstream asset:
+次のコードでは、<PyObject section="partitions" module="dagster" object="TimeWindowPartitionMapping" /> を使用して、毎日パーティション分割されたアセットの各パーティションが、上流のアセット内の前日のパーティションに依存するように指定します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/partition_mapping.py" />
 
-For a list of available `PartitionMappings`, see the [API docs](/api/python-api/partitions#dagster.PartitionMapping).
+利用可能な `PartitionMappings` のリストについては、[API ドキュメント](/api/python-api/partitions#dagster.PartitionMapping) を参照してください。
 
-## Examples
+## 例
 
-### Dependencies between different time-based partitions \{#different-time-dependencies}
+### 異なる時間ベースのパーティション間の依存関係 \{#different-time-dependencies}
 
-The following example creates two partitions: `daily_sales_data` and `daily_sales_summary`, which can be executed at the same time in a single schedule.
+次の例では、単一のスケジュールで同時に実行できる `daily_sales_data` と `daily_sales_summary` の 2 つのパーティションを作成します。
 
 <details>
-<summary>Show example</summary>
+<summary>例を表示</summary>
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
 
 </details>
 
-However, sometimes you might want to define dependencies between different time-based partitions. For example, you might want to aggregate daily data into a weekly report.
+ただし、異なる時間ベースのパーティション間の依存関係を定義したい場合もあります。たとえば、毎日のデータを週次レポートに集計したい場合などです。
 
-Consider the following example:
+次の例を考えてみましょう:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partition_dependencies.py" language="python" />
 
-In this example:
+この例では:
 
-- We have a `daily_sales_data` asset partitioned by day, which will be executed daily.
-- The `weekly_sales_summary` asset depends on the `daily_sales_data` asset, which will be executed weekly.
+- 日ごとに分割された `daily_sales_data` アセットがあり、毎日実行されます。
+- `weekly_sales_summary` アセットは、毎週実行され、`daily_sales_data` アセットに依存します。
 
-  - In this asset, the weekly partition depends on all its parent partitions (all seven days of the week). We use `context.asset_partition_key_range_for_input("daily_sales_data")` to get a range of partition keys, which includes the start and end of the week.
+  - このアセットでは、週ごとのパーティションはすべての親パーティション (週 7 日間すべて) に依存します。週の開始と終了を含むパーティション キーの範囲を取得するには、`context.asset_partition_key_range_for_input("daily_sales_data")` を使用します。
 
-- To automate the execution of these assets:
+- これらのアセットの実行を自動化するには:
 
-  - First, we specify `automation_condition=AutomationCondition.eager()` to the `weekly_sales_summary` asset. This ensures it runs weekly after all seven daily partitions of `daily_sales_data` are up-to-date.
-  - Second, we specify `automation_condition=AutomationCondition.cron(cron_schedule="0 1 * * *")` to the `daily_sales_data` asset. This ensures it runs daily.
+  - まず、`weekly_sales_summary` アセットに `automation_condition=AutomationCondition.eager()` を指定します。これにより、`daily_sales_data` の 7 つの日次パーティションがすべて最新になった後に毎週実行されるようになります。
+  - 次に、`daily_sales_data` アセットに `automation_condition=AutomationCondition.cron(cron_schedule="0 1 * * *")` を指定します。これにより、毎日実行されるようになります。
 
 
 :::tip
 
-We recommend using [automation conditions](/guides/automate/declarative-automation/) instead of [schedules](/guides/automate/schedules) for code with complex dependency logic, such as the example above. Automation conditions specify when an asset should run, which allows you to define execution criteria without needing to add custom scheduling logic.
+上記の例のように、複雑な依存関係ロジックを持つコードでは、[スケジュール](/guides/automate/schedules)ではなく[自動化条件](/guides/automate/declarative-automation/)を使用することをお勧めします。自動化条件は、アセットを実行するタイミングを指定するため、カスタム スケジュール ロジックを追加しなくても実行条件を定義できます。
 
 :::
 

@@ -1,39 +1,39 @@
 ---
-title: "Kind tags"
+title: "種類タグ"
 description: "Use kind tags to easily categorize assets within you Dagster project."
 sidebar_position: 200
 ---
 
-Kind tags can help you quickly identify the underlying system or technology used for a given asset in the Dagster UI. These tags allow you to organize assets within a Dagster project and can be used to filter or search across all your assets.
+種類タグを使用すると、Dagster UI で特定のアセットに使用されている基盤となるシステムまたはテクノロジーをすばやく識別できます。これらのタグを使用すると、Dagster プロジェクト内でアセットを整理したり、すべてのアセットをフィルタリングまたは検索したりすることができます。
 
-## Adding kinds to an asset
+## アセットに種類を追加する
 
-You may add up to three kinds to the `kinds` argument of an <PyObject section="assets" module="dagster" object="asset" decorator />, which can be useful to represent multiple technologies or systems that an asset is associated with. For example, an asset which is built by Python code and stored in Snowflake can be tagged with both `python` and `snowflake` kinds:
+<PyObject section="assets" module="dagster" object="asset" decorator /> の `kinds` 引数には最大 3 つの種類を追加できます。これは、アセットが関連付けられている複数のテクノロジーやシステムを表すのに役立ちます。たとえば、Python コードで構築され、Snowflake に保存されているアセットには、`python` と `snowflake` の両方の種類でタグ付けできます:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/asset_kinds.py" />
 
-Kinds can also be specified on an <PyObject section="assets" module="dagster" object="AssetSpec" />, for use in multi-assets:
+multi_asset で使用するために、<PyObject section="assets" module="dagster" object="AssetSpec" /> で種類を指定することもできます:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/metadata-tags/asset_kinds_multi.py" />
 
-On the backend, these kind inputs are stored as tags on the asset. For more information, see [Tags](/guides/build/assets/metadata-and-tags/index.md#tags).
+バックエンドでは、これらの種類の入力はアセットのタグとして保存されます。詳細については、[タグ](/guides/build/assets/metadata-and-tags/index.md#tags) を参照してください。
 
-When viewing the asset in the lineage view, the attached kinds will be visible at the bottom the asset.
+系統ビューでアセットを表示すると、添付された種類がアセットの下部に表示されます。
 
 <img
   src="/images/guides/build/assets/metadata-tags/kinds/kinds.svg"
   alt="Asset in lineage view with attached kind tags"
 />
 
-## Adding compute kinds to assets
+## アセットにコンピューティングの種類を追加する
 
 :::warning
 
-Using `compute_kind` has been superseded by the `kinds` argument. We recommend using the `kinds` argument instead.
+`compute_kind` の使用は `kinds` 引数に置き換えられました。代わりに `kinds` 引数を使用することをお勧めします。
 
 :::
 
-You can add a single compute kind to any asset by providing a value to the `compute_kind` argument.
+`compute_kind` 引数に値を指定することで、任意のアセットに単一のコンピューティングの種類を追加できます。
 
 ```python
 @asset(compute_kind="dbt")
@@ -41,14 +41,14 @@ def my_asset():
     pass
 ```
 
-## Supported Icons
+## サポートされているアイコン
 
-Some kinds are given a branded icon in the UI. We currently support nearly 200 unique technology icons.
+一部の種類には、UI にブランド アイコンが与えられます。現在、約 200 個の固有のテクノロジー アイコンをサポートしています。
 
 import KindsTags from '@site/docs/partials/\_KindsTags.md';
 
 <KindsTags />
 
-## Requesting additional icons
+## 追加アイコンのリクエスト
 
-The kinds icon pack is open source and anyone can [contribute new icons](/about/contributing) to the public repo or request a new icon by [filing an issue](https://github.com/dagster-io/dagster/issues/new?assignees=&labels=type%3A+feature-request&projects=&template=request_a_feature.ym). Custom icons per deployment are not currently supported.
+Kinds アイコン パックはオープン ソースであり、誰でも新しいアイコンをパブリックリポジトリに[投稿したり](/about/contributing)、[問題を報告して](https://github.com/dagster-io/dagster/issues/new?assignees=&labels=type%3A+feature-request&projects=&template=request_a_feature.ym)新しいアイコンをリクエストしたりできます。デプロイメントごとのカスタム アイコンは現在サポートされていません。

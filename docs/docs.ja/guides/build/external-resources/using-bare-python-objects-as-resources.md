@@ -1,11 +1,11 @@
 ---
-title: Using bare Python objects as resources
+title: 裸のPythonオブジェクトをリソースとして使用する
 sidebar_position: 800
 ---
 
-When starting to build a set of assets or jobs, you may want to use a bare Python object without configuration as a resource, such as a third-party API client.
+アセットまたはジョブのセットの構築を開始するときに、サードパーティの API クライアントなどのリソースとして、構成なしの Python オブジェクトを使用する必要がある場合があります。
 
-Dagster supports passing plain Python objects as resources. This follows a similar pattern to using a <PyObject section="resources" module="dagster" object="ConfigurableResource"/> subclass; however, assets that use these resources must [annotate](https://docs.python.org/3/library/typing.html#typing.Annotated) them with `ResourceParam`. This annotation lets Dagster know that the parameter is a resource and not an upstream input.
+Dagster は、プレーンな Python オブジェクトをリソースとして渡すことをサポートしています。これは、<PyObject section="resources" module="dagster" object="ConfigurableResource"/> サブクラスを使用する場合と同様のパターンに従います。ただし、これらのリソースを使用するアセットは、`ResourceParam` を使用して [注釈](https://docs.python.org/3/library/typing.html#typing.Annotated) する必要があります。この注釈により、Dagster は、パラメーターがリソースであり、アップストリーム入力ではないことを認識します。
 
 {/* TODO replace `ResourceParam` with <PyObject section="resources" module="dagster" object="ResourceParam"/>  */}
 

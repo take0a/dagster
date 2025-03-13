@@ -1,33 +1,33 @@
 ---
-title: "Using Dagster pipes"
+title: "Dagster パイプの使用"
 description: "Learn how to use Dagster Pipes's built-in subprocess implementation to invoke a subprocess with a given command and environment"
 sidebar_position: 10
 ---
 
-In this guide, we’ll show you how to use [Dagster Pipes](/guides/build/external-pipelines/) with Dagster’s built-in subprocess <PyObject section="pipes" module="dagster" object="PipesSubprocessClient" /> to run a local subprocess with a given command and environment. You can then send information such as structured metadata and logging back to Dagster from the subprocess, where it will be visible in the Dagster UI.
+このガイドでは、[Dagster Pipes](/guides/build/external-pipelines/) を Dagster の組み込みサブプロセス <PyObject section="pipes" module="dagster" object="PipesSubprocessClient" /> とともに使用して、指定されたコマンドと環境でローカル サブプロセスを実行する方法を説明します。その後、構造化メタデータやログなどの情報をサブプロセスから Dagster に送信し、Dagster UI で表示できるようになります。
 
-To get there, you'll:
+そうするには、次のことが必要です:
 
-- [Create a Dagster asset that invokes a subprocess](create-subprocess-asset)
-- [Modify existing code to work with Dagster Pipes to send information back to Dagster](modify-external-code)
-- Learn about using Dagster Pipes with other entities in the Dagster system in the [Reference](reference) section
+- [サブプロセスを呼び出すDagsterアセットを作成する](create-subprocess-asset)
+- [既存のコードを修正して、Dagster パイプと連携し、情報を Dagster に送り返す](modify-external-code)
+- DagsterパイプをDagsterシステム内の他のエンティティと併用する方法については、[リファレンス](reference)セクションを参照してください。
 
 :::note
 
-This guide focuses on using an out-of-the-box <PyObject section="pipes" module="dagster" object="PipesSubprocessClient" /> resource. For further customization with the subprocess invocation, use <PyObject section="libraries" module="dagster_pipes" object="open_dagster_pipes"/> approach instead. Refer to [Customizing Dagster Pipes protocols](/guides/build/external-pipelines/dagster-pipes-details-and-customization) for more info.
+このガイドでは、すぐに使用できる <PyObject section="pipes" module="dagster" object="PipesSubprocessClient" /> リソースの使用に焦点を当てています。サブプロセス呼び出しをさらにカスタマイズするには、代わりに <PyObject section="libraries" module="dagster_pipes" object="open_dagster_pipes"/> アプローチを使用します。詳細については、[Dagster Pipes プロトコルのカスタマイズ](/guides/build/external-pipelines/dagster-pipes-details-and-customization)を参照してください。
 
 :::
 
-## Prerequisites
+## 前提条件
 
-To use Dagster Pipes to run a subprocess, you’ll need to have Dagster (`dagster`) and the Dagster UI (`dagster-webserver`) installed. Refer to the [Installation guide](/getting-started/installation) for more info.
+Dagster パイプを使用してサブプロセスを実行するには、Dagster (`dagster`) と Dagster UI (`dagster-webserver`) がインストールされている必要があります。詳細については、[インストール ガイド](/getting-started/installation)を参照してください。
 
-You'll also need **an existing Python script.** We’ll use the following Python script to demonstrate. This file will be invoked by the Dagster asset that you’ll create later in this tutorial.
+また、**既存の Python スクリプト** も必要です。次の Python スクリプトを使用して説明します。このファイルは、このチュートリアルの後半で作成する Dagster アセットによって呼び出されます。
 
-Create a file named `external_code.py` and paste the following into it:
+`external_code.py` という名前のファイルを作成し、次の内容を貼り付けます:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/external_code.py" lineStart="3" />
 
-## Ready to get started?
+## 始める準備はできましたか？
 
-When you've fulfilled all the prerequisites for the tutorial, you can get started by [creating a Dagster asset that executes a subprocess](create-subprocess-asset).
+チュートリアルの前提条件をすべて満たしたら、[サブプロセスを実行する Dagster アセットを作成](create-subprocess-asset)して開始できます。
