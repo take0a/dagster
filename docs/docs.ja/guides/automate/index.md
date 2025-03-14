@@ -1,24 +1,24 @@
 ---
-title: "Automate"
+title: "自動化"
 description: Learn how to automate your data pipelines.
 sidebar_class_name: hidden
 ---
 
-Automation is key to building reliable, efficient data pipelines. Dagster offers several ways to automate pipeline execution to fit a variety of needs.
+自動化は、信頼性が高く効率的なデータ パイプラインを構築する上で重要です。Dagster は、さまざまなニーズに合わせてパイプラインの実行を自動化するさまざまな方法を提供します。
 
-Consider these factors when selecting an automation method:
+自動化方法を選択するときは、次の要素を考慮してください:
 
-* **Pipeline structure**: Are you working primarily with [assets](/guides/build/assets/), [ops](/guides/build/ops), or a mix?
-* **Timing requirements**: Do you need regular updates or event-driven processing?
-* **Data characteristics**: Is your data partitioned? Do you need to update historical data?
-* **System integration**: Do you need to react to external events or systems?
+* **パイプライン構造**: 主に [アセット](/guides/build/assets/)、[ops](/guides/build/ops)、またはその両方を使って作業していますか？
+* **タイミング要件**: 定期的な更新やイベント駆動型処理が必要ですか？
+* **データ特性**: データはパーティション分割されていますか? 履歴データを更新する必要がありますか？
+* **システム統合**: 外部のイベントやシステムに反応する必要がありますか？
 
-## Automation methods
+## 自動化の方法
 
-| Method                       | Description                                | Best for                     | Works with                               |
+| 方法                       | 説明                                | 最適な用途                     | 対応するオブジェクト                               |
 | ---------------------------- | ------------------------------------------ | ---------------------------- | ---------------------------------------- |
-| [Schedules](schedules/) | Run a selection of assets at specified times with a cron expression | Regular, time-based job runs and basic time-based automation | Assets, Ops, Graphs |
-| [Declarative automation](declarative-automation/) |  A framework that allows you to set automation conditions on assets and asset checks | Asset-centric, condition-based updates | Assets only         |
-| [Sensors](sensors/)     |  Trigger runs based on events or conditions that you define, like the arrival of a new file or a change to an external system | Event-driven automation                | Assets, Ops, Graphs |
-| [Asset sensors](asset-sensors) | Trigger jobs when specified assets are materialized, allowing you to create dependencies between jobs or code locations. | Cross-job/location asset dependencies  | Assets only         |
-| [GraphQL triggers](/guides/operate/graphql/) | Trigger materializations and jobs from the GraphQL endpoint      | Event triggers from external systems   | Assets, Ops, Jobs   |
+| [Schedules](schedules/) | cron式を使用して、指定した時間に選択したアセットを実行します。 | 定期的な時間ベースのジョブ実行と基本的な時間ベースの自動化 | Assets, Ops, Graphs |
+| [Declarative automation](declarative-automation/) |  アセットとアセットチェックの自動化条件を設定できるフレームワーク | アセット中心、状態ベースの更新 | Assets only         |
+| [Sensors](sensors/)     | トリガーは、新しいファイルの到着や外部システムの変更など、定義したイベントや条件に基づいて実行されます。 | イベント駆動型自動化                | Assets, Ops, Graphs |
+| [Asset sensors](asset-sensors) | 指定されたアセットが実現されたときにジョブをトリガーし、ジョブまたはコードの場所間の依存関係を作成できます。 | ジョブ/ロケーション間のアセット依存関係  | Assets only         |
+| [GraphQL triggers](/guides/operate/graphql/) | GraphQLエンドポイントからマテリアライゼーションとジョブをトリガーする      | 外部システムからのイベントトリガー   | Assets, Ops, Jobs   |

@@ -1,58 +1,58 @@
 ---
-title: Customizing a schedule's execution timezone
+title: スケジュールの実行タイムゾーンのカスタマイズ
 sidebar_position: 300
 ---
 
-[Schedules](index.md) that don't have a set timezone will, by default, execute in [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time). By the end of this guide, you'll know how to:
+タイムゾーンが設定されていない [スケジュール](index.md) は、デフォルトでは [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) で実行されます。このガイドを読み終えると、次のことが分かるようになります:
 
-- Set custom timezones on schedule definitions
-- Set custom timezones on partitioned jobs
-- Account for the impact of Daylight Savings Time on schedule execution times
+- スケジュール定義にカスタムタイムゾーンを設定する
+- パーティション化されたジョブにカスタムタイムゾーンを設定する
+- 夏時間がスケジュール実行時間に与える影響を考慮する
 
 :::note
 
-This guide assumes familiarity with:
+このガイドでは、以下の知識があることを前提としています:
 
-- [Schedules](index.md)
-- Jobs, either [asset](/guides/build/assets/asset-jobs) or op-based
-- [Partitions](/guides/build/partitions-and-backfills/partitioning-assets)
+- [スケジュール](index.md)
+- ジョブで[アセット](/guides/build/assets/asset-jobs)ベースまたはopベースのいずれか
+- [パーティション](/guides/build/partitions-and-backfills/partitioning-assets)
 
 :::
 
-## Setting timezones on schedule definitions
+## スケジュール定義にタイムゾーンを設定する
 
-Using the `execution_timezone` parameter allows you to specify a timezone for the schedule on the following objects:
+`execution_timezone` パラメータを使用すると、次のオブジェクトのスケジュールのタイムゾーンを指定できます:
 
 - <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />
 - <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" />
 - <PyObject section="libraries" object="build_schedule_from_dbt_selection" module="dagster_dbt" />
 
-This parameter accepts any [`tz` timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). For example, the following schedule will execute **every day at 9:00 AM in US Pacific time (America/Los_Angeles)**:
+このパラメータは、任意の [`tz` タイムゾーン](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) を受け入れます。たとえば、次のスケジュールは、**米国太平洋時間 (America/Los_Angeles) で毎日午前 9 時に実行されます**。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedules.py" startAfter="start_timezone" endBefore="end_timezone" />
 
-## Setting timezones on partitioned jobs
+## パーティションジョブのタイムゾーンの設定
 
-Schedules constructed from partitioned jobs execute in the timezone defined on the partition's config. Partitions definitions have a `timezone` parameter, which accepts any [`tz` timezone](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones).
+パーティション化されたジョブから構築されたスケジュールは、パーティションの設定で定義されたタイムゾーンで実行されます。パーティション定義には `timezone` パラメータがあり、任意の [`tz` タイムゾーン](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) を受け入れます。
 
-For example, the following partition uses the **US Pacific (America/Los_Angeles)** timezone:
+たとえば、次のパーティションは **米国太平洋 (America/Los_Angeles)** タイムゾーンを使用します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/partition_with_timezone.py" />
 
-## Execution times and Daylight Savings Time
+## 実行時間と夏時間
 
-When Daylight Savings Time (DST) begins and ends, there may be some impact on your schedules' execution times.
+夏時間 (DST) の開始と終了時には、スケジュールの実行時間に何らかの影響が出る可能性があります。
 
-### Impact on daily schedules
+### 日次のスケジュールへの影響
 
-Because of DST transitions, it's possible to specify an execution time that doesn't exist for every scheduled interval.
+DST 移行のため、スケジュールされた間隔ごとに存在しない実行時間を指定する可能性があります。
 
-Let's say you have a **schedule that executes every day at 2:30 AM.** On the day DST begins, time jumps from 2:00AM to 3:00AM, which means the time of 2:30 AM won't exist.
+**毎日午前 2:30 に実行されるスケジュール** があるとします。DST が開始する日には、時刻が午前 2:00 から午前 3:00 にジャンプするため、午前 2:30 という時刻は存在しなくなります。
 
-Dagster would instead run the schedule at the next time that exists, which would be 3:00 AM:
+Dagster は代わりに、次の存在する時刻、つまり午前 3 時にスケジュールを実行します。
 
 ```markdown
-# DST begins: time jumps forward an hour at 2:00 AM
+# 夏時間開始: 午前2時に時間が1時間進みます
 
 - 12:30 AM
 - 1:00 AM
@@ -62,14 +62,14 @@ Dagster would instead run the schedule at the next time that exists, which would
 - 4:00 AM
 ```
 
-It's also possible to specify an execution time that exists twice on one day every year.
+毎年 1 日に 2 回存在する実行時間を指定することもできます。
 
-Let's say you have a **schedule that executes every day at 1:30 AM.** On the day DST ends, the hour from 1:00 AM to 2:00 AM repeats, which means the time of 1:30 AM will exist twice. This means there are two possible times the schedule could run.
+**毎日午前 1:30 に実行されるスケジュール** があるとします。DST が終了する日には、午前 1:00 から午前 2:00 までの時間が繰り返されるため、午前 1:30 の時間が 2 回存在することになります。つまり、スケジュールが実行される可能性のある時間は 2 回あることになります。
 
-In this case, Dagster would execute the schedule at the second iteration of 1:30 AM:
+この場合、Dagster は 2 回目の反復である午前 1:30 にスケジュールを実行します。
 
 ```markdown
-# DST ends: time jumps backward an hour at 2:00 AM
+# 夏時間終了: 午前2時に時間が1時間戻ります
 
 - 12:30 AM
 - 1:00 AM
@@ -79,14 +79,14 @@ In this case, Dagster would execute the schedule at the second iteration of 1:30
 - 2:00 AM
 ```
 
-### Impact on hourly schedules
+### 時間ごとのスケジュールへの影響
 
-Hourly schedules are unaffected by daylight savings time transitions. Schedules will continue to run exactly once an hour, even as DST ends and the hour from 1:00 AM to 2:00 AM repeats.
+時間ごとのスケジュールは、夏時間への移行の影響を受けません。DST が終了し、午前 1 時から午前 2 時までの時間が繰り返されても、スケジュールは 1 時間に 1 回だけ実行され続けます。
 
-Let's say you have a **schedule that executes hourly at 30 minutes past the hour.** On the day DST ends, the schedule would run at 12:30 AM and both instances of 1:30 AM before proceeding normally at 2:30 AM:
+**毎時 30 分に実行されるスケジュール** があるとします。DST が終了する日には、スケジュールは午前 12:30 に実行され、午前 1:30 の両方のインスタンスが実行され、午前 2:30 に通常どおり続行されます:
 
 ```markdown
-# DST ends: time jumps backward an hour at 2:00 AM
+# 夏時間終了: 午前2時に時間が1時間戻ります
 
 - 12:30 AM ## schedule executes
 - 1:00 AM
@@ -97,11 +97,11 @@ Let's say you have a **schedule that executes hourly at 30 minutes past the hour
 - 2:30 AM ## schedule executes
 ```
 
-## APIs in this guide
+## このガイドのAPI
 
 | Name                                                                         | Description                                                                                         |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />                                     | Decorator that defines a schedule that executes according to a given cron schedule.                 |
-| <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" />                                     | Class for schedules.                                                                                |
-| <PyObject section="schedules-sensors" module="dagster"  object="build_schedule_from_partitioned_job" />                    | A function that constructs a schedule whose interval matches the partitioning of a partitioned job. |
-| <PyObject section="libraries" object="build_schedule_from_dbt_selection" module="dagster_dbt" /> | A function that constructs a schedule that materializes a set of specified dbt resources.           |
+| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />         | 指定された cron スケジュールに従って実行されるスケジュールを定義するデコレータ。     |
+| <PyObject section="schedules-sensors" module="dagster" object="ScheduleDefinition" />                                     | スケジュールのクラス。    |
+| <PyObject section="schedules-sensors" module="dagster"  object="build_schedule_from_partitioned_job" />  | パーティション化されたジョブのパーティション分割と一致する間隔を持つスケジュールを構築する関数。 |
+| <PyObject section="libraries" object="build_schedule_from_dbt_selection" module="dagster_dbt" /> | 指定された dbt リソースのセットを実体化するスケジュールを構築する関数。           |

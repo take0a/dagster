@@ -1,54 +1,54 @@
 ---
-title: "Sensors"
+title: "センサー"
 sidebar_position: 30
 ---
 
-Sensors enable you to take action in response to events that occur either internally within Dagster or in external systems. They check for events at regular intervals and either perform an action or provide an explanation for why the action was skipped.
+センサーを使用すると、Dagster 内部または外部システムで発生するイベントに応じてアクションを実行できます。センサーは定期的にイベントをチェックし、アクションを実行するか、アクションがスキップされた理由の説明を提供します。
 
-Examples of events include:
-- a run completes in Dagster
-- a run fails in Dagster
-- a job materializes a specific asset 
-- a file appears in an s3 bucket
-- an external system is down
+イベントの例としては次のようなものがあります:
+- Dagster で実行が完了
+- Dagster で実行が失敗
+- ジョブが特定のアセットを実体化 
+- ファイルが S3 バケットに表示される
+- 外部システムがダウンしている
 
-Examples of actions include:
-- launching a run
-- sending a Slack message
-- inserting a row into a database
+アクションの例は次のとおりです:
+- 実行を開始
+- Slack メッセージの送信
+- データベースに行を挿入
 
 :::tip
 
-An alternative to polling with sensors is to push events to Dagster using the [Dagster API](/guides/operate/graphql/).
+センサーによるポーリングの代わりに、[Dagster API](/guides/operate/graphql/) を使用してイベントを Dagster にプッシュできます。
 
 :::
 
 <details>
-<summary>Prerequisites</summary>
+<summary>前提条件</summary>
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、次のことが必要です:
 
-- Familiarity with [assets](/guides/build/assets/)
-- Familiarity with [jobs](/guides/build/assets/asset-jobs)
+- [アセット](/guides/build/assets/) に関する知識
+- [ジョブ](/guides/build/assets/asset-jobs) に関する知識
 </details>
 
-## Basic sensor
+## 基本的なセンサー
 
-Sensors are defined with the `@sensor` decorator. The following example includes a `check_for_new_files` function that simulates finding new files. In a real scenario, this function would check an actual system or directory.
+センサーは `@sensor` デコレータで定義されます。次の例には、新しいファイルの検索をシミュレートする `check_for_new_files` 関数が含まれています。実際のシナリオでは、この関数は実際のシステムまたはディレクトリをチェックします。
 
-If the sensor finds new files, it starts a run of `my_job`. If not, it skips the run and logs `No new files found` in the Dagster UI.
+センサーが新しいファイルを見つけると、`my_job` の実行を開始します。そうでない場合は、実行をスキップし、Dagster UI に `No new files found` と記録します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/simple-sensor-example.py" language="python" />
 
 :::tip
-Unless a sensor has a `default_status` of `DefaultSensorStatus.RUNNING`, it won't be enabled when first deployed to a Dagster instance. To find and enable the sensor, click **Automation > Sensors** in the Dagster UI.
+センサーの `default_status` が `DefaultSensorStatus.RUNNING` でない限り、センサーは Dagster インスタンスに最初にデプロイされたときに有効になりません。センサーを見つけて有効にするには、Dagster UI で **Automation > Sensors** をクリックします。
 :::
 
-## Customizing intervals between evaluations
+## 評価間隔のカスタマイズ
 
-The `minimum_interval_seconds` argument allows you to specify the minimum number of seconds that will elapse between sensor evaluations. This means that the sensor won't be evaluated more frequently than the specified interval.
+`minimum_interval_seconds` 引数を使用すると、センサー評価間の​​最小経過秒数を指定できます。つまり、センサーは指定された間隔よりも頻繁に評価されることはありません。
 
-It's important to note that this interval represents a minimum interval between runs of the sensor and not the exact frequency the sensor runs. If a sensor takes longer to complete than the specified interval, the next evaluation will be delayed accordingly.
+この間隔は、センサーの実行間隔の最小間隔を表しており、センサーが実行される正確な頻度を表しているわけではないことに注意してください。センサーの完了に指定された間隔よりも長い時間がかかる場合、次の評価はそれに応じて遅延されます。
 
 ```python
 # Sensor will be evaluated at least every 30 seconds
@@ -57,38 +57,38 @@ def new_file_sensor():
   ...
 ```
 
-In this example, if the `new_file_sensor`'s evaluation function takes less than a second to run, you can expect the sensor to run consistently around every 30 seconds. However, if the evaluation function takes longer, the interval between evaluations will be longer.
+この例では、`new_file_sensor` の評価関数の実行に 1 秒もかからない場合、センサーは 30 秒ごとに一貫して実行されることが期待できます。ただし、評価関数に時間がかかる場合、評価の間隔は長くなります。
 
-## Preventing duplicate runs
+## 重複実行の防止
 
-To prevent duplicate runs, you can use run keys to uniquely identify each `RunRequest`. In the [previous example](#basic-sensor), the `RunRequest` was constructed with a `run_key`:
+重複実行を防ぐために、実行キーを使用して各 `RunRequest` を一意に識別できます。[前の例](#basic-sensor) では、`RunRequest` は `run_key` を使用して構築されました:
 
 ```
 yield dg.RunRequest(run_key=filename)
 ```
 
-For a given sensor, a single run is created for each `RunRequest` with a unique `run_key`. Dagster will skip processing requests with previously used run keys, ensuring that duplicate runs won't be created.
+特定のセンサーに対して、一意の `run_key` を持つ `RunRequest` ごとに 1 つの実行が作成されます。Dagster は、以前に使用された実行キーを持つリクエストの処理をスキップし、重複する実行が作成されないようにします。
 
-## Cursors and high volume events
+## カーソルと大量のイベント
 
-When dealing with a large number of events, you may want to implement a cursor to optimize sensor performance. Unlike run keys, cursors allow you to implement custom logic that manages state.
+多数のイベントを処理する場合、センサーのパフォーマンスを最適化するためにカーソルを実装する必要がある場合があります。実行キーとは異なり、カーソルを使用すると、状態を管理するカスタム ロジックを実装できます。
 
-The following example demonstrates how you might use a cursor to only create `RunRequests` for files in a directory that have been updated since the last time the sensor ran.
+次の例は、カーソルを使用して、センサーが最後に実行されてから更新されたディレクトリ内のファイルに対してのみ `RunRequests` を作成する方法を示しています。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/sensor-cursor.py" language="python" />
 
-For sensors that consume multiple event streams, you may need to serialize and deserialize a more complex data structure in and out of the cursor string to keep track of the sensor's progress over the multiple streams.
+複数のイベント ストリームを使用するセンサーの場合、複数のストリームにわたるセンサーの進行状況を追跡するために、カーソル文字列の内外にあるより複雑なデータ構造をシリアル化および逆シリアル化する必要がある場合があります。
 
 :::note
-The preceding example uses both a `run_key` and a cursor, which means that if the cursor is reset but the files don't change, new runs won't be launched. This is because the run keys associated with the files won't change.
+前の例では、`run_key` とカーソルの両方を使用しています。つまり、カーソルがリセットされてもファイルが変更されない場合は、新しい実行は開始されません。これは、ファイルに関連付けられた実行キーが変更されないためです。
 
-If you want to be able to reset a sensor's cursor, don't set `run_key`s on `RunRequest`s.
+センサーのカーソルをリセットできるようにしたい場合は、`RunRequest` に `run_key` を設定しないでください。
 :::
 
-## Next steps
+## 次のステップ
 
-By understanding and effectively using these automation methods, you can build more efficient data pipelines that respond to your specific needs and constraints.
+これらの自動化方法を理解し、効果的に使用することで、特定のニーズと制約に対応する、より効率的なデータ パイプラインを構築できます。
 
-- Run pipelines on a [schedule](/guides/automate/schedules)
-- Trigger cross-job dependencies with [asset sensors](/guides/automate/asset-sensors)
-- Explore [Declarative Automation](/guides/automate/declarative-automation) as an alternative to sensors
+- [スケジュール](/guides/automate/schedules)に従ってパイプラインを実行する
+- [アセット センサー](/guides/automate/asset-sensors) を使用してジョブ間の依存関係をトリガーする
+- センサーの代替として[宣言型オートメーション](/guides/automate/declarative-automation)を検討する

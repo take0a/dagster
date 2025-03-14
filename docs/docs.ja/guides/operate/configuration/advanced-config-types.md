@@ -1,77 +1,77 @@
 ---
-title: "Advanced config types"
+title: "高度な設定タイプ"
 description: Dagster's config system supports a variety of more advanced config types.
 sidebar_position: 200
 ---
 
-In some cases, you may want to define a more complex [config schema](run-configuration) for your assets and ops. For example, you may want to define a config schema that takes in a list of files or complex data. In this guide, we'll walk through some common patterns for defining more complex config schemas.
+場合によっては、アセットとオペレーションに対してより複雑な [config schema](run-configuration) を定義したい場合があります。たとえば、ファイルのリストや複雑なデータを取得する config schema を定義したい場合があります。このガイドでは、より複雑な config schema を定義するための一般的なパターンをいくつか説明します。
 
-## Attaching metadata to config fields
+## 設定フィールドにメタデータを添付する
 
-Config fields can be annotated with metadata, which can be used to provide additional information about the field, using the Pydantic <PyObject section="config" module="dagster" object="Field"/> class.
+構成フィールドにはメタデータを注釈として付けることができ、Pydantic <PyObject section="config" module="dagster" object="Field"/> クラスを使用して、フィールドに関する追加情報を提供するのに使用できます。
 
-For example, we can annotate a config field with a description, which will be displayed in the documentation for the config field. We can add a value range to a field, which will be validated when config is specified.
+たとえば、構成フィールドに説明を注釈として付けることができ、その説明は構成フィールドのドキュメントに表示されます。フィールドに値の範囲を追加することができ、構成が指定されたときに検証されます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_metadata_config" endBefore="end_metadata_config" />
 
-## Defaults and optional config fields
+## デフォルトとオプションの設定フィールド
 
-Config fields can have an attached default value. Fields with defaults are not required, meaning they do not need to be specified when constructing the config object.
+構成フィールドにはデフォルト値を設定できます。デフォルト値が設定されているフィールドは必須ではありません。つまり、構成オブジェクトを構築するときに指定する必要はありません。
 
-For example, we can attach a default value of `"hello"` to the `greeting_phrase` field, and can construct `MyAssetConfig` without specifying a phrase. Fields which are marked as `Optional`, such as `person_name`, implicitly have a default value of `None`, but can also be explicitly set to `None` as in the example below.
+たとえば、`greeting_phrase` フィールドに `"hello"` というデフォルト値を添付し、フレーズを指定せずに `MyAssetConfig` を構築できます。`person_name` などの `Optional` としてマークされているフィールドには、暗黙的に `None` というデフォルト値が設定されますが、以下の例のように明示的に `None` に設定することもできます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_optional_config" endBefore="end_optional_config" />
 
-### Required config fields
+### 必須の設定フィールド
 
-By default, fields which are typed as `Optional` are not required to be specified in the config, and have an implicit default value of `None`. If you want to require that a field be specified in the config, you may use an ellipsis (`...`) to [require that a value be passed](https://docs.pydantic.dev/usage/models/#required-fields).
+デフォルトでは、`Optional` と入力されたフィールドは設定で指定する必要はなく、暗黙のデフォルト値として `None` が設定されます。設定でフィールドを指定することを必須にする場合は、省略記号 (`...`) を使用して [値を渡すことを必須にする](https://docs.pydantic.dev/usage/models/#required-fields) ことができます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_required_config" endBefore="end_required_config" />
 
-## Basic data structures
+## 基本的なデータ構造
 
-Basic Python data structures can be used in your config schemas along with nested versions of these data structures. The data structures which can be used are:
+基本的な Python データ構造は、これらのデータ構造のネストされたバージョンとともに、構成スキーマで使用できます。使用できるデータ構造は次のとおりです:
 
 - `List`
 - `Dict`
 - `Mapping`
 
-For example, we can define a config schema that takes in a list of user names and a mapping of user names to user scores.
+たとえば、ユーザー名のリストとユーザー名とユーザースコアのマッピングを取得する構成スキーマを定義できます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_data_structures_config" endBefore="end_basic_data_structures_config" />
 
-## Nested schemas
+## ネストされたスキーマ
 
-Schemas can be nested in one another, or in basic Python data structures.
+スキーマは、互いにネストすることも、基本的な Python データ構造内にネストすることもできます。
 
-Here, we define a schema which contains a mapping of user names to complex user data objects.
+ここでは、ユーザー名と複雑なユーザー データ オブジェクトのマッピングを含むスキーマを定義します。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_nested_schema_config" endBefore="end_nested_schema_config" />
 
-## Permissive schemas
+## 許容スキーマ
 
-By default, `Config` schemas are strict, meaning that they will only accept fields that are explicitly defined in the schema. This can be cumbersome if you want to allow users to specify arbitrary fields in their config. For this purpose, you can use the `PermissiveConfig` base class, which allows arbitrary fields to be specified in the config.
+デフォルトでは、`Config` スキーマは厳密です。つまり、スキーマで明示的に定義されているフィールドのみが受け入れられます。ユーザーが構成で任意のフィールドを指定できるようにする場合、これは面倒になる可能性があります。この目的のために、構成で任意のフィールドを指定できるようにする `PermissiveConfig` 基本クラスを使用できます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_permissive_schema_config" endBefore="end_permissive_schema_config" />
 
-## Union types
+## ユニオン型
 
-Union types are supported using Pydantic [discriminated unions](https://docs.pydantic.dev/usage/types/#discriminated-unions-aka-tagged-unions). Each union type must be a subclass of <PyObject section="config" module="dagster" object="Config"/>. The `discriminator` argument to <PyObject section="config" module="dagster" object="Field"/> specifies the field that will be used to determine which union type to use. Discriminated unions provide comparable functionality to the `Selector` type in the legacy Dagster config APIs.
+ユニオン型は、Pydantic [判別ユニオン](https://docs.pydantic.dev/usage/types/#discriminated-unions-aka-tagged-unions) を使用してサポートされます。各ユニオン型は、<PyObject section="config" module="dagster" object="Config"/> のサブクラスである必要があります。<PyObject section="config" module="dagster" object="Field"/> の `​​discriminator` 引数は、使用するユニオン型を決定するために使用されるフィールドを指定します。判別ユニオンは、従来の Dagster 構成 API の `Selector` 型と同等の機能を提供します。
 
-Here, we define a config schema which takes in a `pet` field, which can be either a `Cat` or a `Dog`, as indicated by the `pet_type` field.
+ここでは、`pet_type` フィールドで示されるように、`Cat` または `Dog` のいずれかになる `pet` フィールドを受け取る構成スキーマを定義します。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_union_schema_config" endBefore="end_union_schema_config" />
 
-### YAML and config dictionary representations of union types
+### ユニオン型のYAMLと設定辞書表現
 
-The YAML or config dictionary representation of a discriminated union is structured slightly differently than the Python representation. In the YAML representation, the discriminator key is used as the key for the union type's dictionary. For example, a `Cat` object would be represented as:
+判別共用体の YAML または config 辞書表現は、Python 表現とは少し異なる構造になっています。YAML 表現では、判別子キーが共用体型の辞書のキーとして使用されます。たとえば、`Cat` オブジェクトは次のように表現されます:
 
 ```yaml
 pet:
@@ -79,7 +79,7 @@ pet:
     meows: 10
 ```
 
-In the config dictionary representation, the same pattern is used:
+設定辞書の表現では、同じパターンが使用されます:
 
 ```python
 {
@@ -91,16 +91,16 @@ In the config dictionary representation, the same pattern is used:
 }
 ```
 
-## Enum types
+## 列挙型
 
-Python enums which subclass `Enum` are supported as config fields. Here, we define a schema that takes in a list of users, whose roles are specified as enum values:
+`Enum` のサブクラスである Python 列挙型は、設定フィールドとしてサポートされています。ここでは、列挙値としてロールが指定されているユーザーのリストを取得するスキーマを定義します:
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_enum_schema_config" endBefore="end_enum_schema_config" />
 
-### YAML and config dictionary representations of enum types
+### 列挙型の YAML および設定辞書表現
 
-The YAML or config dictionary representation of a Python enum uses the enum's name. For example, a YAML specification of the user list above would be:
+Python 列挙型の YAML または設定辞書表現では、列挙型の名前が使用されます。たとえば、上記のユーザー リストの YAML 仕様は次のようになります:
 
 ```yaml
 users_list:
@@ -108,7 +108,7 @@ users_list:
   Alice: ADMIN
 ```
 
-In the config dictionary representation, the same pattern is used:
+設定辞書の表現では、同じパターンが使用されます:
 
 ```python
 {
@@ -119,10 +119,10 @@ In the config dictionary representation, the same pattern is used:
 }
 ```
 
-## Validated config fields
+## 検証された構成フィールド
 
-Config fields can have custom validation logic applied using [Pydantic validators](https://docs.pydantic.dev/usage/validators/). Pydantic validators are defined as methods on the config class, and are decorated with the `@validator` decorator. These validators are triggered when the config class is instantiated. In the case of config defined at runtime, a failing validator will not prevent the launch button from being pressed, but will raise an exception and prevent run start.
+構成フィールドには、[Pydantic バリデータ](https://docs.pydantic.dev/usage/validators/) を使用してカスタム検証ロジックを適用できます。Pydantic バリデータは、構成クラスのメソッドとして定義され、`@validator` デコレータで装飾されます。これらのバリデータは、構成クラスがインスタンス化されるときにトリガーされます。実行時に定義された構成の場合、バリデータが失敗しても起動ボタンが押されることは防止されませんが、例外が発生し、実行が開始されなくなります。
 
-Here, we define some validators on a configured user's name and username, which will throw exceptions if incorrect values are passed in the launchpad or from a schedule or sensor.
+ここでは、構成されたユーザーの名前とユーザー名にいくつかの検証を定義します。これにより、ランチパッドまたはスケジュールやセンサーから誤った値が渡された場合に例外がスローされます。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_validated_schema_config" endBefore="end_validated_schema_config" />

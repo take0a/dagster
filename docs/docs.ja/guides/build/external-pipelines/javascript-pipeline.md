@@ -1,89 +1,90 @@
 ---
-title: "Build pipelines in JavaScript"
+title: "JavaScript でパイプラインを構築する"
 sidebar_position: 20
 ---
 
-This guide covers how to run JavaScript with Dagster using Pipes, however, the same principle will apply to other languages.
+このガイドでは、パイプを使用して Dagster で JavaScript を実行する方法について説明しますが、同じ原則が他の言語にも適用されます。
 
 <details>
-<summary>Prerequisites</summary>
+<summary>前提条件</summary>
 
-To follow this guide, you'll need:
+このガイドに従うには、次のものが必要です:
 
-- Familiarity with [Assets](/guides/build/assets/)
-- A basic understanding of JavaScript and Node.js
+- [アセット](/guides/build/assets/) に関する知識
+- JavaScript と Node.js の基本的な理解
 
-To run the examples, you'll need to install:
+例を実行するには、以下をインストールする必要があります:
 
 - [Node.js](https://nodejs.org/en/download/package-manager/)
-- The following Python packages:
+- 次の Python パッケージ:
 
    ```bash
    pip install dagster dagster-webserver
    ```
-- The following Node packages:
+
+- 次の Node パッケージ:
+
    ```bash
    npm install @tensorflow/tfjs
    ```
 </details>
 
-## Step 1: Create a script using Tensorflow in JavaScript
+## Step 1: JavaScript で Tensorflow を使用してスクリプトを作成する
 
-First, you'll create a JavaScript script that reads a CSV file and uses Tensorflow to train a sequential model.
+まず、CSV ファイルを読み取り、Tensorflow を使用して順次モデルをトレーニングする JavaScript スクリプトを作成します。
 
-Create a file named `tensorflow/main.js` with the following contents:
+次の内容を含む `tensorflow/main.js` という名前のファイルを作成します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-contrived-javascript.js" language="javascript" title="tensorflow/main.js" />
 
-## Step 2: Create a Dagster asset that runs the script
+## Step 2: スクリプトを実行するDagsterアセットを作成する
 
-In Dagster, create an asset that:
+Dagster で、次のアセットを作成します:
 
-- Uses the `PipesSubprocessClient` resource to run the script with `node`
-- Sets the `compute_kind` to `javascript`. This makes it easy to identify that an alternate compute will be used for materialization.
+- `PipesSubprocessClient` リソースを使用して、`node` でスクリプトを実行します。
+- `compute_kind` を `javascript` に設定します。これにより、代替コンピューティングが実体化に使用されることを簡単に識別できます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-asset.py" language="python" />
 
-When the asset is materialized, the stdout and stderr will be captured automatically and shown in the asset logs. If the command passed to Pipes returns a successful exit code, Dagster will produce an asset materialization result.
+アセットがマテリアライズされると、stdout と stderr が自動的にキャプチャされ、アセット ログに表示されます。Pipes に渡されたコマンドが正常終了コードを返すと、Dagster はアセットのマテリアライズ結果を生成します。
 
-## Step 3: Send and receive data from the script
+## Step 3: スクリプトからデータを送受信する
 
-To send context to your script or emit events back to Dagster, you can use environment variables provided by the `PipesSubprocessClient`.
+スクリプトにコンテキストを送信したり、イベントを Dagster に送り返したりするには、`PipesSubprocessClient` によって提供される環境変数を使用できます。
 
+- `DAGSTER_PIPES_CONTEXT` - 入力コンテキスト
+- `DAGSTER_PIPES_MESSAGES` - 出力コンテキスト
 
-- `DAGSTER_PIPES_CONTEXT` - Input context
-- `DAGSTER_PIPES_MESSAGES` - Output context
-
-Create a new file with the following helper functions that read the environment variables, decode the data, and write messages back to Dagster:
+環境変数を読み取り、データをデコードし、メッセージを Dagster に書き戻す次のヘルパー関数を含む新しいファイルを作成します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-javascript-utility.js" language="javascript" />
 
-Both environment variables are base64 encoded, zip compressed JSON objects. Each JSON object contains a path that indicates where to read or write data.
+両方の環境変数は、base64 でエンコードされ、zip で圧縮された JSON オブジェクトです。各 JSON オブジェクトには、データの読み取りまたは書き込み先を示すパスが含まれています。
 
-## Step 4: Emit events and report materializations from your external process
+## Step 4: 外部プロセスからイベントを発行し、マテリアライズをレポートする
 
-Using the utility functions to decode the Dagster Pipes environment variables, you can send additional parameters into the JavaScript process. You can also output more information into the asset materializations.
+ユーティリティ関数を使用して Dagster Pipes 環境変数をデコードすると、JavaScript プロセスに追加のパラメータを送信できます。また、アセットのマテリアライゼーションに詳細情報を出力することもできます。
 
-Update the `tensorflow/main.js` script to:
+`tensorflow/main.js` スクリプトを次のように更新します:
 
-- Retrieve the model configuration from the Dagster context, and
-- Report an asset materialization back to Dagster with model metadata
+- Dagsterコンテキストからモデル構成を取得し、
+- モデル メタデータを使用してアセットの実体化を Dagster に報告する
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-full-featured-javascript.js" language="javascript" />
 
 :::tip
 
-The metadata format shown above (`{"raw_value": value, "type": type}`) is part of Dagster Pipes' special syntax for specifying rich Dagster metadata. For a complete reference of all supported metadata types and their formats, see the [Dagster Pipes metadata reference](using-dagster-pipes/reference#passing-rich-metadata-to-dagster).
+上記のメタデータ形式 (`{"raw_value": value, "type": type}`) は、豊富な Dagster メタデータを指定するための Dagster Pipes の特別な構文の一部です。サポートされているすべてのメタデータ タイプとその形式の完全なリファレンスについては、[Dagster Pipes メタデータ リファレンス](using-dagster-pipes/reference#passing-rich-metadata-to-dagster) を参照してください。
 
 :::
 
-## Step 5: Update the asset to provide extra parameters
+## Step 5: アセットを更新して追加のパラメータを提供する
 
-Finally, update your Dagster asset to pass in the model information that's used by the script:
+最後に、スクリプトで使用されるモデル情報を渡せるように Dagster アセットを更新します:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-asset-with-context.py" language="python" />
 
-## What's next?
+## 次は？
 
-- Schedule your pipeline to run periodically with [Automating Pipelines](/guides/automate/index.md)
-- Explore adding asset checks to validate your script with [Understanding Asset Checks](/guides/test/asset-checks)
+- [パイプラインの自動化](/guides/automate/index.md)を使用して、パイプラインを定期的に実行するようにスケジュールします。
+- [アセット チェックの理解](/guides/test/asset-checks) で、スクリプトを検証するためのアセット チェックの追加について学習します。

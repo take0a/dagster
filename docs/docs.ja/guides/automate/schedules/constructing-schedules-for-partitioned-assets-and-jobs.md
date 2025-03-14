@@ -1,105 +1,105 @@
 ---
-title: "Constructing schedules from partitioned assets and jobs"
+title: "パーティション分割されたアセットとジョブからスケジュールを構築する"
 description: "Learn to construct schedules for your partitioned jobs."
 sidebar_position: 400
 ---
 
-In this guide, we'll walk you through how to construct schedules from partitioned [assets](/guides/build/assets/) and jobs. By the end, you'll be able to:
+このガイドでは、パーティション化された [アセット](/guides/build/assets/) とジョブからスケジュールを構築する方法について説明します。最後に、次のことができるようになります:
 
-- Construct a schedule for a time-partitioned job
-- Customize a partitioned job's starting time
-- Customize the most recent partition in a set
-- Construct a schedule for a statically-partitioned job
+- 時間分割ジョブのスケジュールを作成する
+- パーティションジョブの開始時間をカスタマイズする
+- セット内の最新のパーティションをカスタマイズする
+- 静的にパーティション分割されたジョブのスケジュールを構築する
 
 :::note
 
-This article assumes familiarity with:
+この記事は、以下の知識があることを前提としています。
 
-- [Schedules](index.md)
-- [Partitions](/guides/build/partitions-and-backfills/partitioning-assets)
-- [Asset definitions](/guides/build/assets/defining-assets)
-- [Asset jobs](/guides/build/assets/asset-jobs) and op jobs
+- [スケジュール](index.md)
+- [パーティション](/guides/build/partitions-and-backfills/partitioning-assets)
+- [アセット定義](/guides/build/assets/defining-assets)
+- [アセットジョブ](/guides/build/assets/asset-jobs) and op jobs
 
 :::
 
-## Working with time-based partitions
+## 時間ベースのパーティションの操作
 
-For jobs partitioned by time, you can use the <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> to construct a schedule for the job. The schedule's interval will match the spacing of the partitions in the job. For example, if you have a daily partitioned job that fills in a date partition of a table each time it runs, you likely want to run that job every day.
+時間でパーティション化されたジョブの場合、<PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用してジョブのスケジュールを作成できます。スケジュールの間隔は、ジョブ内のパーティションの間隔と一致します。たとえば、実行されるたびにテーブルの日付パーティションを入力する毎日のパーティション化されたジョブがある場合、そのジョブを毎日実行することが考えられます。
 
-Refer to the following tabs for examples of asset and op-based jobs using <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> to construct schedules:
+<PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用してスケジュールを構築するアセットおよびオペレーションベースのジョブの例については、次のタブを参照してください:
 
 <Tabs>
-<TabItem value="Asset jobs">
+<TabItem value="アセットジョブ">
 
-**Asset jobs**
+**アセットジョブ**
 
-Asset jobs are defined using <PyObject section="assets" module="dagster" object="define_asset_job" />. In this example, we created an asset job named `partitioned_job` and then constructed `asset_partitioned_schedule` by using <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/>:
+アセット ジョブは、<PyObject section="assets" module="dagster" object="define_asset_job" /> を使用して定義されます。この例では、`partitioned_job` という名前のアセット ジョブを作成し、次に <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用して `asset_partitioned_schedule` を構築しました:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_partitioned_asset_schedule" endBefore="end_partitioned_asset_schedule" />
 
 </TabItem>
-<TabItem value="Op jobs">
+<TabItem value="Op ジョブ">
 
-**Op jobs**
+**Op ジョブ**
 
-Op jobs are defined using the <PyObject section="jobs" module="dagster" object="job" decorator />. In this example, we created a partitioned job named `partitioned_op_job` and then constructed `partitioned_op_schedule` using <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/>:
+Op ジョブは、<PyObject section="jobs" module="dagster" object="job" decorator /> を使用して定義されます。この例では、`partitioned_op_job` という名前のパーティション化されたジョブを作成し、次に <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用して `partitioned_op_schedule` を構築しました:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_marker" endBefore="end_marker" />
 
 </TabItem>
 </Tabs>
 
-### Customizing schedule timing
+### スケジュールタイミングのカスタマイズ
 
-The `minute_of_hour`, `hour_of_day`, `day_of_week`, and `day_of_month` parameters of `build_schedule_from_partitioned_job` can be used to control the timing of the schedule.
+`build_schedule_from_partitioned_job` の `minute_of_hour`、`hour_of_day`、`day_of_week`、および `day_of_month` パラメータを使用して、スケジュールのタイミングを制御できます。
 
-Consider the following job:
+次のジョブを考えてみましょう:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_partitioned_schedule_with_offset" endBefore="end_partitioned_schedule_with_offset" />
 
-On May 20, 2024, the schedule will evaluate at 1:30 AM UTC and then start a run for the partition key of the previous day, `2024-05-19`.
+2024 年 5 月 20 日、スケジュールは午前 1 時 30 分 (UTC) に評価され、前日のパーティション キー `2024-05-19` の実行が開始されます。
 
-### Customizing the ending partition in a set
+### セット内の終了パーティションのカスタマイズ
 
 :::tip
 
-The examples in this section use daily partitions, but the same logic also applies to other time-based partitions, such as hourly, weekly, and monthly partitions.
+このセクションの例では日次パーティションを使用していますが、同じロジックは時間別、週別、月別パーティションなどの他の時間ベースのパーティションにも適用されます。
 
 :::
 
-Each schedule tick of a partitioned job targets the latest partition in the partition set that exists as of the tick time. For example, consider a schedule that runs a daily-partitioned job. When the schedule runs on `2024-05-20`, it will target the most recent partition, which will correspond to the previous day: `2024-05-19`.
+パーティション化されたジョブの各スケジュール ティックは、ティック時間の時点で存在するパーティション セット内の最新のパーティションをターゲットにします。たとえば、毎日パーティション化されたジョブを実行するスケジュールを考えてみましょう。スケジュールが `2024-05-20` に実行されると、最新のパーティションがターゲットになり、これは前日の `2024-05-19` に相当します。
 
-| If a job runs on this date... | It will target this partition |
+| この日にジョブが実行されると... | このパーティションをターゲットにします |
 | ----------------------------- | ----------------------------- |
 | 2024-05-20                    | 2024-05-19                    |
 | 2024-05-21                    | 2024-05-20                    |
 | 2024-05-22                    | 2024-05-21                    |
 
-This occurs because each partition is a **time window**. A time window is a set period of time with a start and an end time. The partition's key is the start of the time window, but the partition isn't included in the partition set until its time window has completed. Kicking off a run after the time window completes allows the run to process data for the entire time window.
+これは、各パーティションが **時間ウィンドウ** であるため発生します。時間ウィンドウは、開始時刻と終了時刻を持つ設定された期間です。パーティションのキーは時間ウィンドウの開始ですが、パーティションは時間ウィンドウが完了するまでパーティション セットに含まれません。時間ウィンドウが完了した後に実行を開始すると、実行は時間ウィンドウ全体のデータを処理できます。
 
-Continuing with the daily partition example, the `2024-05-20` partition would have the following start and end times:
+日次パーティションの例を続けると、`2024-05-20` パーティションの開始時刻と終了時刻は次のようになります:
 
-- **Start time** - `2024-05-20 00:00:00`
-- **End time** - `2024-05-20 23:59:59`
+- **開始時刻** - `2024-05-20 00:00:00`
+- **終了時刻** - `2024-05-20 23:59:59`
 
-After `2024-05-20 23:59:59` passes, the time window is complete and Dagster will add a new `2024-05-20` partition to the partition set. At this point, the process will repeat with the next time window of `2024-05-21`.
+`2024-05-20 23:59:59` が経過すると、時間枠が完了し、Dagster は新しい `2024-05-20` パーティションをパーティション セットに追加します。この時点で、プロセスは次の時間枠 `2024-05-21` で繰り返されます。
 
-If you need to customize the ending, or most recent partition in a set, use the `end_offset` parameter in the partition's config:
+セット内の最後のパーティションまたは最新のパーティションをカスタマイズする必要がある場合は、パーティションの設定で `end_offset` パラメータを使用します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_offset_partition" endBefore="end_offset_partition" />
 
-Setting this parameter changes the partition that will be filled in at each schedule tick. Positive and negative integers are accepted, which will have the following effects:
+このパラメータを設定すると、各スケジュール ティックで埋められるパーティションが変更されます。正と負の整数が受け入れられ、次のような効果があります:
 
-- **Positive numbers**, like `1`, cause the schedule to fill in the partition of the **current** hour/day/week/month
-- **Negative numbers**, like `-1,` cause the schedule to fill in the partition of an **earlier** hour/day/week/month
+- `1` のような**正の数** を指定すると、スケジュールは**現在の** 時間/日/週/月のパーティションを埋めます。
+- **負の数**、たとえば「-1」を指定すると、スケジュールは**早い**時間/日/週/月のパーティションを埋めます。
 
-Generally, the calculation for `end_offset` can be expressed as:
+一般的に、`end_offset` の計算は次のように表すことができます:
 
 ```shell
 current_date - 1 type_of_partition + end_offset
 ```
 
-Let's look at an example schedule that's partitioned by day and how different `end_offset` values would affect the most recent partition in the set. In this example, we're using a start date of `2024-05-20`:
+日ごとに分割されたスケジュールの例と、異なる `end_offset` 値がセット内の最新のパーティションにどのように影響するかを見てみましょう。この例では、開始日として `2024-05-20` を使用しています:
 
 | End offset   | Calculated as                 | Ending (most recent) partition          |
 | ------------ | ----------------------------- | --------------------------------------- |
@@ -107,28 +107,28 @@ Let's look at an example schedule that's partitioned by day and how different `e
 | No offset    | `2024-05-20 - 1 day + 0 days` | 2024-05-19 (1 day prior to start date)  |
 | Offset of 1  | `2024-05-20 - 1 day + 1 day`  | 2024-05-20 (start date)                 |
 
-## Working with static partitions
+## 静的パーティションの操作
 
-Next, we'll demonstrate how to create a schedule for a job with a static partition. To do this, we'll construct the schedule from scratch using the <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> decorator, rather than using a helper function like <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/>. This will allow more flexibility in determining which partitions should be run by the schedule.
+次に、静的パーティションを持つジョブのスケジュールを作成する方法を説明します。これを行うには、<PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> などのヘルパー関数を使用するのではなく、<PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> デコレータを使用して、最初からスケジュールを構築します。これにより、スケジュールによって実行されるパーティションをより柔軟に決定できるようになります。
 
-In this example, the job is partitioned by continent:
+この例では、ジョブは大陸ごとに分割されています:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_job" endBefore="end_job" />
 
-Using the <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> decorator, we'll write a schedule that targets each partition, or `continent`:
+<PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> デコレータを使用して、各パーティション、つまり `continent` を対象とするスケジュールを記述します:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_schedule_all_partitions" endBefore="end_schedule_all_partitions" />
 
-If we only want to target the `Antarctica` partition, we can create a schedule like the following:
+`Antarctica` パーティションのみをターゲットにしたい場合は、次のようなスケジュールを作成できます:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_single_partition" endBefore="end_single_partition" />
 
-## APIs in this guide
+## このガイドのAPI
 
-| Name                                                      | Description                                                                                         |
+| 名前                                                      | 説明                                                                                         |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />                  | Decorator that defines a schedule that executes according to a given cron schedule.                 |
-| <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job" /> | A function that constructs a schedule whose interval matches the partitioning of a partitioned job. |
-| <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />                          | A class that represents all the information required to launch a single run.                        |
-| <PyObject section="assets" module="dagster" object="define_asset_job" />                    | A function for defining a job from a selection of assets.                                           |
-| <PyObject section="jobs" module="dagster" object="job" decorator />                       | The decorator used to define a job.                                                                 |
+| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />                  | 指定された cron スケジュールに従って実行されるスケジュールを定義するデコレータ。                 |
+| <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job" /> | パーティション化されたジョブのパーティション分割と一致する間隔を持つスケジュールを構築する関数。 |
+| <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />                          | 1 回の実行を開始するために必要なすべての情報を表すクラス。                        |
+| <PyObject section="assets" module="dagster" object="define_asset_job" />                    |選択したアセットからジョブを定義する機能。            |
+| <PyObject section="jobs" module="dagster" object="job" decorator />                       | ジョブを定義するために使用されるデコレータ。               |

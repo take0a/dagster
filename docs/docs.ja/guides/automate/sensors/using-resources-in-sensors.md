@@ -1,15 +1,15 @@
 ---
-title: Using resources in sensors
+title: センサーのリソースの使用
 sidebar_position: 100
 ---
 
-Dagster's [resources](/guides/build/external-resources/) system can be used with sensors to make it easier to call out to external systems and to make components of a sensor easier to plug in for testing purposes.
+Dagster の [リソース](/guides/build/external-resources/) システムをセンサーで使用すると、外部システムへの呼び出しが容易になり、テスト目的でセンサーのコンポーネントを簡単にプラグインできるようになります。
 
-To specify resource dependencies, annotate the resource as a parameter to the sensor's function. Resources are provided by attaching them to your <PyObject section="definitions" module="dagster" object="Definitions" /> call.
+リソースの依存関係を指定するには、リソースをセンサーの関数のパラメータとして注釈付けします。リソースは、<PyObject section="definitions" module="dagster" object="Definitions" /> 呼び出しに添付することで提供されます。
 
-Here, a resource is provided which provides access to an external API. The same resource could be used in the job or assets that the sensor triggers.
+ここでは、外部 API へのアクセスを提供するリソースが提供されています。同じリソースは、センサーがトリガーするジョブまたはアセットでも使用できます。
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_on_sensor" endBefore="end_new_resource_on_sensor" />
 
-For more information on resources, refer to the [Resources documentation](/guides/build/external-resources). To see how to test schedules with resources, refer to the section on testing sensors with resources in "[Testing sensors](testing-sensors)".
+リソースの詳細については、[リソースのドキュメント](/guides/build/external-resources)を参照してください。リソースを使用してスケジュールをテストする方法については、「[センサーのテスト](testing-sensors)」のリソースを使用したセンサーのテストに関するセクションを参照してください。

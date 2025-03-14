@@ -1,70 +1,70 @@
 ---
-title: "Testing schedules"
+title: "テストスケジュール"
 sidebar_position: 600
 ---
 
-In this article, we'll show you how to use the Dagster UI and Python to test your [schedules](index.md).
+この記事では、Dagster UI と Python を使用して [スケジュール](index.md) をテストする方法を説明します。
 
-## Testing schedules in the Dagster UI
+## Dagster UI でのテストスケジュール
 
-Using the UI, you can manually trigger test evaluations of a schedule and view the results. This can be helpful when [creating a schedule](defining-schedules) or for [troubleshooting unexpected scheduling behavior](troubleshooting-schedules).
+UI を使用すると、スケジュールのテスト評価を手動でトリガーし、結果を表示できます。これは、[スケジュールを作成する](スケジュールの定義) ときや [予期しないスケジュール動作のトラブルシューティング](スケジュールのトラブルシューティング) に役立ちます。
 
-1. In the UI, click **Overview > Schedules tab**.
+1. UI で **Overview > Schedules tab** をクリックする
 
-2. Click the schedule you want to test.
+2. テストしたいスケジュールをクリックする
 
-3. Click the **Test Schedule** button, located near the top right corner of the page.
+3. ページの右上隅にある **Test Schedule** ボタンをクリックします。
 
-4. You'll be prompted to select a mock schedule evaluation time. As schedules are defined on a cadence, the evaluation times in the dropdown are past and future times along that cadence.
+4. 模擬スケジュールの評価時間を選択するように求められます。スケジュールは周期に基づいて定義されるため、ドロップダウンの評価時間はその周期に沿った過去と将来の時間になります。
 
-   For example, let's say you're testing a schedule with a cadence of `"Every day at X time"`. In the dropdown, you'd see past and future evaluation times along that cadence:
+   たとえば、`"毎日 X 時に"` という周期でスケジュールをテストしているとします。ドロップダウンには、その周期に沿った過去と将来の評価時間が表示されます。
 
     ![Selecting a mock evaluation time for a schedule in the Dagster UI](/images/guides/automate/schedules/testing-select-timestamp-page.png)
 
-5. After selecting an evaluation time, click the **Evaluate** button.
+5. 評価時間を選択したら、**Evaluate** ボタンをクリックします。
 
-A window containing the evaluation result will display after the test completes. If the evaluation was successful, click **Open in Launchpad** to launch a run with the same config as the test evaluation.
+テストが完了すると、評価結果を含むウィンドウが表示されます。評価が成功した場合は、**Open in Launchpad** をクリックして、テスト評価と同じ構成で実行を開始します。
 
-## Testing schedules in Python
+## Python でのスケジュールのテスト
 
-You can also test your schedules directly in Python. In this section, we'll demonstrate how to test:
+スケジュールを Python で直接テストすることもできます。このセクションでは、次のテスト方法を説明します:
 
-- [`@schedule`-decorated functions](#testing-schedule-decorated-functions)
-- [Schedules with resources](#testing-schedules-with-resources)
+- [`@schedule` で装飾された関数](#testing-schedule-decorated-functions)
+- [リソースを含むスケジュール](#testing-schedules-with-resources)
 
-### Testing @schedule-decorated functions
+### @schedule で装飾された関数のテスト
 
-To test a function decorated by the <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> decorator, you can invoke the schedule definition like it's a regular Python function. The invocation will return run config, which can then be validated using the <PyObject section="execution" module="dagster" object="validate_run_config" /> function.
+<PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> デコレータでデコレートされた関数をテストするには、スケジュール定義を通常の Python 関数のように呼び出すことができます。呼び出しにより実行構成が返され、<PyObject section="execution" module="dagster" object="validate_run_config" /> 関数を使用して検証できます。
 
-Let's say we want to test the `configurable_job_schedule` in this example:
+この例では、`configurable_job_schedule` をテストしましょう:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedules.py" startAfter="start_run_config_schedule" endBefore="end_run_config_schedule" />
 
-To test this schedule, we used <PyObject section="schedules-sensors" module="dagster" object="build_schedule_context" /> to construct a <PyObject section="schedules-sensors" module="dagster" object="ScheduleEvaluationContext" /> to provide to the `context` parameter:
+このスケジュールをテストするために、<PyObject section="schedules-sensors" module="dagster" object="build_schedule_context" /> を使用して、`context` パラメータに提供する <PyObject section="schedules-sensors" module="dagster" object="ScheduleEvaluationContext" /> を構築しました:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedule_examples.py" startAfter="start_test_cron_schedule_context" endBefore="end_test_cron_schedule_context" />
 
-If your <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />-decorated function doesn't have a context parameter, you don't need to provide one when invoking it.
+<PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> で装飾された関数にコンテキストパラメータがない場合、その関数を呼び出すときにコンテキストパラメータを指定する必要はありません。
 
-### Testing schedules with resources
+### リソースを使用したテストスケジュール
 
-For schedules that utilize [resources](/guides/build/external-resources), you can provide the resources when invoking the schedule function.
+[リソース](/guides/build/external-resources)を利用するスケジュールの場合は、スケジュール関数を呼び出すときにリソースを提供できます。
 
-Let's say we want to test the `process_data_schedule` in this example:
+この例では、`process_data_schedule` をテストするとします:
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_on_schedule" endBefore="end_new_resource_on_schedule" />
 
-In the test for this schedule, we provided the `date_formatter` resource to the schedule when we invoked its function:
+このスケジュールのテストでは、関数を呼び出すときにスケジュールに `date_formatter` リソースを提供しました:
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_test_resource_on_schedule" endBefore="end_test_resource_on_schedule" />
 
-## APIs in this guide
+## このガイドのAPI
 
-| Name                                            | Description                                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------- |
-| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />        | Decorator that defines a schedule that executes according to a given cron schedule.   |
-| <PyObject section="execution" module="dagster" object="validate_run_config" />       | A function that validates a provided run config blob against a job.                   |
-| <PyObject section="schedules-sensors" module="dagster" object="build_schedule_context" />    | A function that constructs a `ScheduleEvaluationContext`, typically used for testing. |
-| <PyObject section="schedules-sensors" module="dagster" object="ScheduleEvaluationContext" /> | The context passed to the schedule definition execution function.                     |
+| 名前                                            | 説明  |
+| ----------------------------------------------- | --------------------------------- |
+| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />        | 指定された cron スケジュールに従って実行されるスケジュールを定義するデコレータ。   |
+| <PyObject section="execution" module="dagster" object="validate_run_config" />       | 提供された実行構成 BLOB をジョブに対して検証する関数。.                   |
+| <PyObject section="schedules-sensors" module="dagster" object="build_schedule_context" />    | 通常はテストに使用される `ScheduleEvaluationContext` を構築する関数。 |
+| <PyObject section="schedules-sensors" module="dagster" object="ScheduleEvaluationContext" /> | スケジュール定義の実行関数に渡されるコンテキスト。                    |

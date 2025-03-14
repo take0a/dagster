@@ -1,95 +1,94 @@
 ---
-title: "Define a Dagster asset that invokes subprocess"
+title: "サブプロセスを呼び出すDagsterアセットを定義する"
 description: "Learn how to create a Dagster asset that invokes a subprocess that executes external code."
 sidebar_position: 100
 ---
 
 :::note
 
-This is part one of the [Using Dagster Pipes](index.md) tutorial. If you are looking for how to modify your existing code that is already being orchestrated by Dagster, you can jump to part 2, [Modify external code](modify-external-code).
+これは、[Dagster パイプの使用](index.md) チュートリアルのパート 1 です。すでに Dagster によってオーケストレーションされている既存のコードを変更する方法を探している場合は、パート 2 の [外部コードの変更](modify-external-code) に進んでください。
 
 :::note
 
-In this part of the tutorial, you'll create a Dagster asset that, in its execution function, opens a Dagster pipes session and invokes a subprocess that executes some external code.
+チュートリアルのこの部分では、実行関数で Dagster パイプ セッションを開き、外部コードを実行するサブプロセスを呼び出す Dagster アセットを作成します。
 
 :::
 
-## Step 1: Define the Dagster asset
+## Step 1: Dagsterアセットを定義する
 
-Before getting started, make sure you have fulfilled all the [prerequisites](index.md#prerequisites) for the tutorial. You should have a standalone Python script named `external_code.py` which looks like the following:
+始める前に、チュートリアルの [前提条件](index.md#prerequisites) をすべて満たしていることを確認してください。次のような `external_code.py` という名前のスタンドアロン Python スクリプトが必要です:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/external_code.py" lineStart="3" />
 
-### Step 1.1: Define the asset
+### Step 1.1: アセットを定義する
 
-First, create a new file named `dagster_code.py` in the same directory as the `external_code.py` file you created earlier in the [Prerequisites](index.md#prerequisites) step.
+まず、[前提条件](index.md#prerequisites) の手順で作成した `external_code.py` ファイルと同じディレクトリに `dagster_code.py` という名前の新しいファイルを作成します。
 
-Next, you’ll define the asset. Copy and paste the following into the file:
+次に、アセットを定義します。次の内容をコピーしてファイルに貼り付けます:
+
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/dagster_code.py" startAfter="start_asset_marker" endBefore="end_asset_marker" />
+
+この例では次の操作を実行しました:
+
+- `subprocess_asset`という名前のアセットを作成しました
+- アセットの `context` 引数として <PyObject section="execution" module="dagster" object="AssetExecutionContext" /> を指定します。このオブジェクトは、リソース、構成、ログなどのシステム情報を提供します。これについては、このセクションの後半で説明します。
+- アセットが使用するリソース「PipesSubprocessClient」を指定しました。これについては後ほど説明します。
+- 外部スクリプトを実行するためのコマンド リスト `cmd` を宣言しました。リスト内は:
+  - まず、`shutil.which("python")` を使用して、システム上の Python 実行可能ファイルへのパスを見つけます。
+  - 次に、実行するファイルへのファイル パスを指定します。この場合、それは先ほど作成した `external_code.py` ファイルです。
+
+### Step 1.2: アセットから外部コードを呼び出す
+
+次に、`pipes_subprocess_client` リソースを使用して、アセットから外部コードを実行するサブプロセスを呼び出します:
 
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/dagster_code.py" startAfter="start_asset_marker" endBefore="end_asset_marker" />
 
-Here’s what we did in this example:
+このコードが何をするのか見てみましょう:
 
-- Created an asset named `subprocess_asset`
-- Provided <PyObject section="execution" module="dagster" object="AssetExecutionContext" /> as the `context` argument to the asset. This object provides system information such as resources, config, and logging. We’ll come back to this a bit later in this section.
-- Specified a resource for the asset to use, `PipesSubprocessClient`. We’ll also come back to this in a little bit.
-- Declared a command list `cmd` to run the external script. In the list:
-  - First, found the path to the Python executable on the system using `shutil.which("python")`.
-  - Then, provided the file path to the file that we want to execute. In this case, it’s the `external_code.py` file that you created earlier.
+- アセットによって使用される `PipesSubprocessClient` リソースは `run` メソッドを公開します。
+- アセットが実行されると、このメソッドはパイプセッション内でサブプロセスを同期的に実行し、`PipesClientCompletedInvocation` オブジェクトを返します。
+- このオブジェクトには `get_materialize_result` メソッドが含まれており、これを使用してサブプロセスによって報告された <PyObject section="assets" module="dagster" object="MaterializeResult" /> イベントにアクセスできます。次のセクションでは、サブプロセスからイベントを報告する方法について説明します。
+- 最後に、サブプロセスの結果を返します。
 
-### Step 1.2: Invoke the external code from the asset
+## Step 2: 定義オブジェクトで定義する
 
-Then, invoke a subprocess that executes the external code from the asset using the `pipes_subprocess_client` resource:
+アセットとサブプロセスのリソースを、CLI、UI、Dagster+ などの Dagster のツールで読み込み、アクセスできるようにするには、それらを含む <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトを作成します。
 
-
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/dagster_code.py" startAfter="start_asset_marker" endBefore="end_asset_marker" />
-
-Let’s take a look at what this code does:
-
-- The `PipesSubprocessClient` resource used by the asset exposes a `run` method.
-- When the asset is executed, this method will synchronously execute the subprocess in in a pipes session, and it will return a `PipesClientCompletedInvocation` object.
-- This object contains a `get_materialize_result` method, which you can use to access the <PyObject section="assets" module="dagster" object="MaterializeResult" /> event reported by the subprocess. We'll talk about how to report events from the subprocess in the next section.
-- Lastly, return the result of the subprocess.
-
-## Step 2: Define a Definitions object
-
-To make the asset and subprocess resource loadable and accessible by Dagster's tools, such as the CLI, UI, and Dagster+, you’ll create a <PyObject section="definitions" module="dagster" object="Definitions" /> object that contains them.
-
-Copy and paste the following to the bottom of `dagster_code.py`:
+次のコードをコピーして、`dagster_code.py` の下部に貼り付けます:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/dagster_code.py" startAfter="start_definitions_marker" endBefore="end_definitions_marker" />
 
-At this point, `dagster_code.py` should look like the following:
+この時点で、`dagster_code.py` は次のようになります:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/dagster_code_finished.py" />
 
-## Step 3: Run the subprocess from the Dagster UI
+## Step 3: Dagster UIからサブプロセスを実行する
 
-In this step, you’ll execute the subprocess asset you created in earlier steps from the Dagster UI.
+このステップでは、前のステップで作成したサブプロセス アセットを Dagster UI から実行します。
 
-1. In a new command line session, run the following to start the UI:
+1. 新しいコマンド ライン セッションで、次のコマンドを実行して UI を起動します:
 
    ```bash
    dagster dev -f dagster_code.py
    ```
 
-2. Navigate to [http://localhost:3000](http://localhost:3000), where you should see the UI:
+2. [http://localhost:3000](http://localhost:3000) に移動すると、UI が表示されます:
 
     ![Asset in the UI](/images/guides/build/external-pipelines/subprocess/part-1-step-3-2-asset.png)
 
-3. Click **Materialize** located in the top right to run your code:
+3. コードを実行するには、右上にある **Materialize** をクリックします:
 
     ![Materialize asset](/images/guides/build/external-pipelines/subprocess/part-1-step-3-3-materialize.png)
 
-4. Navigate to the **Run details** page, where you should see the logs for the run:
+4. **Run details** ページに移動すると、実行のログが表示されます:
 
    ![Logs in the run details page](/images/guides/build/external-pipelines/subprocess/part-1-step-3-4-logs.png)
 
-5. In `external_code.py`, we have a `print` statement that outputs to `stdout`. Dagster will display these in the UI's raw compute log view. To see the `stdout` log, toggle the log section to **stdout**:
+5. `external_code.py` には、`stdout` に出力する `print` ステートメントがあります。Dagster はこれらを UI の生の計算ログビューに表示します。`stdout` ログを表示するには、ログセクションを **stdout** に切り替えます:
 
    ![Raw compute logs in the run details page](/images/guides/build/external-pipelines/subprocess/part-1-step-3-5-stdout.png)
 
-## What's next?
+## 次は？
 
-At this point, you've created a Dagster asset that invokes an external Python script, launched the code in a subprocess, and viewed the result in Dagster UI. Next, you'll learn how to [modify your external code to work with Dagster Pipes](modify-external-code) to send information back to Dagster.
+この時点で、外部 Python スクリプトを呼び出し、サブプロセスでコードを起動し、結果を Dagster UI で表示する Dagster アセットを作成しました。次に、[Dagster Pipes で動作するように外部コードを変更](modify-external-code)して Dagster に情報を送り返す方法を学習します。

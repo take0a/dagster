@@ -1,29 +1,29 @@
 ---
-title: "Asset sensors"
+title: "アセットセンサー"
 sidebar_position: 40
 ---
 
-Asset sensors in Dagster provide a powerful mechanism for monitoring asset materializations and triggering downstream computations or notifications based on those events.
+Dagster のアセットセンサーは、アセットの実現を監視し、それらのイベントに基づいて下流の計算や通知をトリガーするための強力なメカニズムを提供します。
 
-This guide covers the most common use cases for asset sensors, such as defining cross-job and cross-code location dependencies.
+このガイドでは、ジョブ間およびコード間の場所の依存関係の定義など、資産センサーの最も一般的な使用例について説明します。
 
 :::note
 
-This documentation assumes familiarity with [assets](/guides/build/assets/) and [jobs](/guides/build/assets/asset-jobs)
+このドキュメントは、[アセット](/guides/build/assets/) と [ジョブ](/guides/build/assets/asset-jobs) に精通していることを前提としています。
 
 :::
 
-## Getting started
+## はじめる
 
-Asset sensors monitor an asset for new materialization events and target a job when a new materialization occurs.
+アセット センサーは、アセットの新しいマテリアライゼーション イベントを監視し、新しいマテリアライゼーションが発生したときにジョブをターゲットにします。
 
-Typically, asset sensors return a `RunRequest` when a new job is to be triggered. However, they may provide a `SkipReason` if the asset materialization doesn't trigger a job.
+通常、アセット センサーは、新しいジョブがトリガーされるときに `RunRequest` を返します。ただし、アセットの具体化によってジョブがトリガーされない場合は、`SkipReason` が提供される場合があります。
 
-For example, you may wish to monitor an asset that's materialized daily, but don't want to trigger jobs on holidays.
+たとえば、毎日生成されるアセットを監視したいが、休日にはジョブをトリガーしたくない場合があります。
 
-## Cross-job and cross-code location dependencies
+## ジョブ間およびコード間の場所の依存関係
 
-Asset sensors enable dependencies across different jobs and different code locations. This flexibility allows for modular and decoupled workflows.
+アセットセンサーにより、さまざまなジョブやさまざまなコードの場所間での依存関係が可能になります。この柔軟性により、モジュール化された分離されたワークフローが可能になります。
 
 ```mermaid
 %%{
@@ -59,13 +59,13 @@ subgraph CodeLocationB
 end
 ```
 
-This is an example of an asset sensor that triggers a job when an asset is materialized. The `daily_sales_data` asset is in the same code location as the job and other asset for this example, but the same pattern can be applied to assets in different code locations.
+これは、アセットがマテリアライズされたときにジョブをトリガーするアセットセンサーの例です。この例では、`daily_sales_data` アセットはジョブや他のアセットと同じコードの場所にありますが、同じパターンを異なるコードの場所にあるアセットに適用できます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/simple-asset-sensor-example.py" language="python" />
 
-## Customizing the evaluation function of an asset sensor
+## センサーの評価関数のカスタマイズ
 
-You can customize the evaluation function of an asset sensor to include specific logic for deciding when to trigger a run. This allows for fine-grained control over the conditions under which downstream jobs are executed.
+アセットセンサーの評価関数をカスタマイズして、実行をトリガーするタイミングを決定するための特定のロジックを含めることができます。これにより、下流のジョブが実行される条件をきめ細かく制御できます。
 
 ```mermaid
 stateDiagram-v2
@@ -88,32 +88,32 @@ stateDiagram-v2
     classDef userDefined fill: var(--theme-color-accent-lavendar)
 ```
 
-In the following example, the `@asset_sensor` decorator defines a custom evaluation function that returns a `RunRequest` object when the asset is materialized and certain metadata is present, otherwise it skips the run.
+次の例では、`@asset_sensor` デコレータは、アセットが具体化され、特定のメタデータが存在する場合に `RunRequest` オブジェクトを返し、それ以外の場合は実行をスキップするカスタム評価関数を定義します。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/asset-sensor-custom-eval.py" language="python"/>
 
-## Triggering a job with custom configuration
+## カスタム構成でジョブをトリガーする
 
-By providing a configuration to the `RunRequest` object, you can trigger a job with a specific configuration. This is useful when you want to trigger a job with custom parameters based on custom logic you define.
+`RunRequest` オブジェクトに設定を指定すると、特定の設定でジョブをトリガーできます。これは、定義したカスタム ロジックに基づいてカスタム パラメータでジョブをトリガーする場合に便利です。
 
-For example, you might use a sensor to trigger a job when an asset is materialized, but also pass metadata about that materialization to the job:
+たとえば、アセットがマテリアライズされたときにセンサーを使用してジョブをトリガーし、そのマテリアライズに関するメタデータをジョブに渡すこともできます:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/asset-sensor-with-config.py" language="python" />
 
-## Monitoring multiple assets
+## 複数アセットの監視
 
 :::note
 
-The `@multi_asset_sensor` has been marked as deprecated, but will not be removed from the codebase until Dagster 2.0 is released, meaning it will continue to function as it currently does for the foreseeable future. Its functionality has been largely superseded by the `AutomationCondition` system. For more information, see the [Declarative Automation documentation](/guides/automate/declarative-automation/).
+`@multi_asset_sensor` は非推奨としてマークされていますが、Dagster 2.0 がリリースされるまでコードベースから削除されません。つまり、当面は現在と同じように機能し続けます。その機能は、`AutomationCondition` システムによって大部分が置き換えられました。詳細については、[宣言型オートメーションのドキュメント](/guides/automate/declarative-automation/)を参照してください。
 
 :::
 
-When building a pipeline, you may want to monitor multiple assets with a single sensor. This can be accomplished with a multi-asset sensor.
+パイプラインを構築するときに、1 つのセンサーで複数のアセットを監視したい場合があります。これは、マルチアセット センサーで実現できます。
 
-The following example uses a `@multi_asset_sensor` to monitor two assets that triggers an asset job once both have been materialized. You can also trigger op jobs this way.
+次の例では、`@multi_asset_sensor` を使用して 2 つのアセットを監視し、両方が実現されるとアセット ジョブをトリガーします。この方法で op ジョブをトリガーすることもできます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/multi-asset-sensor.py" language="python" />
 
-## Next steps
+## 次は
 
-- Explore [Declarative Automation](/guides/automate/declarative-automation/) as an alternative to asset sensors
+- アセットセンサーの代替として[宣言型自動化](/guides/automate/declarative-automation/)を検討する

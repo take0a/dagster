@@ -1,113 +1,113 @@
 ---
-title: "Dagster Pipes subprocess reference"
+title: "Dagster パイプ サブプロセスリファレンス"
 description: "This page shows ways to execute external code with Dagster Pipes with different entities in the Dagster system."
 ---
 
-This reference shows usage of Dagster Pipes with other entities in the Dagster system. For a step-by-step walkthrough, refer to the [Dagster Pipes tutorial](index.md).
+このリファレンスでは、Dagster システム内の他のエンティティでの Dagster Pipes の使用法を示します。ステップごとのチュートリアルについては、[Dagster Pipes チュートリアル](index.md) を参照してください。
 
-## Specifying environment variables and extras
+## 環境変数と extra の指定
 
-When launching the subprocess, you may want to make environment variables or additional parameters available in the external process. Extras are arbitrary, user-defined parameters made available on the context object in the external process.
+サブプロセスを起動するときに、外部プロセスで環境変数または追加のパラメータを使用できるようにする必要がある場合があります。extra は、外部プロセスのコンテキスト オブジェクトで使用できる任意のユーザー定義パラメータです。
 
 <Tabs>
-<TabItem value="External code in external_code.py">
+<TabItem value="external_code.py の外部コード">
 
-In the external code, you can access extras via the `PipesContext` object:
+外部コードでは、`PipesContext` オブジェクトを介して extra にアクセスできます:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_extras_env/external_code.py" lineStart="3" />
 
 </TabItem>
-<TabItem value="Dagster code in dagster_code.py">
+<TabItem value="dagster_code.py の Dagster コード">
 
-The `run` method to the `PipesSubprocessClient` resource also accepts `env` and `extras` , which allow you to specify environment variables and extra arguments when executing the subprocess:
+`PipesSubprocessClient` リソースの `run` メソッドは `env` と `extras` も受け入れます。これにより、サブプロセスの実行時に環境変数と追加の引数を指定できます:
 
-Note: We're using `os.environ` in this example, but Dagster's recommendation is to use <PyObject section="resources" module="dagster" object="EnvVar" /> in production.
+注: この例では `os.environ` を使用していますが、Dagster では本番環境では <PyObject section="resources" module="dagster" object="EnvVar" /> を使用することを推奨しています。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_extras_env/dagster_code.py" />
 
 </TabItem>
 </Tabs>
 
-## Working with @asset_check
+## @asset_check と連携
 
-Sometimes, you may not want to materialize an asset, but instead want to report a data quality check result. When your asset has data quality checks defined in <PyObject section="asset-checks" module="dagster" object="asset_check" decorator />:
+場合によっては、アセットをマテリアライズするのではなく、データ品質チェックの結果を報告したい場合があります。アセットに <PyObject section="asset-checks" module="dagster" object="asset_check" decorator /> で定義されたデータ品質チェックがある場合:
 
 <Tabs>
 
-<TabItem value="External code in external_code.py">
+<TabItem value="external_code.py の外部コード">
 
-From the external code, you can report to Dagster that an asset check has been performed via <PyObject section="libraries" module="dagster_pipes" object="PipesContext" method="report_asset_check" />. Note that `asset_key` in this case is required, and must match the asset key defined in <PyObject section="asset-checks" module="dagster" object="asset_check" decorator />:
+外部コードから、<PyObject section="libraries" module="dagster_pipes" object="PipesContext" method="report_asset_check" /> を介してアセット チェックが実行されたことを Dagster に報告できます。この場合、`asset_key` は必須であり、<PyObject section="asset-checks" module="dagster" object="asset_check" decorator /> で定義されたアセット キーと一致する必要があることに注意してください:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_asset_check/external_code.py" />
 
 </TabItem>
-<TabItem value="Dagster code in dagster_code.py">
+<TabItem value="dagster_code.py の Dagster コード">
 
-On Dagster's side, the `PipesClientCompletedInvocation` object returned from `PipesSubprocessClient` includes a `get_asset_check_result` method, which you can use to access the <PyObject section="asset-checks" module="dagster" object="AssetCheckResult" /> event reported by the subprocess.
+Dagster 側では、`PipesSubprocessClient` から返される `PipesClientCompletedInvocation` オブジェクトに `get_asset_check_result` メソッドが含まれており、これを使用してサブプロセスによって報告された <PyObject section="asset-checks" module="dagster" object="AssetCheckResult" /> イベントにアクセスできます。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_asset_check/dagster_code.py" />
 
 </TabItem>
 </Tabs>
 
-## Working with multi-assets
+## マルチアセットでの作業
 
-Sometimes, you may invoke a single call to an API that results in multiple tables being updated, or you may have a single script that computes multiple assets. In these cases, you can use Dagster Pipes to report back on multiple assets at once.
+場合によっては、API への単一の呼び出しで複数のテーブルが更新されたり、単一のスクリプトで複数のアセットが計算されたりすることがあります。このような場合は、Dagster Pipes を使用して、複数のアセットを一度にレポートすることができます。
 
 <Tabs>
 
-<TabItem value="External code in external_code.py">
+<TabItem value="external_code.py の外部コード">
 
-**Note**: When working with multi-assets, <PyObject section="libraries" module="dagster_pipes" object="PipesContext" method="report_asset_materialization" /> may only be called once per unique asset key. If called more than once, an error similar to the following will surface:
+**注意**: 複数のアセットを扱う場合、<PyObject section="libraries" module="dagster_pipes" object="PipesContext" method="report_asset_materialization" /> は、一意のアセット キーごとに 1 回だけ呼び出すことができます。複数回呼び出されると、次のようなエラーが表示されます:
 
 ```bash
 Calling {method} with asset key {asset_key} is undefined. Asset has already been materialized, so no additional data can be reported for it
 ```
 
-Instead, you’ll need to set the `asset_key` parameter for each instance of <PyObject module="dagster_pipes" section="libraries" object="PipesContext" method="report_asset_materialization" />:
+代わりに、<PyObject module="dagster_pipes" section="libraries" object="PipesContext" method="report_asset_materialization" /> の各インスタンスに `asset_key` パラメータを設定する必要があります:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_multi_asset/external_code.py" />
 
 </TabItem>
 
-<TabItem value="Dagster code in dagster_code.py">
+<TabItem value="dagster_code.py の Dagster コード">
 
-In the Dagster code, you can use <PyObject section="assets" module="dagster" object="multi_asset" decorator /> to define a single asset that represents multiple assets. The `PipesClientCompletedInvocation` object returned from `PipesSubprocessClient` includes a `get_results` method, which you can use to access all the events, such as multiple <PyObject section="ops" module="dagster" object="AssetMaterialization" pluralize /> and <PyObject section="asset-checks" module="dagster" object="AssetCheckResult" pluralize />, reported by the subprocess:
+Dagster コードでは、<PyObject section="assets" module="dagster" object="multi_asset" decorator /> を使用して、複数のアセットを表す単一のアセットを定義できます。`PipesSubprocessClient` から返される `PipesClientCompletedInvocation` オブジェクトには `get_results` メソッドが含まれており、これを使用して、サブプロセスによって報告される複数の <PyObject section="ops" module="dagster" object="AssetMaterialization" pluralize /> や <PyObject section="asset-checks" module="dagster" object="AssetCheckResult" pluralize /> などのすべてのイベントにアクセスできます:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_multi_asset/dagster_code.py" />
 
 </TabItem>
 </Tabs>
 
-## Passing custom data
+## カスタムデータの受け渡し
 
-Sometimes, you may want to pass data back from the external process for use in the orchestration code for purposes other than reporting directly to Dagster such as use in creating an output. In this example we use custom messages to create an I/O managed output that is returned from the asset.
+場合によっては、出力の作成に使用するなど、Dagster に直接レポートする以外の目的で、オーケストレーション コードで使用するために外部プロセスからデータを返したい場合があります。この例では、カスタム メッセージを使用して、アセットから返される I/O 管理出力を作成します。
 
 <Tabs>
-<TabItem value="External code in external_code.py">
+<TabItem value="external_code.py の外部コード">
 
-In the external code, we send messages using `report_custom_message`. The message can be any data that is JSON serializable.
+外部コードでは、`report_custom_message` を使用してメッセージを送信します。メッセージは、JSON シリアル化可能な任意のデータにすることができます。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/custom_messages/external_code.py" />
 
 </TabItem>
-<TabItem value="Dagster code in dagster_code.py">
+<TabItem value="dagster_code.py の Dagster コード">
 
-In the Dagster code we receive custom messages using `get_custom_messages`.
+Dagster コードでは、`get_custom_messages` を使用してカスタム メッセージを受信します。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/custom_messages/dagster_code.py" />
 
 </TabItem>
 </Tabs>
 
-## Passing rich metadata to Dagster
+## 豊富なメタデータを Dagster に渡す
 
-Dagster supports rich metadata types such as <PyObject section="metadata" module="dagster" object="TableMetadataValue"/>, <PyObject section="metadata" module="dagster" object="UrlMetadataValue"/>, and <PyObject section="metadata" module="dagster" object="JsonMetadataValue"/>. However, because the `dagster-pipes` package doesn't have a direct dependency on `dagster`, you'll need to pass a raw dictionary back to Dagster with a specific format. For a given metadata type, you will need to specify a dictionary with the following keys:
+Dagster は、<PyObject section="metadata" module="dagster" object="TableMetadataValue"/>、<PyObject section="metadata" module="dagster" object="UrlMetadataValue"/>、<PyObject section="metadata" module="dagster" object="JsonMetadataValue"/> などの豊富なメタデータ タイプをサポートしています。ただし、`dagster-pipes` パッケージは `dagster` に直接依存していないため、特定の形式で生の辞書を Dagster に渡す必要があります。特定のメタデータ タイプに対して、次のキーを持つ辞書を指定する必要があります:
 
-- `type`: The type of metadata value, such as `table`, `url`, or `json`.
-- `raw_value`: The actual value of the metadata.
+- `type`: メタデータ値のタイプ（`table`、`url`、`json` など）。
+- `raw_value`: メタデータの実際の値。
 
-Below are examples of specifying data for all supported metadata types. Float, integer, boolean, string, and null metadata objects can be passed directly without the need for a dictionary.
+以下は、サポートされているすべてのメタデータ タイプのデータを指定する例です。float、integer、boolean、string、null のメタデータ オブジェクトは、辞書を必要とせずに直接渡すことができます。
 
 ### Examples for complex metadata types
 

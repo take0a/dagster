@@ -1,13 +1,13 @@
 ---
-title: Troubleshooting schedules
+title: スケジュールのトラブルシューティング
 sidebar_position: 700
 ---
 
-If you have issues with a schedule, use the following steps to diagnose and resolve the problem.
+スケジュールに問題がある場合は、次の手順に従って問題を診断し、解決してください。
 
-## Step 1: Verify the schedule is included in the Definitions object
+## Step 1: スケジュールが定義オブジェクトに含まれていることを確認します
 
-First, verify that the schedule has been included in a <PyObject section="definitions" module="dagster" object="Definitions" /> object. This ensures that the schedule is detectable and loadable by Dagster tools like the Dagster UI and CLI:
+まず、スケジュールが <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに含まれていることを確認します。これにより、スケジュールが Dagster UI や CLI などの Dagster ツールによって検出およびロード可能になります:
 
 ```python
 defs = Definitions(
@@ -17,88 +17,88 @@ defs = Definitions(
 )
 ```
 
-For more information. see the [code locations documentation](/guides/deploy/code-locations/).
+詳細については、[コードの場所のドキュメント](/guides/deploy/code-locations/)を参照してください。
 
-## Step 2: Verify that the schedule has been started
+## Step 2: スケジュールが開始されたことを確認する
 
-1. In the Dagster UI, click **Overview > Schedules tab**.
-2. Locate the schedule. Schedules that have been started will have an enabled toggle in the **Running** column:
+1. Dagster UI で、**Overview > Schedules タブ** をクリックします。
+2. スケジュールを見つけます。開始されたスケジュールには、**Running** 列に有効なトグルが表示されます。
 
    ![Enabled toggle next to a schedule in the Schedules tab of the Overview page](/images/guides/automate/schedules/schedules-enabled-toggle.png)
 
-## Step 3: Check for execution failures
+## Step 3: 実行失敗を確認する
 
-Next, check that the schedule executed successfully. You can do this by looking at the **Last tick** column in the **Schedules tab**.
+次に、スケジュールが正常に実行されたことを確認します。これは、**Schedules タブ** の **Last tick** 列を確認することで確認できます。
 
-If the scheduled failed to execute, this column will contain a **Failed** badge. Click the badge to display the error and stack trace describing the failure.
+スケジュールされた実行に失敗した場合、この列には **Failed** バッジが表示されます。バッジをクリックすると、失敗を説明するエラーとスタック トレースが表示されます。
 
-## Step 4: Verify the schedule's interval configuration
+## Step 4:スケジュールの間隔設定を確認する
 
-Next, verify that the schedule is using the time interval you expect. In the **Schedules** tab, locate the schedule and look at the **Schedule** column:
+次に、スケジュールが期待どおりの時間間隔を使用していることを確認します。**Schedules** タブでスケジュールを見つけて、**Schedule** 列を確認します。
 
 ![Highlighted Next tick value for a schedule in the Dagster UI](/images/guides/automate/schedules/schedules-next-tick.png)
 
-The **Next tick** value indicates when the schedule is next expected to run. In the above image, the next tick is `May 2, 12:00 AM UTC`.
+**Next tick** の値は、スケジュールが次にいつ実行される予定かを示します。上の画像では、次のティックは `5 月 2 日午前 12:00 UTC` です。
 
-Verify that the time is what you expect, including the timezone.
+タイムゾーンを含め、時刻が予想どおりであることを確認します。
 
-## Step 5: Verify that the UI is using your latest Dagster code
+## Step 5: UIが最新のDagsterコードを使用していることを確認する
 
-The next step is to verify that the UI is using the latest version of your Dagster code. Use the tabs to view instructions for the version of Dagster you're using.
+次のステップは、UI が最新バージョンの Dagster コードを使用していることを確認することです。タブを使用して、使用している Dagster のバージョンの手順を表示します。
 
 <Tabs>
-<TabItem value="Local webserver or Dagster OSS">
+<TabItem value="ローカルウェブサーバーまたは Dagster OSS">
 
-1. In the UI, click **Settings** in the top navigation.
-2. In the **Code locations** tab, click **Reload definitions** near the top right corner of the page.
+1. UI で、上部のナビゲーションにある **Settings** をクリックします。
+2. **Code locations** タブで、ページの右上隅近くにある **Reload definitions** をクリックします。
 
 </TabItem>
 <TabItem value="Dagster+">
 
-1. In the UI, click **Deployment** in the top navigation.
-2. In the **Code locations** tab, locate the code location that contains the schedule definition.
-3. Click **Redeploy**.
+1. UI で、上部のナビゲーションにある **Deployment** をクリックします。
+2. **Code locations** タブで、スケジュール定義が含まれているコードの場所を見つけます。
+3. **Redeploy** をクリックします。
 
 </TabItem>
 </Tabs>
 
-**If the code location can't be loaded** - for example, due to a syntax error - it will have a **Status** of **Failed**. Click the **View error** link in this column to view the error message.
+**コードの場所をロードできない場合** (たとえば、構文エラーのため)、**Status** は **Failed** になります。この列の **View error** リンクをクリックすると、エラー メッセージが表示されます。
 
-**If the code location loaded successfully** but the schedule isn't present in the **Schedules** tab, the schedule may not be included in the code location's `Definitions` object. Refer to [Step 1](#step-1-verify-the-schedule-is-included-in-the-definitions-object) for more information.
+**コードの場所が正常に読み込まれた** が、**Schedules** タブにスケジュールが存在しない場合は、スケジュールがコードの場所の `定義` オブジェクトに含まれていない可能性があります。詳細については、[Step 1](#step-1-verify-the-schedule-is-included-in-the-definitions-object) を参照してください。
 
-## Step 6: Verify your dagster-daemon setup
+## Step 6: dagster-daemon の設定を確認する
 
 :::note
 
-This section is applicable to Open Source (OSS) deployments.
+このセクションは、オープン ソース (OSS) のデプロイに適用されます。
 
 :::
 
-If the schedule interval is correctly configured but runs aren't being created, it's possible that the dagster-daemon process isn't working correctly. If you haven't set up a Dagster daemon yet, refer to the [Open Source Deployment guides](/guides/deploy/deployment-options/) for more info.
+スケジュール間隔が正しく構成されているにもかかわらず実行が作成されない場合は、dagster-daemon プロセスが正しく動作していない可能性があります。まだ Dagster デーモンを設定していない場合は、詳細については [オープン ソース デプロイメント ガイド](/guides/deploy/deployment-options/) を参照してください。
 
-### Verify the daemon is running
+### デーモンが実行中であることを確認する
 
-1. In the UI, click **Deployment** in the top navigation.
-2. Click the **Daemons** tab.
-3. Locate the **Scheduler** row.
+1. UI で、上部のナビゲーションにある **Deployment** をクリックします。
+2. **Daemons** タブをクリックします。
+3. **Scheduler** 行を見つけます。
 
-The daemon process periodically sends out a hearbeat from the scheduler. If the scheduler daemon has a status of **Not running**, this indicates that there's an issue with your daemon deployment. If the daemon ran into an error that resulted in an exception, this error will often display in this tab.
+デーモン プロセスは、スケジューラから定期的にハートビートを送信します。スケジューラ デーモンのステータスが **Not running** の場合、デーモンの展開に問題があることを示しています。デーモンで例外が発生するエラーが発生した場合、このエラーがこのタブに表示されることがよくあります。
 
-If there isn't a clear error on this page or if the daemon should be sending heartbeats but isn't, move on to the next step.
+このページに明確なエラーがない場合、またはデーモンがハートビートを送信する必要があるのに送信されていない場合は、次の手順に進みます。
 
-### Check the daemon process logs
+### デーモンプロセスのログを確認する
 
-Next, check the logs from the daemon process. The steps to do this will depend on your deployment - for example, if you're using Kubernetes, you'll need to get the logs from the pod that's running the daemon. You should be able to search those logs for the name of the schedule (or `SchedulerDaemon` to see all logs associated with the scheduler) to gain an understanding of what's going wrong.
+次に、デーモン プロセスからのログを確認します。これを行う手順は、デプロイメントによって異なります。たとえば、Kubernetes を使用している場合は、デーモンを実行しているポッドからログを取得する必要があります。スケジュールの名前 (または、スケジューラに関連付けられているすべてのログを表示するには、`SchedulerDaemon`) でこれらのログを検索して、何が問題なのかを把握できるはずです。
 
-If the daemon output contains error indicating the schedule couldn't be found, verify that the daemon is using the same `workspace.yaml` file as the webserver. The daemon does not need to restart in order to pick up changes to the `workspace.yaml` file. Refer to the [Workspace files documentation](/guides/deploy/code-locations/workspace-yaml) for more information.
+デーモンの出力にスケジュールが見つからなかったことを示すエラーが含まれている場合は、デーモンが Web サーバーと同じ `workspace.yaml` ファイルを使用していることを確認してください。デーモンは、`workspace.yaml` ファイルへの変更を反映するために再起動する必要はありません。詳細については、[ワークスペース ファイルのドキュメント](/guides/deploy/code-locations/workspace-yaml)を参照してください。
 
-If the logs don't indicate the cause of the issue, move on to the next step.
+ログに問題の原因が示されていない場合は、次の手順に進みます。
 
-### Check for execution failures
+### 実行失敗を確認する
 
-The last step is to check that the schedule executed successfully. If you didn't do this already, refer to [Step 3](#step-3-check-for-execution-failures) for more information.
+最後のステップは、スケジュールが正常に実行されたことを確認することです。まだ実行していない場合は、詳細については [Step 3](#step-3-check-for-execution-failures) を参照してください。
 
-## More help
+## その他のヘルプ
 
-**Still stuck?** If these steps didn't resolve the issue, reach out in [Slack](https://dagster.io/slack or [file an issue on GitHub](https://github.com/dagster-io/dagster/issues).
+**まだ問題が解決しない場合は?** これらの手順を実行しても問題が解決しない場合は、[Slack](https://dagster.io/slack) に連絡するか、[GitHub で問題を報告](https://github.com/dagster-io/dagster/issues)してください。
 

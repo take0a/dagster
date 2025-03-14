@@ -1,28 +1,28 @@
 ---
-title: "Schedules"
+title: "スケジュール"
 sidebar_position: 10
 ---
 
-Schedules enable automated execution of jobs at specified intervals. These intervals can range from common frequencies like hourly, daily, or weekly, to more intricate patterns defined using cron expressions.
+スケジュールを使用すると、指定した間隔でジョブを自動的に実行できます。これらの間隔は、1 時間ごと、1 日ごと、1 週間ごとなどの一般的な頻度から、cron 式を使用して定義されるより複雑なパターンまでさまざまです。
 
 <details>
-<summary>Prerequisites</summary>
+<summary>前提条件</summary>
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、次のものが必要です:
 
-- Familiarity with [assets](/guides/build/assets/)
-- Familiarity with [jobs](/guides/build/assets/asset-jobs/)
+- [アセット](/guides/build/assets/) に関する知識
+- [ジョブ](/guides/build/assets/asset-jobs/)に関する知識
 </details>
 
-## Basic schedule
+## 基本的なスケジュール
 
-A basic schedule is defined by a `JobDefinition` and a `cron_schedule` using the `ScheduleDefinition` class. A job can be thought of as a selection of assets or operations executed together.
+基本的なスケジュールは、`ScheduleDefinition` クラスを使用して `JobDefinition` と `cron_schedule` によって定義されます。ジョブは、一緒に実行されるアセットまたは操作の選択と考えることができます。
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/simple-schedule-example.py" language="python" />
 
-## Run schedules in a different timezone
+## 異なるタイムゾーンでスケジュールを実行する
 
-By default, schedules without a timezone will run in Coordinated Universal Time (UTC). To run a schedule in a different timezone, set the `timezone` parameter:
+デフォルトでは、タイムゾーンのないスケジュールは協定世界時 (UTC) で実行されます。別のタイムゾーンでスケジュールを実行するには、`timezone` パラメータを設定します。
 
 ```python
 daily_schedule = ScheduleDefinition(
@@ -33,33 +33,33 @@ daily_schedule = ScheduleDefinition(
 )
 ```
 
-For more information, see "[Customizing a schedule's execution timezone](customizing-execution-timezone)".
+詳細については、「[スケジュールの実行タイムゾーンのカスタマイズ](customizing-execution-timezone)」を参照してください。
 
-## Create schedules from partitions
+## パーティションからスケジュールを作成する
 
-If using partitions and jobs, you can create a schedule using the partition with `build_schedule_from_partitioned_job`. The schedule will execute at the same cadence specified by the partition definition.
+パーティションとジョブを使用する場合は、`build_schedule_from_partitioned_job` を使用してパーティションを使用してスケジュールを作成できます。スケジュールは、パーティション定義で指定された同じリズムで実行されます。
 
 <Tabs>
 <TabItem value="assets" label="Assets">
 
-If you have a [partitioned asset](/guides/build/partitions-and-backfills) and job:
+[パーティション化されたアセット](/guides/build/partitions-and-backfills)とジョブがある場合:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/schedule-with-partition.py" language="python" />
 
 </TabItem>
 <TabItem value="ops" label="Ops">
 
-If you have a partitioned op job:
+パーティション化されたオペレーションジョブがある場合:
 
 <CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/schedule-with-partition-ops.py" language="python" />
 
 </TabItem>
 </Tabs>
 
-## Next steps
+## 次は
 
-By understanding and effectively using these automation methods, you can build more efficient data pipelines that respond to your specific needs and constraints:
+これらの自動化の方法を理解し、効果的に使用することで、特定のニーズと制約に対応する、より効率的なデータ パイプラインを構築できます:
 
-- Learn more about schedules in [Understanding automation](/guides/automate/index.md)
-- React to events with [sensors](/guides/automate/sensors)
-- Explore [Declarative Automation](/guides/automate/declarative-automation) as an alternative to schedules
+- スケジュールの詳細については、[自動化の理解](/guides/automate/index.md) を参照してください。
+- [センサー](/guides/automate/sensors) でイベントに反応する
+- スケジュールの代替として[宣言型自動化](/guides/automate/declarative-automation)を検討する

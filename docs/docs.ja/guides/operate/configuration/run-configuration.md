@@ -1,62 +1,62 @@
 ---
-title: "Run configuration"
+title: "実行構成"
 description: Job run configuration allows providing parameters to jobs at the time they're executed.
 sidebar_position: 100
 ---
 
-Run configuration allows providing parameters to jobs at the time they're executed.
+実行構成を使用すると、ジョブの実行時にパラメータを提供できます。
 
-It's often useful to provide user-chosen values to Dagster jobs or asset definitions at runtime. For example, you might want to provide a connection URL for a database resource. Dagster exposes this functionality through a configuration API.
+実行時に Dagster ジョブまたはアセット定義にユーザーが選択した値を提供すると便利なことがよくあります。たとえば、データベース リソースの接続 URL を提供する必要がある場合があります。Dagster は、構成 API を通じてこの機能を公開します。
 
-Various Dagster entities (assets, ops, resources) can be individually configured. When launching a job that materializes (assets), executes (ops), or instantiates (resources) a configurable entity, you can provide _run configuration_ for each entity. Within the function that defines the entity, you can access the passed-in configuration through the `config` parameter. Typically, the provided run configuration values correspond to a _configuration schema_ attached to the asset/op/resource definition. Dagster validates the run configuration against the schema and proceeds only if validation is successful.
+さまざまな Dagster エンティティ (アセット、オペレーション、リソース) を個別に構成できます。構成可能なエンティティを具体化 (アセット)、実行 (オペレーション)、またはインスタンス化 (リソース) するジョブを起動するときに、各エンティティの _実行構成_ を指定できます。エンティティを定義する関数内で、`config` パラメータを使用して渡された構成にアクセスできます。通常、指定された実行構成の値は、アセット/オペレーション/リソース定義に添付された _構成スキーマ_ に対応します。Dagster は、実行構成をスキーマに対して検証し、検証が成功した場合にのみ続行します。
 
-A common use of configuration is for a [schedule](/guides/automate/schedules/) or [sensor](/guides/automate/sensors/) to provide configuration to the job run it is launching. For example, a daily schedule might provide the day it's running on to one of the assets as a config value, and that asset might use that config value to decide what day's data to read.
+構成の一般的な使用法は、[スケジュール](/guides/automate/schedules/) または [センサー](/guides/automate/sensors/) が起動するジョブ実行に構成を提供することです。たとえば、日次スケジュールでは、実行日を構成値としてアセットの 1 つに提供し、そのアセットではその構成値を使用して、読み取る日のデータを決定する場合があります。
 
-## Defining and accessing configuration
+## 構成の定義とアクセス
 
-Configurable parameters accepted by an asset or op are specified by defining a config model subclass of <PyObject section="config" module="dagster" object="Config"/> and a `config` parameter to the corresponding asset or op function. Under the hood, these config models utilize [Pydantic](https://docs.pydantic.dev/), a popular Python library for data validation and serialization.
+アセットまたはオペレーションによって受け入れられる構成可能なパラメータは、<PyObject section="config" module="dagster" object="Config"/> の構成モデル サブクラスと、対応するアセットまたはオペレーション関数への `config` パラメータを定義することによって指定されます。内部的には、これらの構成モデルは、データの検証とシリアル化のための一般的な Python ライブラリである [Pydantic](https://docs.pydantic.dev/) を利用しています。
 
-During execution, the specified config is accessed within the body of the op or asset using the `config` parameter.
+実行中、指定された構成は、オペレーションまたはアセットの本体内で `config` パラメータを使用してアクセスされます。
 
 <Tabs persistentKey="assetsorops">
-<TabItem value="Using software-defined-assets">
+<TabItem value="software-defined-assets を使用">
 
-Here, we define a subclass of <PyObject section="config" module="dagster" object="Config"/> holding a single string value representing the name of a user. We can access the config through the `config` parameter in the asset body.
+ここでは、ユーザー名を表す単一の文字列値を保持する <PyObject section="config" module="dagster" object="Config"/> のサブクラスを定義します。アセット本体の `config` パラメータを通じて構成にアクセスできます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_asset_config" endBefore="end_basic_asset_config" />
 
 </TabItem>
-<TabItem value="Using ops and jobs">
+<TabItem value="ops とジョブを使用">
 
-Here, we define a subclass of <PyObject section="config" module="dagster" object="Config"/> holding a single string value representing the name of a user. We can access the config through the `config` parameter in the op body.
+ここでは、ユーザー名を表す単一の文字列値を保持する <PyObject section="config" module="dagster" object="Config"/> のサブクラスを定義します。op 本体の `config` パラメータを通じて構成にアクセスできます。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_op_config" endBefore="end_basic_op_config" />
 
-You can also build config into jobs.
+ジョブに構成を組み込むこともできます。
 
 </TabItem>
 </Tabs>
 
-These examples showcase the most basic config types that can be used. For more information on the set of config types Dagster supports, see [the advanced config types documentation](advanced-config-types).
+これらの例は、使用できる最も基本的な設定タイプを示しています。Dagster がサポートする設定タイプのセットの詳細については、[高度な設定タイプのドキュメント](advanced-config-types)を参照してください。
 
-## Defining and accessing Pythonic configuration for a resource
+## リソースの Python 構成の定義とアクセス
 
-Configurable parameters for a resource are defined by specifying attributes for a resource class, which subclasses <PyObject section="resources" module="dagster" object="ConfigurableResource"/>. The below resource defines a configurable connection URL, which can be accessed in any methods defined on the resource.
+リソースの設定可能なパラメータは、<PyObject section="resources" module="dagster" object="ConfigurableResource"/> のサブクラスであるリソース クラスの属性を指定することによって定義されます。以下のリソースは、リソースで定義された任意のメソッドからアクセスできる設定可能な接続 URL を定義します。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_resource_config" endBefore="end_basic_resource_config" />
 
-For more information on using resources, refer to the [Resources guide](/guides/build/external-resources/).
+リソースの使用に関する詳細については、[リソースガイド](/guides/build/external-resources/)を参照してください。
 
-## Specifying runtime configuration
+## ランタイム構成の指定
 
-To execute a job or materialize an asset that specifies config, you'll need to provide values for its parameters. How we provide these values depends on the interface we are using: Python, the Dagster UI, or the command line (CLI).
+ジョブを実行したり、構成を指定するアセットをマテリアライズしたりするには、そのパラメータの値を指定する必要があります。これらの値を指定する方法は、使用しているインターフェース（Python、Dagster UI、またはコマンドライン（CLI））によって異なります。
 
 <Tabs persistentKey="configtype">
 <TabItem value="Python">
 
-When specifying config from the Python API, we can use the `run_config` argument for <PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> or <PyObject section="execution" module="dagster" object="materialize"/>. This takes a <PyObject section="config" module="dagster" object="RunConfig"/> object, within which we can supply config on a per-op or per-asset basis. The config is specified as a dictionary, with the keys corresponding to the op/asset names and the values corresponding to the config values.
+Python API から構成を指定する場合、<PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> または <PyObject section="execution" module="dagster" object="materialize"/> の `​​run_config` 引数を使用できます。これは <PyObject section="config" module="dagster" object="RunConfig"/> オブジェクトを受け取り、その中でオペレーションごとまたはアセットごとに構成を指定できます。構成は辞書として指定され、キーはオペレーション/アセット名に対応し、値は構成値に対応します。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_config" endBefore="end_execute_with_config" />
@@ -64,18 +64,18 @@ When specifying config from the Python API, we can use the `run_config` argument
 </TabItem>
 <TabItem value="Dagster UI">
 
-From the UI's **Launchpad** tab, you can supply config as YAML using the config editor. Here, the YAML schema matches the layout of the defined config class. The editor has typeahead, schema validation, and schema documentation.
+UI の **Launchpad** タブから、構成エディターを使用して構成を YAML として提供できます。ここで、YAML スキーマは定義された構成クラスのレイアウトと一致します。エディターには、タイプアヘッド、スキーマ検証、およびスキーマ ドキュメントがあります。
 
-You can also click the **Scaffold Missing Config** button to generate dummy values based on the config schema. Note that a modal containing the Launchpad editor will pop up if you attempt to materialize an asset with a defined `config`.
+**Scaffold Missing Config** ボタンをクリックして、構成スキーマに基づいてダミー値を生成することもできます。定義された `config` を使用してアセットをマテリアライズしようとすると、Launchpad エディターを含むモーダルがポップアップ表示されることに注意してください。
 
 ![Config in the Dagster UI](/images/guides/operate/config-ui.png)
 
 </TabItem>
-<TabItem value="Command line">
+<TabItem value="コマンドライン">
 
-### Command line
+### コマンドライン
 
-When executing a job from Dagster's CLI with [`dagster job execute`](/api/python-api/cli#dagster-job), you can put config in a YAML file:
+Dagster の CLI から [`dagster job execute`](/api/python-api/cli#dagster-job) を使用してジョブを実行する場合、YAML ファイルに構成を配置できます:
 
 ```YAML file=/concepts/configuration/good.yaml
 ops:
@@ -84,7 +84,7 @@ ops:
       person_name: Alice
 ```
 
-And then pass the file path with the `--config` option:
+次に、`--config` オプションを使用してファイル パスを渡します:
 
 ```bash
 dagster job execute --config my_config.yaml
@@ -93,22 +93,22 @@ dagster job execute --config my_config.yaml
 </TabItem>
 </Tabs>
 
-## Validation
+## 検証
 
-Dagster validates any provided run config against the corresponding Pydantic model. It will abort execution with a <PyObject section="errors" module="dagster" object="DagsterInvalidConfigError"/> or Pydantic `ValidationError` if validation fails. For example, both of the following will fail, because there is no `nonexistent_config_value` in the config schema:
+Dagster は、提供された実行構成を対応する Pydantic モデルに対して検証します。検証が失敗すると、<PyObject section="errors" module="dagster" object="DagsterInvalidConfigError"/> または Pydantic `ValidationError` で実行を中止します。たとえば、次の両方とも失敗します。これは、構成スキーマに `nonexistent_config_value` がないためです。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_bad_config" endBefore="end_execute_with_bad_config" />
 
-### Using environment variables with config
+### config で環境変数を使用する
 
-Assets and ops can be configured using environment variables by passing an <PyObject section="resources" module="dagster" object="EnvVar" /> when constructing a config object. This is useful when the value is sensitive or may vary based on environment. If using Dagster+, environment variables can be [set up directly in the UI](/guides/deploy/using-environment-variables-and-secrets).
+アセットとオペレーションは、設定オブジェクトの構築時に <PyObject section="resources" module="dagster" object="EnvVar" /> を渡すことで、環境変数を使用して設定できます。これは、値の機密性が高い場合や環境によって変わる可能性がある場合に便利です。Dagster+ を使用する場合、環境変数は [UI で直接設定](/guides/deploy/using-environment-variables-and-secrets) できます。
 
 {/* TODO add dedent=4 prop when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_config_envvar" endBefore="end_execute_with_config_envvar" />
 
-Refer to the [Environment variables and secrets guide](/guides/deploy/using-environment-variables-and-secrets) for more general info about environment variables in Dagster.
+Dagster の環境変数に関する一般的な情報については、[環境変数とシークレットのガイド](/guides/deploy/using-environment-variables-and-secrets)を参照してください。
 
-## Next steps
+## 次は
 
-Config is a powerful tool for making Dagster pipelines more flexible and observable. For a deeper dive into the supported config types, see [the advanced config types documentation](advanced-config-types). For more information on using resources, which are a powerful way to encapsulate reusable logic, see [the Resources guide](/guides/build/external-resources).
+Config は、Dagster パイプラインをより柔軟かつ監視可能にする強力なツールです。サポートされている構成タイプの詳細については、[高度な構成タイプのドキュメント](advanced-config-types)を参照してください。再利用可能なロジックをカプセル化する強力な方法であるリソースの使用の詳細については、[リソース ガイド](/guides/build/external-resources)を参照してください。

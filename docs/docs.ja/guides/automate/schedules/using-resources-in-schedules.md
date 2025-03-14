@@ -1,28 +1,28 @@
 ---
-title: Using resources in schedules
+title: スケジュールでのリソースの使用
 sidebar_position: 500
 ---
 
-This example demonstrates how to use resources in schedules. To specify a resource dependency, annotate the resource as a parameter to the schedule's function.
+この例では、スケジュールでリソースを使用する方法を示します。リソースの依存関係を指定するには、スケジュールの関数のパラメーターとしてリソースに注釈を付けます。
 
 :::note
 
-This article assumes familiarity with [resources](/guides/build/external-resources/), [code locations and definitions](/guides/deploy/code-locations/), and [schedule testing](testing-schedules).
+この記事では、[リソース](/guides/build/external-resources/)、[コードの場所と定義](/guides/deploy/code-locations/)、[テストのスケジュール](testing-schedules)に関する知識があることを前提としています。
 
-All Dagster definitions, including schedules and resources, must be attached to a <PyObject section="definitions" module="dagster" object="Definitions" /> call.
+スケジュールやリソースを含むすべての Dagster 定義は、<PyObject section="definitions" module="dagster" object="Definitions" /> 呼び出しに添付する必要があります。
 
 :::
 
 {/* TODO add dedent=4 prop to CodeExample below when implemented */}
 <CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_on_schedule" endBefore="end_new_resource_on_schedule" />
 
-## APIs in this guide
+## このガイドのAPI
 
-| Name | Description |
+| 名前 | 説明 |
 |------|-------------|
-| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> | Decorator that defines a schedule that executes according to a given cron schedule. |
+| <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> | 指定された cron スケジュールに従って実行されるスケジュールを定義するデコレータ。 |
 | <PyObject section="resources" module="dagster" object="ConfigurableResource" /> | |
-| <PyObject section="jobs" module="dagster" object="job" decorator /> | The decorator used to define a job. |
-| <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />                          | A class that represents all the information required to launch a single run. |
+| <PyObject section="jobs" module="dagster" object="job" decorator /> | ジョブを定義するために使用されるデコレータ。 |
+| <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />                          | 1 回の実行を開始するために必要なすべての情報を表すクラス。 |
 | <PyObject section="config" module="dagster" object="RunConfig" /> | |
 | <PyObject section="definitions" module="dagster" object="Definitions" /> | |

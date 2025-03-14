@@ -1,43 +1,44 @@
 ---
-title: Declarative Automation
+title: 宣言型オートメーション
 sidebar_position: 20
 ---
 
-Declarative Automation is a framework that allows you to access information about events that impact the status of your assets, and the dependencies between them, in order to:
+宣言型オートメーションは、アセットの状態やアセット間の依存関係に影響を与えるイベントに関する情報にアクセスして、次のことを可能にするフレームワークです:
 
-- Ensure you're working with the most up-to-date data.
-- Optimize resource usage by only materializing assets or executing checks when needed.
-- Precisely define when specific assets should be updated based on the state of other assets.
+- 最新のデータを使用して作業していることを確認します。
+- 必要な場合にのみアセットを実体化したりチェックを実行したりすることで、リソースの使用を最適化します。
+- 他のアセットの状態に基づいて、特定のアセットをいつ更新するかを正確に定義します。
 
-Declarative Automation has two components:
+宣言型オートメーションには 2 つのコンポーネントがあります:
 
-- An **[automation condition](#automation-conditions)**, set on an asset or asset check, which represents when an individual asset or check should be executed.
-- An **[automation condition sensor](#automation-condition-sensors)**, which evaluates automation conditions and launches runs in response to their statuses.
+- アセットまたはアセット チェックに設定される **[自動化条件](#automation-conditions)** は、個々のアセットまたはチェックをいつ実行する必要があるかを表します。
+- **[自動化条件センサー](#automation-condition-sensors)** は、自動化条件を評価し、そのステータスに応じて実行を開始します。
 
-## Using Declarative Automation
+## 宣言型オートメーションの使用
 
-To use Declarative Automation, you must:
-* [Set automation conditions on assets or asset checks in your code](#setting-automation-conditions-on-assets-and-asset-checks).
-* Enable the automation condition sensor in the Dagster UI:
-    1. Navigate to **Automation**.
-    2. Locate the desired code location.
-    3. Toggle on the **default_automation_condition_sensor** sensor.
+宣言型オートメーションを使用するには、次のことが必要です:
 
-## Automation conditions
+* [コード内のアセットまたはアセットチェックに自動化条件を設定する](#setting-automation-conditions-on-assets-and-asset-checks).
+* Dagster UI で自動化状態センサーを有効にします:
+    1. **Automation** に移動します。
+    2. 目的のコードの場所を見つけます。
+    3. **default_automation_condition_sensor** センサーをオンに切り替えます。
 
-An <PyObject section="assets" module="dagster" object="AutomationCondition" /> on an asset or asset check describe the conditions under which work should be executed.
+## 自動化条件
 
-Dagster provides a few pre-built automation conditions to handle common use cases:
+アセットまたはアセット チェックの <PyObject section="assets" module="dagster" object="AutomationCondition" /> は、作業を実行する条件を記述します。
 
-| Name | Condition | Useful for |
+Dagster は、一般的なユースケースを処理するために、いくつかの事前構築された自動化条件を提供します:
+
+| 名前 | 条件 | 有用なケース |
 |------|-----------|------------|
-| `AutomationCondition.on_cron(cron_schedule)` | This condition will materialize an asset on a provided `cron_schedule`, after all of its dependencies have been updated. | Regularly updating an asset without worrying about the specifics of how its dependencies update. |
-| `AutomationCondition.on_missing()` | This condition will materialize an asset if all its dependencies have been updated, but the asset itself has not. | Filling in partitioned assets as soon as upstream data is available. |
-| `AutomationCondition.eager()` | This condition will materialize an asset: <ul><li>If the asset has never been materialized before, or</li><li>When the asset's dependencies update, as long as none of the dependencies are currently missing or have an update in progress.</li></ul> | Automatically propagating changes through the asset graph.<br /><br />Ensuring assets remain up to date.|
+| `AutomationCondition.on_cron(cron_schedule)` | この条件は、すべての依存関係が更新された後、指定された `cron_schedule` でアセットを実現します。| 依存関係の更新方法の詳細を気にせずに、アセットを定期的に更新します。 |
+| `AutomationCondition.on_missing()` | この条件では、すべての依存関係が更新されているが、アセット自体は更新されていない場合にアセットが実体化されます。 | 上流データが利用可能になるとすぐに、パーティション化されたアセットを入力します。 |
+| `AutomationCondition.eager()` | この条件では、アセットがマテリアライズされます: <ul><li>アセットがこれまでにマテリアライズされたことがない場合、または</li><li>アセットの依存関係が更新されたとき (依存関係が現在欠落していないか、更新が進行中でない限り)。</li></ul> | アセット グラフを通じて変更を自動的に伝播します。<br /><br />アセットが最新の状態に保たれるようにします。|
 
-### Setting automation conditions on assets and asset checks
+### アセットとアセットチェックの自動化条件の設定
 
-You can set automation conditions on the <PyObject section="assets" module="dagster" object="asset" decorator /> decorator or on an <PyObject section="assets" module="dagster" object="AssetSpec" /> object:
+<PyObject section="assets" module="dagster" object="asset" decorator /> デコレータまたは <PyObject section="assets" module="dagster" object="AssetSpec" /> オブジェクトに自動化条件を設定できます:
 
 ```python
 import dagster as dg
@@ -48,7 +49,7 @@ def my_eager_asset(): ...
 AssetSpec("my_cron_asset", automation_condition=AutomationCondition.on_cron("@daily"))
 ```
 
-You can also set automation conditions on the <PyObject section="asset-checks" module="dagster" object="asset_check" decorator /> decorator or on an <PyObject section="asset-checks" module="dagster" object="AssetCheckSpec" /> object:
+<PyObject section="asset-checks" module="dagster" object="asset_check" decorator /> デコレータまたは <PyObject section="asset-checks" module="dagster" object="AssetCheckSpec" /> オブジェクトに自動化条件を設定することもできます:
 
 ```python
 @dg.asset_check(asset=dg.AssetKey("orders"), automation_condition=dg.AutomationCondition.on_cron("@daily"))
@@ -63,20 +64,20 @@ dg.AssetCheckSpec(
 )
 ```
 
-### Customizing automation conditions
+### 自動化条件のカスタマイズ
 
-If the [pre-built automation conditions](#automation-conditions) don't fit your needs, you can build your own. For more information, see "[Customizing automation conditions](customizing-automation-conditions/)".
+[あらかじめ構築された自動化条件](#automation-conditions)がニーズに合わない場合は、独自の条件を構築できます。詳細については、「[自動化条件のカスタマイズ](customizing-automation-conditions/)」を参照してください。
 
-## Automation condition sensors
+## 自動化状態センサー
 
-The **default_automation_conditition_sensor** monitors all assets and asset checks in a code location in which it is [enabled](#using-declarative-automation). When automation conditions for an asset or asset check in that code location are met, the sensor will execute a run in response.
+**default_automation_conditition_sensor** は、それが [有効](#using-declarative-automation) になっているコードの場所にあるすべての資産と資産チェックを監視します。そのコードの場所にある資産または資産チェックの自動化条件が満たされると、センサーはそれに応じて実行を実行します。
 
-The sensor's evaluation history will be visible in the UI:
+センサーの評価履歴は UI に表示されます:
 
 ![Default automation sensor evaluations in the Dagster UI](/images/guides/automate/declarative-automation/default-automation-sensor.png)
 
-You can also view a detailed history of each asset's evaluations on the asset's Asset Details page. This allows you to see why an asset was or wasn't materialized at different points in time:
+また、各アセットの評価の詳細な履歴は、アセットの「Asset Details」ページで確認することもできます。これにより、さまざまな時点でアセットが実体化された、または実体化されなかった理由を確認できます。
 
 ![Automation condition evaluations in the Asset Details page](/images/guides/automate/declarative-automation/evaluations-asset-details.png)
 
-To use multiple sensors or change the properties of the default sensor, see the <PyObject section="assets" module="dagster" object="AutomationConditionSensorDefinition" /> API documentation.
+複数のセンサーを使用する場合、またはデフォルトのセンサーのプロパティを変更する場合は、<PyObject section="assets" module="dagster" object="AutomationConditionSensorDefinition" /> API ドキュメントを参照してください。

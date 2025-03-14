@@ -1,9 +1,9 @@
 ---
-title: Configuring job behavior based on scheduled run time
+title: スケジュールされた実行時間に基づいてジョブの動作を構成する
 sidebar_position: 200
 ---
 
-This example demonstrates how to use run config to vary the behavior of a job based on its scheduled run time.
+この例では、実行構成を使用して、スケジュールされた実行時間に基づいてジョブの動作を変更する方法を示します。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedules.py" startAfter="start_run_config_schedule" endBefore="end_run_config_schedule" />
 
