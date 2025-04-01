@@ -19,7 +19,13 @@ Dagster では、アセットを定義するのと同じように [アセット�
 
 `joined_data` アセットの下に次のコードをコピーします。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="134" lineEnd="150"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="134"
+  lineEnd="150"
+/>
+
 
 ## 2. アセットチェックを実行する
 
@@ -46,8 +52,8 @@ defs = dg.Definitions(
 3. "Checks" タブを選択します。
 4. `missing_dimension_check` の **Execute** ボタンをクリックします。
 
-  ![2048 resolution](/images/tutorial/etl-tutorial/asset-check.png)
+![2048 resolution](/images/tutorial/etl-tutorial/asset-check.png)
 
 ## 次は
 
-- このチュートリアルを続けて、[パーティション化されたアセットの作成と実体化](create-and-materialize-partitioned-asset) に進みます。
+- このチュートリアルを続けて、[パーティション化されたアセットの作成と実体化](/etl-pipeline-tutorial/create-and-materialize-partitioned-asset) に進みます。

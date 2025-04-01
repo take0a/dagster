@@ -19,25 +19,30 @@ DuckDB に生のデータが読み込まれたので、上流のアセットを�
 
 ご覧のとおり、新しい `joined_data` アセットは、いくつかの小さな変更を除いて、以前のものとよく似ています。このアセットを別のグループに配置します。このアセットを生のテーブルに依存させるには、アセット定義の `deps` パラメータにアセット キーを追加します。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="89" lineEnd="132"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="89"
+  lineEnd="132"
+/>
 
 ## 2. そのアセットを実体化する
 
 1. joined_data アセットを定義オブジェクトに追加する
 
-  ```python
-  defs = dg.Definitions(
-    assets=[products,
-        sales_reps,
-        sales_data,
-        joined_data,
-    ],
-    resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
-  )
-  ```
+```python
+defs = dg.Definitions(
+  assets=[products,
+      sales_reps,
+      sales_data,
+      joined_data,
+  ],
+  resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
+)
+```
 
 2. Dagster UI で定義を再読み込みし、`joined_data` アセットを実体化します。
 
 ## 次は
 
-- このチュートリアルを続けて、[アセット チェックによるデータ品質の確保](ensure-data-quality-with-asset-checks) に進みます。
+- このチュートリアルを続けて、[アセット チェックによるデータ品質の確保](/etl-pipeline-tutorial/ensure-data-quality-with-asset-checks) に進みます。

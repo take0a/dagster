@@ -19,7 +19,12 @@ sidebar_position: 50
 
 `product performance` アセットの下に次のコードをコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="268" lineEnd="273"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="268"
+  lineEnd="273"
+/>
 
 ## 2. アセットの実体化を自動化する
 
@@ -27,11 +32,21 @@ sidebar_position: 50
 
 `monthly_sales_performance` については、すべての依存関係が更新されたときに更新されるようにします。これを実現するには、`eager` 自動化条件を使用します。`monthly_sales_performance` アセットを更新して、自動化条件をデコレータに追加します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="155" lineEnd="209"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="155"
+  lineEnd="209"
+/>
 
 `product_performance` に対しても同じことを行います:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="216" lineEnd="267"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="216"
+  lineEnd="267"
+/>
 
 ## 3. 自動化を有効にしてテストする
 
@@ -39,20 +54,20 @@ sidebar_position: 50
 
 定義オブジェクトは次のようになります:
 
-  ```python
-  defs = dg.Definitions(
-      assets=[products,
-          sales_reps,
-          sales_data,
-          joined_data,
-          monthly_sales_performance,
-          product_performance,
-      ],
-      asset_checks=[missing_dimension_check],
-      schedules=[weekly_update_schedule],
-      resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
-  )
-  ```
+```python
+defs = dg.Definitions(
+    assets=[products,
+        sales_reps,
+        sales_data,
+        joined_data,
+        monthly_sales_performance,
+        product_performance,
+    ],
+    asset_checks=[missing_dimension_check],
+    schedules=[weekly_update_schedule],
+    resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
+)
+```
 
 最後のステップは、UI で自動化を有効にすることです。
 
@@ -69,8 +84,8 @@ sidebar_position: 50
 
 さらに、Runs タブに移動すると、`monthly_sales_performance` と `product_performance` のマテリアライゼーションも実行されていることがわかります。
 
-   ![2048 resolution](/images/tutorial/etl-tutorial/automation-final.png)
+![2048 resolution](/images/tutorial/etl-tutorial/automation-final.png)
 
 ## 次は
 
-- このチュートリアルを続けて、[センサーベースのアセット](create-a-sensor-asset)を追加します。
+- このチュートリアルを続けて、[センサーベースのアセット](/etl-pipeline-tutorial/create-a-sensor-asset)を追加します。

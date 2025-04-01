@@ -20,30 +20,31 @@ Dagster では、 <PyObject section="definitions" module="dagster" object="Defin
 
 `etl_tutorial` ディレクトリの `definitions.py` ファイルを開き、次のコードをコピーします:
 
-  ```python
-  import json
-  import os
+```python
+import json
+import os
 
-  from dagster_duckdb import DuckDBResource
+from dagster_duckdb import DuckDBResource
 
-  import dagster as dg
+import dagster as dg
 
-  defs = dg.Definitions(
-    assets=[],
-    resources={},
-  )
-  ```
+defs = dg.Definitions(
+  assets=[],
+  resources={},
+)
+```
 
 ## 2. DuckDB リソースを定義する
 
 Dagster では、[リソース](/api/python-api/resources)は、ジョブを実行するために必要な外部サービス、ツール、およびストレージ バックエンドです。このプロジェクトのストレージ バックエンドには、アプリケーション内で実行される高速なインプロセス SQL データベースである [DuckDB](https://duckdb.org/) を使用します。これを定義オブジェクトで 1 回定義すると、必要なすべてのアセットとオブジェクトで使用できるようになります。
 
-  ```python
-  defs = dg.Definitions(
-      assets=[],
-      resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
-  )
-  ```
+
+```python
+defs = dg.Definitions(
+    assets=[],
+    resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
+)
+```
 
 ## 3. アセットを作成する
 
@@ -61,33 +62,48 @@ Dagster では、[リソース](/api/python-api/resources)は、ジョブを実�
 
 このアセットを作成するには、`definitions.py` ファイルを開き、次のコードをコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="8" lineEnd="33"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="8"
+  lineEnd="33"
+/>
 
 ### 営業担当者アセット
 
 営業担当者アセットのコードは、製品アセット コードと似ています。`definitions.py` ファイルで、製品アセット コードの下に次のコードをコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="35" lineEnd="61"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="35"
+  lineEnd="61"
+/>
 
 ### 販売データアセット
 
 販売データアセットを追加するには、次のコードを `definitions.py` ファイルの営業担当者アセットの下にコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="62" lineEnd="87"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="62"
+  lineEnd="87"
+/>
 
 ## 4. 定義オブジェクトにアセットを追加する
 
 次に、これらのアセットを Definitions オブジェクトに取り込みます。これらを Definitions オブジェクトに追加すると、Dagster プロジェクトで使用できるようになります。これらを、assets パラメータの空のリストに追加します。
 
-  ```python
-  defs = dg.Definitions(
-      assets=[products,
-          sales_reps,
-          sales_data,
-      ],
-      resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
-  )
-  ```
+```python
+defs = dg.Definitions(
+    assets=[products,
+        sales_reps,
+        sales_data,
+    ],
+    resources={"duckdb": DuckDBResource(database="data/mydb.duckdb")},
+)
+```
 
 ## 5. アセットを実体化する
 
@@ -107,4 +123,4 @@ Dagster では、[リソース](/api/python-api/resources)は、ジョブを実�
 
 ## 次は
 
-- [アセットの依存関係](create-and-materialize-a-downstream-asset)を使用してこのチュートリアルを続行します。
+- [アセットの依存関係](/etl-pipeline-tutorial/create-and-materialize-a-downstream-asset)を使用してこのチュートリアルを続行します。

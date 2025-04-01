@@ -42,25 +42,37 @@ dagster-etl-tutorial/
 
 アセットはプロジェクトの大部分を占めており、これが最大のファイルになります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/assets.py" language="python"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/assets.py"
+  language="python"
+/>
 
 ### Partitions
 
 パーティション ファイルには、`monthly_partition` と `product_category_partition` が含まれます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/partitions.py" language="python" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/partitions.py"
+  language="python"
+/>
 
 ### Schedules
 
 スケジュール ファイルには `weekly_update_schedule` のみが含まれます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/schedules.py" language="python" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/schedules.py"
+  language="python"
+/>
 
 ### Sensors
 
 センサー ファイルには、`adhoc_request` アセットのジョブとセンサーが含まれます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/sensors.py" language="python" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/sensors.py"
+  language="python"
+/>
 
 ## 定義オブジェクトのリファクタリング
 
@@ -73,7 +85,10 @@ Dagster プロジェクトはルート ディレクトリから実行される�
 
 プロジェクトをまとめるには、次のコードを `definitions.py` ファイルにコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/definitions.py" language="python" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial_completed/etl_tutorial/definitions.py"
+  language="python"
+/>
 
 ## 迅速な検証
 

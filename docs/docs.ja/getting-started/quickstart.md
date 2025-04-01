@@ -2,7 +2,7 @@
 title: 最初のDagsterプロジェクトを構築する
 description: Learn how to quickly get up and running with Dagster
 sidebar_position: 30
-sidebar_label: "Quickstart"
+sidebar_label: 'Quickstart'
 ---
 
 Dagster へようこそ! このガイドでは、Dagster を使用して、次の基本的なパイプラインを作成します:
@@ -26,6 +26,7 @@ Dagster へようこそ! このガイドでは、Dagster を使用して、次�
 
 - Pythonの基礎知識
 - システムに Python 3.9 以降がインストールされていること。詳細については、[インストール ガイド](/getting-started/installation)を参照してください。
+
 </details>
 
 ## Step 1: Dagster環境を設定する
@@ -40,18 +41,12 @@ Dagster へようこそ! このガイドでは、Dagster を使用して、次�
 2. 仮想環境を作成してアクティブ化します:
 
    <Tabs>
-   <TabItem value="macos" label="MacOS">
-   ```bash
-   python -m venv venv
-   source venv/bin/activate
-   ```
-   </TabItem>
-   <TabItem value="windows" label="Windows">
-   ```bash
-   python -m venv venv
-   source venv\Scripts\activate
-   ```
-   </TabItem>
+     <TabItem value="macos" label="MacOS">
+       ```bash python -m venv venv source venv/bin/activate ```
+     </TabItem>
+     <TabItem value="windows" label="Windows">
+       ```bash python -m venv venv source venv\Scripts\activate ```
+     </TabItem>
    </Tabs>
 
 3. Dagster と必要な依存関係をインストールします:
@@ -101,7 +96,7 @@ dagster-quickstart/
 
 次に、ETL パイプラインのアセットを作成します。`quickstart/assets.py` を開き、次のコードを追加します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/getting-started/quickstart.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/getting-started/quickstart.py" language="python" />
 
 タスクベースのオーケストレーションに慣れている場合、これは異常に思えるかもしれません。その場合、抽出、変換、読み込みの 3 つの個別のステップが必要になります。
 

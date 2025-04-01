@@ -17,18 +17,12 @@ Python をインストールした後は、仮想環境を設定することを�
 これを行う方法はたくさんありますが、このガイドでは追加の依存関係を必要としないため、`venv` を使用します。
 
 <Tabs>
-<TabItem value="macos" label="MacOS">
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-</TabItem>
-<TabItem value="windows" label="Windows">
-```bash
-python -m venv venv
-source venv\Scripts\activate
-```
-</TabItem>
+  <TabItem value="macos" label="MacOS">
+    ```bash python -m venv venv source venv/bin/activate ```
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+    ```bash python -m venv venv source venv\Scripts\activate ```
+  </TabItem>
 </Tabs>
 
 :::tip

@@ -1,5 +1,5 @@
 ---
-title: "コンセプト"
+title: 'コンセプト'
 sidebar_position: 200
 ---
 

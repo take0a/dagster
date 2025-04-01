@@ -27,7 +27,12 @@ sidebar_position: 60
 
 それ以外は、このアセットの定義は以前のアセットと同じです。次のコードを `product_performance` の下にコピーします。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="275" lineEnd="312"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="275"
+  lineEnd="312"
+/>
 
 ## 2. センサーを構築する
 
@@ -38,13 +43,23 @@ Dagster でセンサーを定義するには、`@sensor` デコレータを使�
 - **Job**: 条件が満たされたときにセンサーがトリガーするジョブ。
 - **RunRequest**: ジョブ実行の構成を指定するオブジェクト。これには、冪等性を保証する `run_key` と、ジョブ固有の設定用の `run_config` が含まれます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="314" lineEnd="355"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="314"
+  lineEnd="355"
+/>
 
 ## 3. センサーアセットの実体化
 
 1. 定義オブジェクトを次のように更新します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="357" lineEnd="373"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="357"
+  lineEnd="373"
+/>
 
 2. 定義を再読み込みします。
 
@@ -67,4 +82,4 @@ Dagster でセンサーを定義するには、`@sensor` デコレータを使�
 
 これでプロジェクトが完成したので、次のステップでは、必要に応じて追加できるように、プロジェクトをより管理しやすい構造にリファクタリングします。
 
-[プロジェクトをリファクタリング](refactor-your-project)してチュートリアルを終了します。
+[プロジェクトをリファクタリング](/etl-pipeline-tutorial/refactor-your-project)してチュートリアルを終了します。

@@ -23,64 +23,69 @@ sidebar_position: 40
 
 Dagster は、日時グループによるアセットのパーティション分割をネイティブにサポートしています。各営業担当者の月間パフォーマンスを計算するアセットを作成したいと考えています。月間パーティションを作成するには、次のコードを `missing_dimension_check` アセット チェックの下にコピーします。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="152" lineEnd="153"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="152"
+  lineEnd="153"
+/>
 
 パーティション データは、コンテキストによってアセット内でアクセスされます。パーティションから特定の月に対してこの計算を実行し、その月の以前の値を削除するアセットを作成します。作成したばかりの `monthly_partition` の下に次のアセットをコピーします。
 
-  ```python
-  @dg.asset(
-      partitions_def=monthly_partition,
-      compute_kind="duckdb",
-      group_name="analysis",
-      deps=[joined_data],
-  )
-  def monthly_sales_performance(
-      context: dg.AssetExecutionContext, duckdb: DuckDBResource
-  ):
-      partition_date_str = context.partition_key
-      month_to_fetch = partition_date_str[:-3]
+```python
+@dg.asset(
+    partitions_def=monthly_partition,
+    compute_kind="duckdb",
+    group_name="analysis",
+    deps=[joined_data],
+)
+def monthly_sales_performance(
+    context: dg.AssetExecutionContext, duckdb: DuckDBResource
+):
+    partition_date_str = context.partition_key
+    month_to_fetch = partition_date_str[:-3]
 
-      with duckdb.get_connection() as conn:
-          conn.execute(
-              f"""
-              create table if not exists monthly_sales_performance (
-                  partition_date varchar,
-                  rep_name varchar,
-                  product varchar,
-                  total_dollar_amount double
-              );
+    with duckdb.get_connection() as conn:
+        conn.execute(
+            f"""
+            create table if not exists monthly_sales_performance (
+                partition_date varchar,
+                rep_name varchar,
+                product varchar,
+                total_dollar_amount double
+            );
 
-              delete from monthly_sales_performance where partition_date = '{month_to_fetch}';
+            delete from monthly_sales_performance where partition_date = '{month_to_fetch}';
 
-              insert into monthly_sales_performance
-              select
-                  '{month_to_fetch}' as partition_date,
-                  rep_name, 
-                  product_name,
-                  sum(dollar_amount) as total_dollar_amount
-              from joined_data where strftime(date, '%Y-%m') = '{month_to_fetch}'
-              group by '{month_to_fetch}', rep_name, product_name;
-              """
-          )
+            insert into monthly_sales_performance
+            select
+                '{month_to_fetch}' as partition_date,
+                rep_name,
+                product_name,
+                sum(dollar_amount) as total_dollar_amount
+            from joined_data where strftime(date, '%Y-%m') = '{month_to_fetch}'
+            group by '{month_to_fetch}', rep_name, product_name;
+            """
+        )
 
-          preview_query = f"select * from monthly_sales_performance where partition_date = '{month_to_fetch}';"
-          preview_df = conn.execute(preview_query).fetchdf()
-          row_count = conn.execute(
-              f"""
-              select count(*)
-              from monthly_sales_performance
-              where partition_date = '{month_to_fetch}'
-              """
-          ).fetchone()
-          count = row_count[0] if row_count else 0
+        preview_query = f"select * from monthly_sales_performance where partition_date = '{month_to_fetch}';"
+        preview_df = conn.execute(preview_query).fetchdf()
+        row_count = conn.execute(
+            f"""
+            select count(*)
+            from monthly_sales_performance
+            where partition_date = '{month_to_fetch}'
+            """
+        ).fetchone()
+        count = row_count[0] if row_count else 0
 
-      return dg.MaterializeResult(
-          metadata={
-              "row_count": dg.MetadataValue.int(count),
-              "preview": dg.MetadataValue.md(preview_df.to_markdown(index=False)),
-          }
-      )
-  ```
+    return dg.MaterializeResult(
+        metadata={
+            "row_count": dg.MetadataValue.int(count),
+            "preview": dg.MetadataValue.md(preview_df.to_markdown(index=False)),
+        }
+    )
+```
 
 ## 2. カテゴリベースの分割アセットを作成する
 
@@ -88,7 +93,12 @@ Dagster は、日時グループによるアセットのパーティション分
 
 1. 製品カテゴリの静的に定義されたパーティションを作成するには、次のコードを `monthly_sales_performance` アセットの下にコピーします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py" language="python" lineStart="211" lineEnd="214"/>
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/tutorials/etl_tutorial/etl_tutorial/definitions.py"
+  language="python"
+  lineStart="211"
+  lineEnd="214"
+/>
 
 2. パーティションが定義されたので、製品カテゴリのパフォーマンスを計算するアセットでそれを使用できます:
 
@@ -175,4 +185,4 @@ defs = dg.Definitions(
 
 ## 次は
 
-ETL パイプラインに主要なアセットが揃ったので、[パイプラインに自動化](automate-your-pipeline)を追加します。
+ETL パイプラインに主要なアセットが揃ったので、[パイプラインに自動化](/etl-pipeline-tutorial/automate-your-pipeline)を追加します。

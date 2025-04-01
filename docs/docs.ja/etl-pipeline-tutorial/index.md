@@ -35,6 +35,7 @@ sidebar_class_name: hidden
 - システムに Python 3.9 以降がインストールされていること。詳細については、[インストール ガイド](/getting-started/installation)を参照してください。
 - SQL および Pandas などの Python データ操作ライブラリに精通していること。
 - データ パイプラインと抽出、変換、ロード プロセスに関する理解。
+
 </details>
 
 
@@ -52,18 +53,12 @@ sidebar_class_name: hidden
 2. 仮想環境を作成してアクティブ化します:
 
    <Tabs>
-   <TabItem value="macos" label="MacOS">
-   ```bash
-   python -m venv dagster_tutorial
-   source dagster_tutorial/bin/activate
-   ```
-   </TabItem>
-   <TabItem value="windows" label="Windows">
-   ```bash
-   python -m venv dagster_tutorial
-   dagster_tutorial\Scripts\activate
-   ```
-   </TabItem>
+     <TabItem value="macos" label="MacOS">
+       ```bash python -m venv dagster_tutorial source dagster_tutorial/bin/activate ```
+     </TabItem>
+     <TabItem value="windows" label="Windows">
+       ```bash python -m venv dagster_tutorial dagster_tutorial\Scripts\activate ```
+     </TabItem>
    </Tabs>
 
 3. Dagster と必要な依存関係をインストールします:
@@ -76,13 +71,15 @@ sidebar_class_name: hidden
 
 次のコマンドを実行して、このチュートリアルのプロジェクトディレクトリとファイルを作成します:
 
-   ```bash 
-      dagster project from-example --example getting_started_etl_tutorial
-   ```
+```bash
+dagster project from-example --example getting_started_etl_tutorial
+```
+
 
 プロジェクトはこのような構造にする必要があります:
 
 {/* vale off */}
+
 ```
 dagster-etl-tutorial/
 ├── data/
@@ -97,6 +94,7 @@ dagster-etl-tutorial/
 ├── setup.cfg
 ├── setup.py
 ```
+
 {/* vale on */}
 
 :::info
@@ -131,10 +129,10 @@ Dagster には、ユースケースに応じてインストールできるサン
 
 Dagsterとその依存関係が正しくインストールされていることを確認するには、プロジェクトのルートディレクトリに移動し、Dagsterウェブサーバーを起動します:
 
-   ```bash
-   dagster dev
-   ```
+```bash
+dagster dev
+```
 
 ## 次は
 
-- このチュートリアルを続けるには、[アセットの作成と実体化](create-and-materialize-assets)へ進んでください。
+- このチュートリアルを続けるには、[アセットの作成と実体化](/etl-pipeline-tutorial/create-and-materialize-assets)へ進んでください。
