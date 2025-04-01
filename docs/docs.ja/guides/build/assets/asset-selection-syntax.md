@@ -1,3 +1,4 @@
+<!-- このファイルは再構成されたので、同期が完了したら廃棄する
 ---
 title: 'アセット選択構文'
 sidebar_position: 1000
@@ -348,4 +349,4 @@ taxi_zones_file++
 ![Screenshot of Daggy U project graph](/images/guides/build/assets/asset-selection-syntax/select-two-downstream-layers.png)
 
 </TabItem>
-</Tabs>
+</Tabs> -->
