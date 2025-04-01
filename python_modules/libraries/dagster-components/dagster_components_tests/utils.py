@@ -1,4 +1,5 @@
 import contextlib
+import random
 import shutil
 import tempfile
 import textwrap
@@ -8,38 +9,55 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import TracebackType
-from typing import AbstractSet, Any, Iterable, Optional, TypeVar  # noqa: UP035
+from typing import Any, Iterable, Optional, TypeVar, Union  # noqa: UP035
 
 import tomlkit
 from click.testing import Result
-from dagster import AssetKey, DagsterInstance
-from dagster._utils import pushd
-from dagster_components.core.component import Component, ComponentDeclNode, ComponentLoadContext
+from dagster import Definitions
+from dagster._utils import alter_sys_path, pushd
+from dagster._utils.pydantic_yaml import enrich_validation_errors_with_source_position
+from dagster_components import Component, ComponentLoadContext
 from dagster_components.utils import ensure_loadable_path
+from dagster_shared import check
+from dagster_shared.yaml_utils import parse_yaml_with_source_positions
+from pydantic import TypeAdapter
 
 T = TypeVar("T")
+T_Component = TypeVar("T_Component", bound=Component)
 
 
-def script_load_context(decl_node: Optional[ComponentDeclNode] = None) -> ComponentLoadContext:
-    return ComponentLoadContext.for_test(decl_node=decl_node)
-
-
-def get_asset_keys(component: Component) -> AbstractSet[AssetKey]:
-    return {
-        key
-        for key in component.build_defs(ComponentLoadContext.for_test())
-        .get_asset_graph()
-        .get_all_asset_keys()
-    }
-
-
-def assert_assets(component: Component, expected_assets: int) -> None:
-    defs = component.build_defs(ComponentLoadContext.for_test())
-    assert len(defs.get_asset_graph().get_all_asset_keys()) == expected_assets
-    result = defs.get_implicit_global_asset_job_def().execute_in_process(
-        instance=DagsterInstance.ephemeral()
+def load_context_and_component_for_test(
+    component_type: type[T_Component], attrs: Union[str, dict[str, Any]]
+) -> tuple[ComponentLoadContext, T_Component]:
+    context = ComponentLoadContext.for_test()
+    context = context.with_rendering_scope(component_type.get_additional_scope())
+    schema = check.not_none(
+        component_type.get_schema(), "Component must have schema for direct test"
     )
-    assert result.success
+    if isinstance(attrs, str):
+        source_positions = parse_yaml_with_source_positions(attrs)
+        with enrich_validation_errors_with_source_position(
+            source_positions.source_position_tree, []
+        ):
+            attributes = TypeAdapter(schema).validate_python(source_positions.value)
+    else:
+        attributes = TypeAdapter(schema).validate_python(attrs)
+    component = component_type.load(attributes, context)
+    return context, component
+
+
+def load_component_for_test(
+    component_type: type[T_Component], attrs: Union[str, dict[str, Any]]
+) -> T_Component:
+    _, component = load_context_and_component_for_test(component_type, attrs)
+    return component
+
+
+def build_component_defs_for_test(
+    component_type: type[Component], attrs: dict[str, Any]
+) -> Definitions:
+    context, component = load_context_and_component_for_test(component_type, attrs)
+    return component.build_defs(context)
 
 
 def generate_component_lib_pyproject_toml(name: str, is_project: bool = False) -> str:
@@ -57,7 +75,7 @@ def generate_component_lib_pyproject_toml(name: str, is_project: bool = False) -
         ]
 
         [project.entry-points]
-        "dagster.components" = {{ {pkg_name} = "{pkg_name}.lib" }}
+        "dagster_dg.library" = {{ {pkg_name} = "{pkg_name}.lib" }}
     """)
     if is_project:
         return base + textwrap.dedent("""
@@ -89,7 +107,7 @@ def temp_code_location_bar() -> Iterator[None]:
 def _setup_component_in_folder(
     src_path: str, dst_path: str, local_component_defn_to_inject: Optional[Path]
 ) -> None:
-    origin_path = Path(__file__).parent / "integration_tests" / "components" / src_path
+    origin_path = Path(__file__).parent / "integration_tests" / "integration_test_defs" / src_path
 
     shutil.copytree(origin_path, dst_path, dirs_exist_ok=True)
     if local_component_defn_to_inject:
@@ -108,30 +126,47 @@ def inject_component(
 @contextlib.contextmanager
 def create_project_from_components(
     *src_paths: str, local_component_defn_to_inject: Optional[Path] = None
-) -> Iterator[Path]:
+) -> Iterator[tuple[Path, str]]:
     """Scaffolds a project with the given components in a temporary directory,
     injecting the provided local component defn into each component's __init__.py.
     """
-    with tempfile.TemporaryDirectory() as tmpdir:
-        project_root = Path(tmpdir) / "my_location"
+    location_name = f"my_location_{str(random.random()).replace('.', '')}"
+
+    # Using mkdtemp instead of TemporaryDirectory so that the directory is accessible
+    # from launched procsses (such as duckdb)
+    tmpdir = tempfile.mkdtemp()
+    try:
+        project_root = Path(tmpdir) / location_name
         project_root.mkdir()
-        with open(project_root / "pyproject.toml", "w") as f:
-            f.write(generate_component_lib_pyproject_toml("my_location", is_project=True))
 
-        for src_path in src_paths:
-            component_name = src_path.split("/")[-1]
+        python_module_root = project_root / location_name
+        python_module_root.mkdir()
+        (python_module_root / "__init__.py").touch()
 
-            components_dir = project_root / "my_location" / "defs" / component_name
-            components_dir.mkdir(parents=True, exist_ok=True)
+        defs_dir = python_module_root / "defs"
+        defs_dir.mkdir()
+        (defs_dir / "__init__.py").touch()
 
-            _setup_component_in_folder(
-                src_path=src_path,
-                dst_path=str(components_dir),
-                local_component_defn_to_inject=local_component_defn_to_inject,
-            )
+        with alter_sys_path(to_add=[str(project_root)], to_remove=[]):
+            with open(project_root / "pyproject.toml", "w") as f:
+                f.write(generate_component_lib_pyproject_toml(location_name, is_project=True))
 
-        with ensure_loadable_path(project_root):
-            yield project_root
+            for src_path in src_paths:
+                component_name = src_path.split("/")[-1]
+
+                components_dir = defs_dir / component_name
+                components_dir.mkdir()
+
+                _setup_component_in_folder(
+                    src_path=src_path,
+                    dst_path=str(components_dir),
+                    local_component_defn_to_inject=local_component_defn_to_inject,
+                )
+
+            with ensure_loadable_path(project_root):
+                yield project_root, location_name
+    finally:
+        shutil.rmtree(tmpdir)
 
 
 # ########################

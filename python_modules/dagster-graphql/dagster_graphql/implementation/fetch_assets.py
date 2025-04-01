@@ -3,7 +3,7 @@ from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, AbstractSet, Optional, Union, cast  # noqa: UP035
 
-import dagster._seven as seven
+import dagster_shared.seven as seven
 from dagster import (
     AssetKey,
     DagsterEventType,
@@ -25,7 +25,7 @@ from dagster._core.definitions.time_window_partitions import (
     TimeWindowPartitionsSubset,
     fetch_flattened_time_window_ranges,
 )
-from dagster._core.event_api import AssetRecordsFilter
+from dagster._core.event_api import AssetRecordsFilter, EventLogRecord
 from dagster._core.events.log import EventLogEntry
 from dagster._core.instance import DynamicPartitionsStore
 from dagster._core.loader import LoadingContext
@@ -40,6 +40,7 @@ from dagster._core.storage.partition_status_cache import (
     get_validated_partition_keys,
     is_cacheable_partition_type,
 )
+from dagster._time import get_current_datetime
 
 from dagster_graphql.implementation.loader import StaleStatusLoader
 
@@ -251,7 +252,7 @@ def get_asset(
     return GrapheneAsset(key=asset_key, definition=def_node)
 
 
-def get_asset_materializations(
+def get_asset_materialization_event_records(
     graphene_info: "ResolveInfo",
     asset_key: AssetKey,
     partitions: Optional[Sequence[str]] = None,
@@ -259,7 +260,8 @@ def get_asset_materializations(
     before_timestamp: Optional[float] = None,
     after_timestamp: Optional[float] = None,
     storage_ids: Optional[Sequence[int]] = None,
-) -> Sequence[EventLogEntry]:
+    cursor: Optional[str] = None,
+) -> Sequence[EventLogRecord]:
     check.inst_param(asset_key, "asset_key", AssetKey)
     check.opt_int_param(limit, "limit")
     check.opt_float_param(before_timestamp, "before_timestamp")
@@ -274,7 +276,6 @@ def get_asset_materializations(
     )
     if limit is None:
         event_records = []
-        cursor = None
         while True:
             event_records_result = instance.fetch_materializations(
                 records_filter=records_filter,
@@ -287,10 +288,73 @@ def get_asset_materializations(
                 break
     else:
         event_records = instance.fetch_materializations(
-            records_filter=records_filter, limit=limit
+            records_filter=records_filter, limit=limit, cursor=cursor
         ).records
 
-    return [event_record.event_log_entry for event_record in event_records]
+    return event_records
+
+
+def get_asset_materializations(
+    graphene_info: "ResolveInfo",
+    asset_key: AssetKey,
+    partitions: Optional[Sequence[str]] = None,
+    limit: Optional[int] = None,
+    before_timestamp: Optional[float] = None,
+    after_timestamp: Optional[float] = None,
+    storage_ids: Optional[Sequence[int]] = None,
+) -> Sequence[EventLogEntry]:
+    return [
+        event_record.event_log_entry
+        for event_record in get_asset_materialization_event_records(
+            graphene_info,
+            asset_key,
+            partitions,
+            limit,
+            before_timestamp,
+            after_timestamp,
+            storage_ids,
+        )
+    ]
+
+
+def get_asset_failed_to_materialize_event_records(
+    graphene_info: "ResolveInfo",
+    asset_key: AssetKey,
+    partitions: Optional[Sequence[str]] = None,
+    limit: Optional[int] = None,
+    before_timestamp: Optional[float] = None,
+    after_timestamp: Optional[float] = None,
+    storage_ids: Optional[Sequence[int]] = None,
+    cursor: Optional[str] = None,
+) -> Sequence[EventLogRecord]:
+    check.inst_param(asset_key, "asset_key", AssetKey)
+    check.opt_int_param(limit, "limit")
+    check.opt_float_param(before_timestamp, "before_timestamp")
+
+    instance = graphene_info.context.instance
+    records_filter = AssetRecordsFilter(
+        asset_key=asset_key,
+        asset_partitions=partitions,
+        before_timestamp=before_timestamp,
+        after_timestamp=after_timestamp,
+        storage_ids=storage_ids,
+    )
+    if limit is None:
+        event_records = []
+        while True:
+            event_records_result = instance.fetch_failed_materializations(
+                records_filter=records_filter, limit=get_max_event_records_limit(), cursor=cursor
+            )
+            cursor = event_records_result.cursor
+            event_records.extend(event_records_result.records)
+            if not event_records_result.has_more:
+                break
+    else:
+        event_records = instance.fetch_failed_materializations(
+            records_filter=records_filter, limit=limit, cursor=cursor
+        ).records
+
+    return event_records
 
 
 def get_asset_observations(
@@ -569,6 +633,8 @@ def get_2d_run_length_encoded_partitions(
         GrapheneMultiPartitionStatuses,
     )
 
+    current_time = get_current_datetime()
+
     check.invariant(
         isinstance(partitions_def, MultiPartitionsDefinition),
         "Partitions definition should be multipartitioned",
@@ -613,7 +679,7 @@ def get_2d_run_length_encoded_partitions(
     materialized_2d_ranges = []
 
     dim1_keys = primary_dim.partitions_def.get_partition_keys(
-        dynamic_partitions_store=dynamic_partitions_store
+        current_time=current_time, dynamic_partitions_store=dynamic_partitions_store
     )
     unevaluated_idx = 0
     range_start_idx = 0  # pointer to first dim1 partition with same dim2 materialization status
@@ -622,7 +688,8 @@ def get_2d_run_length_encoded_partitions(
         len(dim1_keys) == 0
         or len(
             secondary_dim.partitions_def.get_partition_keys(
-                dynamic_partitions_store=dynamic_partitions_store
+                current_time=current_time,
+                dynamic_partitions_store=dynamic_partitions_store,
             )
         )
         == 0
@@ -654,7 +721,11 @@ def get_2d_run_length_encoded_partitions(
                 if isinstance(primary_partitions_def, TimeWindowPartitionsDefinition):
                     time_windows = cast(
                         TimeWindowPartitionsDefinition, primary_partitions_def
-                    ).time_windows_for_partition_keys(frozenset([start_key, end_key]))
+                    ).time_windows_for_partition_keys(
+                        frozenset([start_key, end_key]),
+                        current_time=current_time,
+                        validate=False,  # we already know these keys are in the partition set
+                    )
                     start_time = time_windows[0].start.timestamp()
                     end_time = time_windows[-1].end.timestamp()
                 else:

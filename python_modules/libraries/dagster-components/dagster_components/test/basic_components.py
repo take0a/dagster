@@ -1,16 +1,15 @@
 """Sample local components for testing validation. Paired with test cases
-in integration_tests/components/validation.
+in integration_tests/integration_test_defs/validation.
 """
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from typing import Annotated, Any
 
 from dagster._core.definitions.definitions_class import Definitions
 from pydantic import BaseModel, ConfigDict
 
-from dagster_components import Component, ResolvableModel, ResolvedFrom
-from dagster_components.core.component import ComponentLoadContext
+from dagster_components import Component, ComponentLoadContext, Resolvable, Resolver
 
 
 def _inner_error():
@@ -21,15 +20,17 @@ def _error():
     _inner_error()
 
 
-class MyComponentModel(ResolvableModel):
-    a_string: str
-    an_int: int
+def _maybe_throw(ctx, throw):
+    if throw:
+        _error()
+    return throw
 
 
 @dataclass
-class MyComponent(Component, ResolvedFrom[MyComponentModel]):
+class MyComponent(Component, Resolvable):
     a_string: str
     an_int: int
+    throw: Annotated[bool, Resolver(_maybe_throw)] = False
 
     def build_defs(self, context: ComponentLoadContext) -> Definitions:
         return Definitions()

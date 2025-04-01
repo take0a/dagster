@@ -13,6 +13,11 @@ def sanitize_family(family):
     return re.sub(r"[^\w^\-]", "", family)[:255]
 
 
+def sanitize_tag(tag):
+    # https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-using-tags.html
+    return re.sub("[^A-Za-z0-9_]", "-", tag)[:255].strip("-")
+
+
 def _get_family_hash(name):
     m = hashlib.sha1()
     m.update(name.encode("utf-8"))
@@ -146,6 +151,12 @@ def is_transient_task_stopped_reason(stopped_reason: str) -> bool:
 
     if "CannotPullContainerError" in stopped_reason and (
         "invalid argument" in stopped_reason or "EOF" in stopped_reason
+    ):
+        return True
+
+    if (
+        "Unexpected EC2 error while attempting to Create Network Interface" in stopped_reason
+        and "AuthFailure" in stopped_reason
     ):
         return True
 

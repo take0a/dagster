@@ -1,5 +1,8 @@
 from abc import abstractmethod
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, AbstractSet, Any, Generic, Optional, Union  # noqa: UP035
+
+from dagster_shared.serdes import whitelist_for_serdes
 
 import dagster._check as check
 from dagster._annotations import public
@@ -13,7 +16,7 @@ from dagster._core.definitions.declarative_automation.automation_condition impor
 )
 from dagster._core.definitions.declarative_automation.automation_context import AutomationContext
 from dagster._record import copy, record
-from dagster._serdes.serdes import whitelist_for_serdes
+from dagster._utils.security import non_secure_md5_hash_str
 
 if TYPE_CHECKING:
     from dagster._core.definitions.asset_selection import AssetSelection
@@ -31,7 +34,7 @@ class EntityMatchesCondition(
     def name(self) -> str:
         return self.key.to_user_string()
 
-    async def evaluate(
+    async def evaluate(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, context: AutomationContext[T_EntityKey]
     ) -> AutomationResult[T_EntityKey]:
         # if the key we're mapping to is a child of the key we're mapping from and is not
@@ -48,7 +51,9 @@ class EntityMatchesCondition(
             self.key, direction=directions[0]
         )
         to_context = context.for_child_condition(
-            child_condition=self.operand, child_index=0, candidate_subset=to_candidate_subset
+            child_condition=self.operand,
+            child_indices=[0],
+            candidate_subset=to_candidate_subset,
         )
 
         to_result = await to_context.evaluate_async()
@@ -106,6 +111,17 @@ class DepsAutomationCondition(BuiltinAutomationCondition[T_EntityKey]):
     @property
     def requires_cursor(self) -> bool:
         return False
+
+    def get_node_unique_id(self, *, parent_unique_id: Optional[str], index: Optional[int]) -> str:
+        """Ignore allow_selection / ignore_selection for the cursor hash."""
+        parts = [str(parent_unique_id), str(index), self.base_name]
+        return non_secure_md5_hash_str("".join(parts).encode())
+
+    def get_backcompat_node_unique_ids(
+        self, *, parent_unique_id: Optional[str] = None, index: Optional[int] = None
+    ) -> Sequence[str]:
+        # backcompat for previous cursors where the allow/ignore selection influenced the hash
+        return [super().get_node_unique_id(parent_unique_id=parent_unique_id, index=index)]
 
     @public
     def allow(self, selection: "AssetSelection") -> "DepsAutomationCondition":
@@ -169,7 +185,7 @@ class AnyDepsCondition(DepsAutomationCondition[T_EntityKey]):
     def base_name(self) -> str:
         return "ANY_DEPS_MATCH"
 
-    async def evaluate(
+    async def evaluate(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, context: AutomationContext[T_EntityKey]
     ) -> AutomationResult[T_EntityKey]:
         dep_results = []
@@ -178,7 +194,10 @@ class AnyDepsCondition(DepsAutomationCondition[T_EntityKey]):
         for i, dep_key in enumerate(sorted(self._get_dep_keys(context.key, context.asset_graph))):
             dep_result = await context.for_child_condition(
                 child_condition=EntityMatchesCondition(key=dep_key, operand=self.operand),
-                child_index=i,
+                child_indices=[  # Prefer a non-indexed ID in case asset keys move around, but fall back to the indexed one for back-compat
+                    None,
+                    i,
+                ],
                 candidate_subset=context.candidate_subset,
             ).evaluate_async()
             dep_results.append(dep_result)
@@ -194,7 +213,7 @@ class AllDepsCondition(DepsAutomationCondition[T_EntityKey]):
     def base_name(self) -> str:
         return "ALL_DEPS_MATCH"
 
-    async def evaluate(
+    async def evaluate(  # pyright: ignore[reportIncompatibleMethodOverride]
         self, context: AutomationContext[T_EntityKey]
     ) -> AutomationResult[T_EntityKey]:
         dep_results = []
@@ -203,7 +222,10 @@ class AllDepsCondition(DepsAutomationCondition[T_EntityKey]):
         for i, dep_key in enumerate(sorted(self._get_dep_keys(context.key, context.asset_graph))):
             dep_result = await context.for_child_condition(
                 child_condition=EntityMatchesCondition(key=dep_key, operand=self.operand),
-                child_index=i,
+                child_indices=[  # Prefer a non-indexed ID in case asset keys move around, but fall back to the indexed one for back-compat
+                    None,
+                    i,
+                ],
                 candidate_subset=context.candidate_subset,
             ).evaluate_async()
             dep_results.append(dep_result)

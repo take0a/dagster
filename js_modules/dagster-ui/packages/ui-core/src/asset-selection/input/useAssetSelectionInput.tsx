@@ -5,8 +5,8 @@ import {useAssetSelectionState} from 'shared/asset-selection/useAssetSelectionSt
 import {FilterableAssetDefinition} from 'shared/assets/useAssetDefinitionFilterState.oss';
 
 import {featureEnabled} from '../../app/Flags';
+import {SyntaxError} from '../../selection/CustomErrorListener';
 import {useAssetSelectionFiltering} from '../useAssetSelectionFiltering';
-
 export const useAssetSelectionInput = <
   T extends {
     id: string;
@@ -16,9 +16,11 @@ export const useAssetSelectionInput = <
 >({
   assets,
   assetsLoading,
+  onErrorStateChange,
 }: {
   assets: T[];
   assetsLoading?: boolean;
+  onErrorStateChange?: (errors: SyntaxError[]) => void;
 }) => {
   const [assetSelection, setAssetSelection] = useAssetSelectionState();
 
@@ -44,9 +46,10 @@ export const useAssetSelectionInput = <
         value={assetSelection}
         onChange={setAssetSelection}
         assets={graphQueryItems}
+        onErrorStateChange={onErrorStateChange}
       />
     );
   }
 
-  return {filterInput, loading, filtered, assetSelection, setAssetSelection};
+  return {filterInput, loading, filtered: filtered as T[], assetSelection, setAssetSelection};
 };
