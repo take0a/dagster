@@ -17,7 +17,7 @@ Dagster プロジェクトの構築を開始する最も簡単な方法は、`da
 
 デフォルトのプロジェクトスケルトンを使用して新しいプロジェクトの土台を作ることも、公式の Dagster のサンプルの 1 つから開始することもできます。
 
-Dagster プロジェクトのデフォルトファイルの詳細については、[Dagster プロジェクトファイルのリファレンス](dagster-project-file-reference) を参照してください。
+Dagster プロジェクトのデフォルトファイルの詳細については、[Dagster プロジェクトファイルのリファレンス](/guides/build/projects/dagster-project-file-reference) を参照してください。
 
 <Tabs>
 <TabItem value="デフォルトのプロジェクトスケルトン">

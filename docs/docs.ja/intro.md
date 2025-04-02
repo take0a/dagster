@@ -6,17 +6,17 @@ displayed_sidebar: 'docs'
 hide_table_of_contents: true
 ---
 
-import { Card, CardGroup } from '@site/src/components/Cards';
+import {Card, CardGroup} from '@site/src/components/Cards';
 import ThemedImage from '@theme/ThemedImage';
 
 # Dagster へようこそ
 
 Dagster は、統合された系統、可観測性、宣言型プログラミング モデル、クラス最高のテスト可能性を備えた、データ エンジニア向けに構築されたデータ オーケストレーターです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/getting-started/hello-world.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/getting-started/hello-world.py" language="python" />
 <ThemedImage
   alt="Docusaurus themed image"
-  style={{width:'100%', height: 'auto'}}
+  style={{width: '100%', height: 'auto'}}
   sources={{
     light: './img/getting-started/lineage-light.jpg',
     dark: './img/getting-started/lineage-dark.jpg',

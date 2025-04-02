@@ -1,8 +1,9 @@
 ---
 title: "アセットのバージョン管理とキャッシュ"
+sidebar_position: 1300
 ---
 
-import Beta from '../../../partials/\_Beta.md';
+import Beta from '@site/docs/partials/\_Beta.md';
 
 <Beta />
 
@@ -44,7 +45,7 @@ dagster dev
 
 **Asset catalog** に移動し、**Materialize** をクリックしてアセットをマテリアライズします。
 
-次に、マテリアライゼーションのエントリを確認します。マテリアライゼーションの詳細の **システム タグ** セクションにある 2 つのハッシュ (`code_version` と `data_version`) に注意してください:
+次に、Asset Catalog の "Events" タブにあるマテリアライゼーションのエントリを確認します。マテリアライゼーションの詳細の **システム タグ** セクションにある 2 つのハッシュ (`code_version` と `data_version`) に注意してください:
 
 ![Simple asset data version](/images/guides/build/assets/asset-versioning-and-caching/simple-asset-in-catalog.png)
 
@@ -72,7 +73,15 @@ dagster dev
 
 アセットには、最後にマテリアライズされてからコード バージョンが変更されたことを示すラベルが付きました。これは、アセット グラフとサイドバーの両方で確認できます。サイドバーでは、選択したノードの最後のマテリアライズに関する詳細が表示されます。`versioned_number` の最後のマテリアライズに関連付けられたコード バージョンは `v1` ですが、現在のコード バージョンは `v2` であることがわかります。これは、インジケーター タグの `(i)` アイコンにマウスを移動したときに表示されるツールヒントでも説明されています。
 
-`versioned_number` アセットを最新の状態にするには、再度マテリアライズする必要があります。**Materialize** ボタンの右側にあるトグルをクリックして、**Propagate changes** オプションを表示します。これをクリックすると、`versioned_number` をマテリアライズして、変更されたコード バージョンが伝播されます。これにより、サイドバーに表示されている最新のマテリアライズ `code_version` が `v2` に更新され、アセットが最新の状態になります。
+:::note
+The "Unsynced" label can appear for three reasons:
+
+- The code version of the asset is changed.
+- The dependencies of the asset have changed (a dependency was added or removed).
+- The data version of a parent asset has changed due to a new materialization. Note that if you are not using code versions, all new materialization of a dependency will change the data version. The UI will in this case report a "new materialization" rather than a "new data version".
+:::
+
+`versioned_number` アセットを最新の状態にするには、再度マテリアライズする必要があります。**Materialize** ボタンの右側にあるトグルをクリックして、**Materialize unsynced** オプションを表示します。これをクリックすると、`versioned_number` をマテリアライズして、変更されたコード バージョンが伝播されます。これにより、サイドバーに表示されている最新のマテリアライズ `code_version` が `v2` に更新され、アセットが最新の状態になります。
 
 ## Step two: 依存関係のあるデータバージョン
 
@@ -82,21 +91,19 @@ dagster dev
 
 Dagster UI で、**Reload definitions** をクリックします。`multiplied_number` アセットは、**Never materialized** としてマークされます。
 
-次に、**Materialize** ボタンの右側にあるトグルをクリックして、**Propagate changes** オプションを表示します。**Materialize** ボタンはバージョン管理を無視するため、`multiplied_number` アセットが適切にマテリアライズされるようにするにはこのオプションが必要です。
+Once again, click the toggle to the right side of the **Materialize** button to display the **Materialize unsynced** option. This will also provide the option to materialize "Never materialized" assets. This time, you will not see `versioned_number` as an option, because the system knows that `versioned_number` is up to date. Confirm the materialization of `multiplied_number`.
 
-作成された実行では、`multiplied_number` に関連付けられたステップのみが実行されます。システムは `versioned_number` が最新であることを認識しているため、その計算を安全にスキップできます。これは実行の詳細ページで確認できます:
-
-![Materialize stale event log](/images/guides/build/assets/asset-versioning-and-caching/materialize-stale-event-log.png)
+![Run event log](/images/guides/build/assets/asset-versioning-and-caching/materialize-stale-event-log.png)
 
 それでは、`versioned_number` アセットを更新しましょう。具体的には、戻り値とコード バージョンを変更します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/asset_versioning_and_caching/dependencies_code_version_only_v2.py" />
 
-以前と同様に、これにより `versioned_number` は、最新のマテリアライズ以降にコード バージョンが変更されたことを示すラベルを取得します。ただし、`multiplied_number` は `versioned_number` に依存しているため、これも再計算する必要があり、アップストリーム アセットのコード バージョンが変更されたことを示すラベルを取得します。`multiplied_number` の **Upstream code version** タグにマウス カーソルを合わせると、コード バージョンが変更されたアップストリーム アセットが表示されます:
+以前と同様に、これにより `versioned_number` は、最新のマテリアライズ以降にコード バージョンが変更されたことを示すラベルを取得します。 You might think that, since `multiplied_number` depends on `versioned_number`, it would also appear to be "Unsynced". However, "Unsynced" status is _not_ transitive in Dagster. `multiplied_number` will only appear to be "Unsynced" if its last materialization is against an outdated version of `versioned_number`. Materialize `versioned_number` and you will see that `multiplied_number` then becomes "Unsynced", with a reported reason of "Upstream data version change".
 
 ![Dependencies code version only](/images/guides/build/assets/asset-versioning-and-caching/dependencies-code-version-only.png)
 
-両方のアセットを最新の状態にするには、**Propagate changes** をクリックします。
+両方のアセットを最新の状態にするには、`multiplied_number` を実体化します。
 
 ## Step three: 独自のデータバージョンを計算する
 
@@ -108,7 +115,7 @@ Dagster は、ユーザー コードが独自のデータ バージョンを提�
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/asset_versioning_and_caching/manual_data_versions_1.py" />
 
-両方のアセットには、`versioned_number` の新しいコード バージョンの影響を受けることを示すラベルが付けられます。両方を再マテリアライズして最新の状態にしましょう。`versioned_number` の `DataVersion` が `20` になっていることに注目してください。
+If you reload definitions, as before, you will see `versioned_number` gets an "Unsynced" label to indicate the latest materialization is out of sync with its code version. We also know that if we materialize `versioned_number`, `multiplied_number` will become unsynced. Let's re-materialize them both in one run to avoid that intermediate state. Notice the `DataVersion` of `versioned_number` is now `20`:
 
 ![Manual data versions 1](/images/guides/build/assets/asset-versioning-and-caching/manual-data-versions-1.png)
 
@@ -116,13 +123,13 @@ Dagster は、ユーザー コードが独自のデータ バージョンを提�
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/asset_versioning_and_caching/manual_data_versions_2.py" />
 
-もう一度言いますが、両方のアセットにはコード バージョンの変更を示すラベルがあります。Dagster はコード バージョンとデータ バージョンしか認識していないため、バージョン番号の `v5` が `v4` と同じ値を返すことを認識していません。
+Once again, `versioned_asset` will have an "Unsynced" label to indicate the change in the code version.
 
 `versioned_number` のみがマテリアライズされた場合に何が起こるかを見てみましょう。アセットグラフでそれを選択し、**Materialize selected** をクリックします。サイドバーには、最新のマテリアライズの code_version が `v5` になり、データバージョンが再び `20` になっていることが示されています。
 
 ![Manual data versions 2](/images/guides/build/assets/asset-versioning-and-caching/manual-data-versions-2.png)
 
-`multiplied_number` は、マテリアライズしていないにもかかわらず、ラベルがなくなったことに注目してください。何が起こったかは、次のとおりです。明示的に指定されたデータ バージョンによる `versioned_number` の新しいマテリアライズが、`versioned_number` のコードバージョンに取って代わります。次に、Dagster は、`multiplied_number` をマテリアライズするために最後に使用された `versioned_number` のデータバージョンを、`versioned_number` の現在のデータバージョンと比較しました。この比較により、`versioned_number` のデータバージョンが変更されていないことが示されるため、Dagster は、`versioned_number` のコードバージョンの変更が `multiplied_number` に影響しないことを認識します。
+Notice that, unlike the last time we materialized `versioned_number`, `multiplied_number` does not have an "Unsynced" label! Here's what happened: the new materialization of `versioned_number` with the explicitly supplied data version supersedes the code version of `versioned_number`. Dagster then compared the data version of `versioned_number` last used to materialize `multiplied_number` to the current data version of `versioned_number`. Since this comparison shows that the data version of `versioned_number` hasn't changed, Dagster knows that the change to the code version of `versioned_number` doesn't affect `multiplied_number`.
 
 `versioned_number` が Dagster によって生成されたデータ バージョンを使用していた場合、戻り値は変更されなかったにもかかわらず、更新されたコード バージョンにより `versioned_number` のデータ バージョンが変更されます。`multiplied_number` には、上流のデータ バージョンが変更されたことを示すラベルが付きます。
 

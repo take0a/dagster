@@ -1,6 +1,6 @@
 ---
 title: UI でアセットを構成する
-sidebar_position: 600
+sidebar_position: 400
 ---
 
 Dagster UI は、アセットを手動で実現したり、履歴データをバックフィルしたり、運用上の問題をデバッグしたり、その他の 1 回限りのタスクを実行したりするためによく使用されます。
@@ -9,7 +9,7 @@ Dagster UI は、アセットを手動で実現したり、履歴データをバ
 
 :::note
 
-この記事では、[アセット](index.md) と [Pydantic](https://docs.pydantic.dev/latest/) に精通していることを前提としています。
+この記事では、[アセット](/guides/build/assets) と [Pydantic](https://docs.pydantic.dev/latest/) に精通していることを前提としています。
 
 :::
 
@@ -20,7 +20,7 @@ Dagster UI は、アセットを手動で実現したり、履歴データをバ
 
 たとえば、アセットを実体化する計算のルックバック時間ウィンドウをチームが変更できるようにしたいとします:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/configuring-assets/config-schema.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/configuring-assets/config-schema.py" language="python" />
 
 ## Dagster UI を使用して構成を指定する
 

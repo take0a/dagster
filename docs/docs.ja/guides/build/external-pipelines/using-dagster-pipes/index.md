@@ -8,9 +8,9 @@ sidebar_position: 10
 
 そうするには、次のことが必要です:
 
-- [サブプロセスを呼び出すDagsterアセットを作成する](create-subprocess-asset)
-- [既存のコードを修正して、Dagster パイプと連携し、情報を Dagster に送り返す](modify-external-code)
-- DagsterパイプをDagsterシステム内の他のエンティティと併用する方法については、[リファレンス](reference)セクションを参照してください。
+- [サブプロセスを呼び出すDagsterアセットを作成する](/guides/build/external-pipelines/using-dagster-pipes/create-subprocess-asset)
+- [既存のコードを修正して、Dagster パイプと連携し、情報を Dagster に送り返す](/guides/build/external-pipelines/using-dagster-pipes/modify-external-code)
+- DagsterパイプをDagsterシステム内の他のエンティティと併用する方法については、[リファレンス](/guides/build/external-pipelines/using-dagster-pipes/reference)セクションを参照してください。
 
 :::note
 
@@ -30,4 +30,4 @@ Dagster パイプを使用してサブプロセスを実行するには、Dagste
 
 ## 始める準備はできましたか？
 
-チュートリアルの前提条件をすべて満たしたら、[サブプロセスを実行する Dagster アセットを作成](create-subprocess-asset)して開始できます。
+チュートリアルの前提条件をすべて満たしたら、[サブプロセスを実行する Dagster アセットを作成](/guides/build/external-pipelines/using-dagster-pipes/create-subprocess-asset)して開始できます。

@@ -23,13 +23,13 @@ Dagster でデータをパーティション分割する方法はいくつかあ
 
 パーティショニングの一般的な使用例は、日次ログや月次レポートなど、時間間隔に分割できるデータを処理することです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
 
 ## 定義済みカテゴリを持つパーティション \{#static-partitions}
 
 データに事前定義されたカテゴリのセットがある場合があります。たとえば、異なる地域ごとにデータを個別に処理したい場合があります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/static_partitioning.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/static_partitioning.py" language="python" />
 
 {/* TODO: Link to Backfill page to explain how to backfill regional sales data */}
 
@@ -37,7 +37,7 @@ Dagster でデータをパーティション分割する方法はいくつかあ
 
 2 次元パーティション分割では、2 つの異なる軸に沿って同時にデータをパーティション分割できます。これは、複数の方法で分類できるデータを処理する必要がある場合に便利です。例:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/two_dimensional_partitioning.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/two_dimensional_partitioning.py" language="python" />
 
 この例では:
 
@@ -52,7 +52,7 @@ Dagster でデータをパーティション分割する方法はいくつかあ
 
 次の例を考えてみましょう:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/dynamic_partitioning.py" language="python" title="Dynamic partitioning" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/dynamic_partitioning.py" language="python" title="Dynamic partitioning" />
 
 この例では:
 

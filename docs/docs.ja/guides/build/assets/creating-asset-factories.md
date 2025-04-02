@@ -1,6 +1,6 @@
 ---
 title: アセットファクトリーの作成
-sidebar_position: 700
+sidebar_position: 500
 ---
 
 データ エンジニアリングでは、多くの場合、類似したアセットを大量に作成する必要があります。例:
@@ -39,7 +39,7 @@ Python や Dagster に慣れていない利害関係者にサービスを提供�
 
 このプロセスを自動化するには、次のように Python でアセットファクトリを定義します。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/python-asset-factory.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories/python-asset-factory.py" language="python" />
 
 アセットファクトリパターンは、基本的に、何らかの構成を受け取り、`dg.Definitions` を返す関数です。
 
@@ -47,11 +47,11 @@ Python や Dagster に慣れていない利害関係者にサービスを提供�
 
 現在、チームは次のようなファイルを使用して、Python ではなく YAML を使用してアセット ファクトリーを構成できるようにしたいと考えています。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/etl_jobs.yaml" language="yaml" title="etl_jobs.yaml" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories/etl_jobs.yaml" language="yaml" title="etl_jobs.yaml" />
 
 これを実装するには、YAML ファイルを解析し、それを使用して S3 リソースと ETL ジョブを作成します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/simple-yaml-asset-factory.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories/simple-yaml-asset-factory.py" language="python" />
 
 ## PydanticとJinjaでユーザビリティを向上
 
@@ -64,11 +64,11 @@ Python や Dagster に慣れていない利害関係者にサービスを提供�
 
 新しい YAML ファイルは次のようになります。環境変数を参照するために Jinja テンプレートがどのように使用されているかに注意してください。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/etl_jobs_with_jinja.yaml" language="yaml" title="etl_jobs.yaml" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories/etl_jobs_with_jinja.yaml" language="yaml" title="etl_jobs.yaml" />
 
 Python 実装は次のとおりです:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories/advanced-yaml-asset-factory.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories/advanced-yaml-asset-factory.py" language="python" />
 
 ## 次は
 

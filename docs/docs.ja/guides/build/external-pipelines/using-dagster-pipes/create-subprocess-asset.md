@@ -6,7 +6,7 @@ sidebar_position: 100
 
 :::note
 
-これは、[Dagster パイプの使用](index.md) チュートリアルのパート 1 です。すでに Dagster によってオーケストレーションされている既存のコードを変更する方法を探している場合は、パート 2 の [外部コードの変更](modify-external-code) に進んでください。
+これは、[Dagster パイプの使用](/guides/build/external-pipelines/using-dagster-pipes) チュートリアルのパート 1 です。すでに Dagster によってオーケストレーションされている既存のコードを変更する方法を探している場合は、パート 2 の [外部コードの変更](/guides/build/external-pipelines/using-dagster-pipes/modify-external-code) に進んでください。
 
 :::note
 
@@ -16,13 +16,13 @@ sidebar_position: 100
 
 ## Step 1: Dagsterアセットを定義する
 
-始める前に、チュートリアルの [前提条件](index.md#prerequisites) をすべて満たしていることを確認してください。次のような `external_code.py` という名前のスタンドアロン Python スクリプトが必要です:
+始める前に、チュートリアルの [前提条件](/guides/build/external-pipelines/using-dagster-pipes#prerequisites) をすべて満たしていることを確認してください。次のような `external_code.py` という名前のスタンドアロン Python スクリプトが必要です:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/part_1/external_code.py" lineStart="3" />
 
 ### Step 1.1: アセットを定義する
 
-まず、[前提条件](index.md#prerequisites) の手順で作成した `external_code.py` ファイルと同じディレクトリに `dagster_code.py` という名前の新しいファイルを作成します。
+まず、[前提条件](/guides/build/external-pipelines/using-dagster-pipes#prerequisites) の手順で作成した `external_code.py` ファイルと同じディレクトリに `dagster_code.py` という名前の新しいファイルを作成します。
 
 次に、アセットを定義します。次の内容をコピーしてファイルに貼り付けます:
 
@@ -91,4 +91,4 @@ sidebar_position: 100
 
 ## 次は？
 
-この時点で、外部 Python スクリプトを呼び出し、サブプロセスでコードを起動し、結果を Dagster UI で表示する Dagster アセットを作成しました。次に、[Dagster Pipes で動作するように外部コードを変更](modify-external-code)して Dagster に情報を送り返す方法を学習します。
+この時点で、外部 Python スクリプトを呼び出し、サブプロセスでコードを起動し、結果を Dagster UI で表示する Dagster アセットを作成しました。次に、[Dagster Pipes で動作するように外部コードを変更](/guides/build/external-pipelines/using-dagster-pipes/modify-external-code)して Dagster に情報を送り返す方法を学習します。

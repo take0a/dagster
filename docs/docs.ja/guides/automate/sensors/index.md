@@ -1,11 +1,12 @@
 ---
-title: "センサー"
+title: 'センサー'
 sidebar_position: 30
 ---
 
 センサーを使用すると、Dagster 内部または外部システムで発生するイベントに応じてアクションを実行できます。センサーは定期的にイベントをチェックし、アクションを実行するか、アクションがスキップされた理由の説明を提供します。
 
 イベントの例としては次のようなものがあります:
+
 - Dagster で実行が完了
 - Dagster で実行が失敗
 - ジョブが特定のアセットを実体化 
@@ -13,6 +14,7 @@ sidebar_position: 30
 - 外部システムがダウンしている
 
 アクションの例は次のとおりです:
+
 - 実行を開始
 - Slack メッセージの送信
 - データベースに行を挿入
@@ -24,12 +26,13 @@ sidebar_position: 30
 :::
 
 <details>
-<summary>前提条件</summary>
+  <summary>前提条件</summary>
 
 このガイドの手順を実行するには、次のことが必要です:
 
 - [アセット](/guides/build/assets/) に関する知識
-- [ジョブ](/guides/build/assets/asset-jobs) に関する知識
+- [ジョブ](/guides/build/jobs/) に関する知識
+
 </details>
 
 ## 基本的なセンサー
@@ -38,10 +41,12 @@ sidebar_position: 30
 
 センサーが新しいファイルを見つけると、`my_job` の実行を開始します。そうでない場合は、実行をスキップし、Dagster UI に `No new files found` と記録します。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/simple-sensor-example.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/simple-sensor-example.py" language="python" />
 
 :::tip
 センサーの `default_status` が `DefaultSensorStatus.RUNNING` でない限り、センサーは Dagster インスタンスに最初にデプロイされたときに有効になりません。センサーを見つけて有効にするには、Dagster UI で **Automation > Sensors** をクリックします。
+
+To explicitly disable a sensor, you can use `DefaultSensorStatus.STOPPED`.
 :::
 
 ## 評価間隔のカスタマイズ
@@ -75,7 +80,7 @@ yield dg.RunRequest(run_key=filename)
 
 次の例は、カーソルを使用して、センサーが最後に実行されてから更新されたディレクトリ内のファイルに対してのみ `RunRequests` を作成する方法を示しています。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/sensor-cursor.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/sensor-cursor.py" language="python" />
 
 複数のイベント ストリームを使用するセンサーの場合、複数のストリームにわたるセンサーの進行状況を追跡するために、カーソル文字列の内外にあるより複雑なデータ構造をシリアル化および逆シリアル化する必要がある場合があります。
 

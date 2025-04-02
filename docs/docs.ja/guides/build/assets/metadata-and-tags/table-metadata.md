@@ -1,7 +1,7 @@
 ---
 title: "テーブルメタデータ"
 description: "Table metadata can be used to provide additional context about a tabular asset, such as its schema, row count, and more."
-sidebar_position: 300
+sidebar_position: 3000
 ---
 
 テーブルメタデータは、スキーマ、行数など、表形式のアセットに関する追加のコンテキストを提供します。このメタデータを使用すると、データプラットフォームでのコラボレーション、デバッグ、データ品質を向上させることができます。
@@ -51,7 +51,7 @@ Dagster では、最新の行数を表示するだけでなく、時間の経過
 
 ## 列レベルの系統の添付
 
-列の系統により、データ エンジニアと分析エンジニアは、データ プラットフォームで列がどのように作成され、使用されるかを理解できます。詳細については、[列レベルの系統のドキュメント](column-level-lineage) を参照してください。
+列の系統により、データ エンジニアと分析エンジニアは、データ プラットフォームで列がどのように作成され、使用されるかを理解できます。詳細については、[列レベルの系統のドキュメント](/guides/build/assets/metadata-and-tags/column-level-lineage) を参照してください。
 
 ## テーブルスキーマの一貫性の確保
 

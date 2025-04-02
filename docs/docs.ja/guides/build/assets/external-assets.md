@@ -1,6 +1,6 @@
 ---
 title: 外部アセット
-sidebar_position: 500
+sidebar_position: 700
 ---
 
 Dagster の目標の 1 つは、たとえそれらの資産が Dagster 以外のシステムによってオーケストレーションされている場合でも、組織内のすべてのデータ資産の単一の統一された系統を提示することです。
@@ -27,7 +27,7 @@ Dagster の目標の 1 つは、たとえそれらの資産が Dagster 以外の
 
 生のトランザクション データは Dagster によって具体化されないため、外部アセットとしてモデル化するのが合理的です。次の例では、`AssetSpec` を使用してこれを実現します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/creating-external-assets.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/external-assets/creating-external-assets.py" language="python" />
 
 外部アセットに提供できるパラメータについては、<PyObject section="assets" module="dagster" object="AssetSpec" /> を参照してください。
 
@@ -46,7 +46,7 @@ Dagster [センサー](/guides/automate/sensors) を使用すると、外部シ�
 
 たとえば、ファイルが変更されるたびに SFTP サーバーなどの外部システムをポーリングして外部アセットを更新する方法は次のとおりです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/pulling-with-sensors.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/external-assets/pulling-with-sensors.py" language="python" />
 
 センサーの詳細については、[センサーガイド](/guides/automate/sensors)を参照してください。
 
@@ -104,4 +104,4 @@ curl \
 
 通常の Dagster アセットと同様に、外部アセットにも依存関係を設定できます。これは、別のシステムによってオーケストレーションされるデータ パイプライン全体をモデル化する場合に役立ちます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/external-assets/dag-of-external-assets.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/external-assets/dag-of-external-assets.py" language="python" />

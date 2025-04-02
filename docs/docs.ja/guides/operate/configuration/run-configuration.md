@@ -23,29 +23,43 @@ sidebar_position: 100
 
 ここでは、ユーザー名を表す単一の文字列値を保持する <PyObject section="config" module="dagster" object="Config"/> のサブクラスを定義します。アセット本体の `config` パラメータを通じて構成にアクセスできます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_asset_config" endBefore="end_basic_asset_config" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_basic_asset_config"
+  endBefore="end_basic_asset_config"
+  dedent="4"
+/>
+
 
 </TabItem>
 <TabItem value="ops とジョブを使用">
 
 ここでは、ユーザー名を表す単一の文字列値を保持する <PyObject section="config" module="dagster" object="Config"/> のサブクラスを定義します。op 本体の `config` パラメータを通じて構成にアクセスできます。
 
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_op_config" endBefore="end_basic_op_config" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_basic_op_config"
+  endBefore="end_basic_op_config"
+/>
 
 ジョブに構成を組み込むこともできます。
 
 </TabItem>
 </Tabs>
 
-これらの例は、使用できる最も基本的な設定タイプを示しています。Dagster がサポートする設定タイプのセットの詳細については、[高度な設定タイプのドキュメント](advanced-config-types)を参照してください。
+これらの例は、使用できる最も基本的な設定タイプを示しています。Dagster がサポートする設定タイプのセットの詳細については、[高度な設定タイプのドキュメント](/guides/operate/configuration/advanced-config-types)を参照してください。
 
 ## リソースの Python 構成の定義とアクセス
 
 リソースの設定可能なパラメータは、<PyObject section="resources" module="dagster" object="ConfigurableResource"/> のサブクラスであるリソース クラスの属性を指定することによって定義されます。以下のリソースは、リソースで定義された任意のメソッドからアクセスできる設定可能な接続 URL を定義します。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_resource_config" endBefore="end_basic_resource_config" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_basic_resource_config"
+  endBefore="end_basic_resource_config"
+  dedent="4"
+/>
+
 
 リソースの使用に関する詳細については、[リソースガイド](/guides/build/external-resources/)を参照してください。
 
@@ -58,8 +72,12 @@ sidebar_position: 100
 
 Python API から構成を指定する場合、<PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> または <PyObject section="execution" module="dagster" object="materialize"/> の `​​run_config` 引数を使用できます。これは <PyObject section="config" module="dagster" object="RunConfig"/> オブジェクトを受け取り、その中でオペレーションごとまたはアセットごとに構成を指定できます。構成は辞書として指定され、キーはオペレーション/アセット名に対応し、値は構成値に対応します。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_config" endBefore="end_execute_with_config" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_execute_with_config"
+  endBefore="end_execute_with_config"
+  dedent="4"
+/>
 
 </TabItem>
 <TabItem value="Dagster UI">
@@ -97,18 +115,27 @@ dagster job execute --config my_config.yaml
 
 Dagster は、提供された実行構成を対応する Pydantic モデルに対して検証します。検証が失敗すると、<PyObject section="errors" module="dagster" object="DagsterInvalidConfigError"/> または Pydantic `ValidationError` で実行を中止します。たとえば、次の両方とも失敗します。これは、構成スキーマに `nonexistent_config_value` がないためです。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_bad_config" endBefore="end_execute_with_bad_config" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_execute_with_bad_config"
+  endBefore="end_execute_with_bad_config"
+  dedent="4"
+/>
 
 ### config で環境変数を使用する
 
 アセットとオペレーションは、設定オブジェクトの構築時に <PyObject section="resources" module="dagster" object="EnvVar" /> を渡すことで、環境変数を使用して設定できます。これは、値の機密性が高い場合や環境によって変わる可能性がある場合に便利です。Dagster+ を使用する場合、環境変数は [UI で直接設定](/guides/deploy/using-environment-variables-and-secrets) できます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_execute_with_config_envvar" endBefore="end_execute_with_config_envvar" />
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py"
+  startAfter="start_execute_with_config_envvar"
+  endBefore="end_execute_with_config_envvar"
+  dedent="4"
+/>
+
 
 Dagster の環境変数に関する一般的な情報については、[環境変数とシークレットのガイド](/guides/deploy/using-environment-variables-and-secrets)を参照してください。
 
 ## 次は
 
-Config は、Dagster パイプラインをより柔軟かつ監視可能にする強力なツールです。サポートされている構成タイプの詳細については、[高度な構成タイプのドキュメント](advanced-config-types)を参照してください。再利用可能なロジックをカプセル化する強力な方法であるリソースの使用の詳細については、[リソース ガイド](/guides/build/external-resources)を参照してください。
+Config は、Dagster パイプラインをより柔軟かつ監視可能にする強力なツールです。サポートされている構成タイプの詳細については、[高度な構成タイプのドキュメント](/guides/operate/configuration/advanced-config-types)を参照してください。再利用可能なロジックをカプセル化する強力な方法であるリソースの使用の詳細については、[リソース ガイド](/guides/build/external-resources)を参照してください。

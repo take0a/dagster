@@ -1,5 +1,5 @@
 ---
-title: "アセットセンサー"
+title: 'アセットセンサー'
 sidebar_position: 40
 ---
 
@@ -9,7 +9,7 @@ Dagster のアセットセンサーは、アセットの実現を監視し、そ
 
 :::note
 
-このドキュメントは、[アセット](/guides/build/assets/) と [ジョブ](/guides/build/assets/asset-jobs) に精通していることを前提としています。
+このドキュメントは、[アセット](/guides/build/assets/) と [ジョブ](/guides/build/jobs/)に精通していることを前提としています。
 
 :::
 
@@ -61,7 +61,7 @@ end
 
 これは、アセットがマテリアライズされたときにジョブをトリガーするアセットセンサーの例です。この例では、`daily_sales_data` アセットはジョブや他のアセットと同じコードの場所にありますが、同じパターンを異なるコードの場所にあるアセットに適用できます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/simple-asset-sensor-example.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/simple-asset-sensor-example.py" language="python" />
 
 ## センサーの評価関数のカスタマイズ
 
@@ -90,7 +90,7 @@ stateDiagram-v2
 
 次の例では、`@asset_sensor` デコレータは、アセットが具体化され、特定のメタデータが存在する場合に `RunRequest` オブジェクトを返し、それ以外の場合は実行をスキップするカスタム評価関数を定義します。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/asset-sensor-custom-eval.py" language="python"/>
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/asset-sensor-custom-eval.py" language="python" />
 
 ## カスタム構成でジョブをトリガーする
 
@@ -98,7 +98,7 @@ stateDiagram-v2
 
 たとえば、アセットがマテリアライズされたときにセンサーを使用してジョブをトリガーし、そのマテリアライズに関するメタデータをジョブに渡すこともできます:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/asset-sensor-with-config.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/asset-sensor-with-config.py" language="python" />
 
 ## 複数アセットの監視
 
@@ -112,7 +112,7 @@ stateDiagram-v2
 
 次の例では、`@multi_asset_sensor` を使用して 2 つのアセットを監視し、両方が実現されるとアセット ジョブをトリガーします。この方法で op ジョブをトリガーすることもできます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/automation/multi-asset-sensor.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/automation/multi-asset-sensor.py" language="python" />
 
 ## 次は
 

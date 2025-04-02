@@ -1,4 +1,4 @@
----
+<!-- ---
 title: アセットジョブ
 sidebar_position: 900
 ---
@@ -45,4 +45,4 @@ Dagster には、ビジネス ロジックを環境から分離したり、制�
 
 ## 例
 
-[Hacker News の例](https://github.com/dagster-io/dagster/tree/master/examples/project_fully_featured) [アセットグループをターゲットとするアセットジョブを構築します](https://github.com/dagster-io/dagster/blob/master/examples/project_fully_featured/project_fully_featured/jobs.py)。
+[Hacker News の例](https://github.com/dagster-io/dagster/tree/master/examples/project_fully_featured) [アセットグループをターゲットとするアセットジョブを構築します](https://github.com/dagster-io/dagster/blob/master/examples/project_fully_featured/project_fully_featured/jobs.py)。 -->

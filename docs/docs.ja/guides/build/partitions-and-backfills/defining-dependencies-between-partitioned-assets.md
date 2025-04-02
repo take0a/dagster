@@ -39,7 +39,7 @@ Dagster のパーティション化されたアセットは、他のパーティ
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/partition_mapping.py" />
 
-利用可能な `PartitionMappings` のリストについては、[API ドキュメント](/api/python-api/partitions#dagster.PartitionMapping) を参照してください。
+利用可能な `PartitionMappings` のリストについては、[API ドキュメント](/api/python-api/partitions#dagster.PartitionMapping) を参照してください。 Note that custom `PartitionMapping` and overriding `PartitionMapping` outside of Dagster is not currently supported.
 
 ## 例
 
@@ -50,7 +50,7 @@ Dagster のパーティション化されたアセットは、他のパーティ
 <details>
 <summary>例を表示</summary>
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/time_based_partitioning.py" language="python" />
 
 </details>
 
@@ -58,7 +58,7 @@ Dagster のパーティション化されたアセットは、他のパーティ
 
 次の例を考えてみましょう:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/partitioning/time_based_partition_dependencies.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/partitioning/time_based_partition_dependencies.py" language="python" />
 
 この例では:
 

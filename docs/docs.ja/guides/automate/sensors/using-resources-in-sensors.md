@@ -9,7 +9,11 @@ Dagster の [リソース](/guides/build/external-resources/) システムをセ
 
 ここでは、外部 API へのアクセスを提供するリソースが提供されています。同じリソースは、センサーがトリガーするジョブまたはアセットでも使用できます。
 
-{/* TODO add dedent=4 prop to CodeExample below when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_on_sensor" endBefore="end_new_resource_on_sensor" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py"
+  startAfter="start_new_resource_on_sensor"
+  endBefore="end_new_resource_on_sensor"
+  dedent="4"
+/>
 
-リソースの詳細については、[リソースのドキュメント](/guides/build/external-resources)を参照してください。リソースを使用してスケジュールをテストする方法については、「[センサーのテスト](testing-sensors)」のリソースを使用したセンサーのテストに関するセクションを参照してください。
+リソースの詳細については、[リソースのドキュメント](/guides/build/external-resources)を参照してください。リソースを使用してスケジュールをテストする方法については、「[センサーのテスト](/guides/automate/sensors/testing-sensors)」のリソースを使用したセンサーのテストに関するセクションを参照してください。

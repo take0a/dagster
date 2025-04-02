@@ -1,6 +1,6 @@
 ---
 title: Dagster ウェブサーバーと UI
-description: "The Dagster UI is a web-based interface for Dagster. You can inspect Dagster objects (ex: assets, jobs, schedules), launch runs, view launched runs, and view assets produced by those runs."
+description: 'The Dagster UI is a web-based interface for Dagster. You can inspect Dagster objects (ex: assets, jobs, schedules), launch runs, view launched runs, and view assets produced by those runs.'
 sidebar_position: 20
 ---
 
@@ -47,7 +47,7 @@ dagster-webserver
 
 **アセットカタログ (OSS)**
 
-- **説明**: **Asset catalog** ページには、Dagster デプロイメント内のすべての [アセット](/guides/build/assets/) が一覧表示されます。これらは、アセット キー、コンピューティングの種類、アセット グループ、[コードの場所](/guides/deploy/code-locations/)、[タグ]/guides/build/assets/metadata-and-tags/index.md#tags でフィルター処理できます。アセットをクリックすると、そのアセットの **Asset details** ページが開きます。**Global asset lineage** ページに移動して、定義を再読み込みし、アセットを実体化することもできます。
+- **説明**: **Asset catalog** ページには、Dagster デプロイメント内のすべての [アセット](/guides/build/assets/) が一覧表示されます。これらは、アセット キー、コンピューティングの種類、アセット グループ、[コードの場所](/guides/deploy/code-locations/)、[タグ](/guides/build/assets/metadata-and-tags/index.md#tags) でフィルター処理できます。アセットをクリックすると、そのアセットの **Asset details** ページが開きます。**Global asset lineage** ページに移動して、定義を再読み込みし、アセットを実体化することもできます。
 
 - **アクセス方法:** 上部のナビゲーションバーで **Assets** をクリックします
 
@@ -64,7 +64,7 @@ dagster-webserver
 
 :::
 
-- **説明**: このバージョンの **Asset catalog** ページには、コンピューティングの種類、アセット グループ、[コードの場所](/guides/deploy/code-locations/)、[タグ]/guides/build/assets/metadata-and-tags/index.md#tags)、[所有者]/guides/build/assets/metadata-and-tags/index.md#owners) などによって分類された、元のページのすべての情報と機能が含まれています。このページでは、次の操作を実行できます。
+- **説明**: このバージョンの **Asset catalog** ページには、コンピューティングの種類、アセット グループ、[コードの場所](/guides/deploy/code-locations/)、[タグ](/guides/build/assets/metadata-and-tags/index.md#tags)、[所有者](/guides/build/assets/metadata-and-tags/index.md#owners) などによって分類された、元のページのすべての情報と機能が含まれています。このページでは、次の操作を実行できます。
 
   - Dagster デプロイメント内のすべての [アセット](/guides/build/assets/) を表示します
   - 特定のアセットをクリックすると詳細が表示されます
@@ -213,7 +213,7 @@ dagster-webserver
 
 **スケジュールの詳細**
 
-- **説明**: **Schedule details** ページには、次のティック、ティック履歴、実行履歴など、単一のスケジュールに関する詳細が表示されます。ページの右上隅にある **Test schedule** ボタンをクリックすると、スケジュールをテストできます。
+- **説明**: **Schedule details** ページには、次のティック、ティック履歴、実行履歴など、単一のスケジュールに関する詳細が表示されます。ページの右上隅にある **Preview tick result** ボタンをクリックすると、スケジュールをテストできます。
 
 - **アクセス方法**: **Schedules** ページでスケジュールをクリックします。
 
@@ -240,7 +240,7 @@ dagster-webserver
 
 **センサーの詳細**
 
-- **説明**: **Sensor details** ページには、次のティック、ティック履歴、実行履歴など、単一のセンサーに関する詳細が表示されます。ページの右上隅近くにある **Test sensor** ボタンをクリックすると、センサーをテストできます。
+- **説明**: **Sensor details** ページには、次のティック、ティック履歴、実行履歴など、単一のセンサーに関する詳細が表示されます。ページの右上隅近くにある **Preview tick result** ボタンをクリックすると、センサーをテストできます。
 
 - **アクセス方法**: **Sensors** ページでセンサーをクリックする
 
@@ -287,7 +287,7 @@ dagster-webserver
 
 **リソースを使用するもののタブ**
 
-- **説明**: **Uses** タブには、[アセット](/guides/build/assets/)、[ジョブ](/guides/build/assets/asset-jobs)、[ops](/guides/build/ops) など、リソースを使用する他の Dagster 定義に関する情報が含まれています。これらの定義のいずれかをクリックすると、その定義タイプの詳細ページが開きます。
+- **説明**: **Uses** タブには、[アセット](/guides/build/assets/)、[ジョブ](/guides/build/jobs/)、[ops](/guides/build/ops/) など、リソースを使用する他の Dagster 定義に関する情報が含まれています。これらの定義のいずれかをクリックすると、その定義タイプの詳細ページが開きます。
 
 - **アクセス方法**: **Resource details** ページで **Uses タブ**をクリック
 
@@ -313,7 +313,7 @@ dagster-webserver
 
 **すべてのジョブ**
 
-- **説明**: **Jobs** ページには、すべてのコードの場所にわたる Dagster デプロイメントで定義されているすべての [ジョブ](/guides/build/assets/asset-jobs) が一覧表示されます。ジョブのスケジュールまたはセンサー、最新の実行時間、履歴に関する情報が含まれます。ジョブをクリックすると、**Job details** ページが開きます。
+- **説明**: **Jobs** ページには、すべてのコードの場所にわたる Dagster デプロイメントで定義されているすべての [ジョブ](/guides/build/jobs/) が一覧表示されます。ジョブのスケジュールまたはセンサー、最新の実行時間、履歴に関する情報が含まれます。ジョブをクリックすると、**Job details** ページが開きます。
 
 - **アクセス方法**: **Overview (top nav) > Jobs タブ** をクリック
 

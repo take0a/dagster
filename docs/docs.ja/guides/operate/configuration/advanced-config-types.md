@@ -12,8 +12,7 @@ sidebar_position: 200
 
 たとえば、構成フィールドに説明を注釈として付けることができ、その説明は構成フィールドのドキュメントに表示されます。フィールドに値の範囲を追加することができ、構成が指定されたときに検証されます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_metadata_config" endBefore="end_metadata_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_metadata_config" endBefore="end_metadata_config" dedent="4" />
 
 ## デフォルトとオプションの設定フィールド
 
@@ -21,15 +20,13 @@ sidebar_position: 200
 
 たとえば、`greeting_phrase` フィールドに `"hello"` というデフォルト値を添付し、フレーズを指定せずに `MyAssetConfig` を構築できます。`person_name` などの `Optional` としてマークされているフィールドには、暗黙的に `None` というデフォルト値が設定されますが、以下の例のように明示的に `None` に設定することもできます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_optional_config" endBefore="end_optional_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_optional_config" endBefore="end_optional_config" dedent="4" />
 
 ### 必須の設定フィールド
 
 デフォルトでは、`Optional` と入力されたフィールドは設定で指定する必要はなく、暗黙のデフォルト値として `None` が設定されます。設定でフィールドを指定することを必須にする場合は、省略記号 (`...`) を使用して [値を渡すことを必須にする](https://docs.pydantic.dev/usage/models/#required-fields) ことができます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_required_config" endBefore="end_required_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_required_config" endBefore="end_required_config" dedent="4" />
 
 ## 基本的なデータ構造
 
@@ -41,8 +38,7 @@ sidebar_position: 200
 
 たとえば、ユーザー名のリストとユーザー名とユーザースコアのマッピングを取得する構成スキーマを定義できます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_data_structures_config" endBefore="end_basic_data_structures_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_basic_data_structures_config" endBefore="end_basic_data_structures_config" dedent="4" />
 
 ## ネストされたスキーマ
 
@@ -50,15 +46,13 @@ sidebar_position: 200
 
 ここでは、ユーザー名と複雑なユーザー データ オブジェクトのマッピングを含むスキーマを定義します。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_nested_schema_config" endBefore="end_nested_schema_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_nested_schema_config" endBefore="end_nested_schema_config" dedent="4" />
 
 ## 許容スキーマ
 
 デフォルトでは、`Config` スキーマは厳密です。つまり、スキーマで明示的に定義されているフィールドのみが受け入れられます。ユーザーが構成で任意のフィールドを指定できるようにする場合、これは面倒になる可能性があります。この目的のために、構成で任意のフィールドを指定できるようにする `PermissiveConfig` 基本クラスを使用できます。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_permissive_schema_config" endBefore="end_permissive_schema_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_permissive_schema_config" endBefore="end_permissive_schema_config" dedent="4" />
 
 ## ユニオン型
 
@@ -66,8 +60,7 @@ sidebar_position: 200
 
 ここでは、`pet_type` フィールドで示されるように、`Cat` または `Dog` のいずれかになる `pet` フィールドを受け取る構成スキーマを定義します。
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_union_schema_config" endBefore="end_union_schema_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_union_schema_config" endBefore="end_union_schema_config" dedent="4" />
 
 ### ユニオン型のYAMLと設定辞書表現
 
@@ -95,8 +88,7 @@ pet:
 
 `Enum` のサブクラスである Python 列挙型は、設定フィールドとしてサポートされています。ここでは、列挙値としてロールが指定されているユーザーのリストを取得するスキーマを定義します:
 
-{/* TODO add dedent=4 prop when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_enum_schema_config" endBefore="end_enum_schema_config" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/pythonic_config/pythonic_config.py" startAfter="start_enum_schema_config" endBefore="end_enum_schema_config" dedent="4" />
 
 ### 列挙型の YAML および設定辞書表現
 

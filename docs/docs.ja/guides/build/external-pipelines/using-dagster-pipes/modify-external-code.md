@@ -6,7 +6,7 @@ sidebar_position: 200
 
 :::note
 
-これは、[Dagster パイプを使用してローカル サブプロセスを実行する](index.md) チュートリアルのパート 2 です。
+これは、[Dagster パイプを使用してローカル サブプロセスを実行する](/guides/build/external-pipelines/using-dagster-pipes) チュートリアルのパート 2 です。
 
 :::
 
@@ -123,6 +123,6 @@ Dagster がコードを実行すると、UI にチェック結果を含むアセ
 
 次は何をしますか? ここから、次のことができます:
 
-- [サブプロセスリファレンス](reference)で、Dagster Pipes を介してサブプロセスで外部コードを実行するその他の機能について学習します。
+- [サブプロセスリファレンス](/guides/build/external-pipelines/using-dagster-pipes/reference)で、Dagster Pipes を介してサブプロセスで外部コードを実行するその他の機能について学習します。
 - [独自の Dagster Pipes プロトコルをカスタマイズする](/guides/build/external-pipelines/dagster-pipes-details-and-customization) 方法を学びます
 - [Dagster Pipes とのその他の統合](/guides/build/external-pipelines/) について学ぶ

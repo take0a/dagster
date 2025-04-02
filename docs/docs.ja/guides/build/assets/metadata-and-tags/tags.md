@@ -1,6 +1,6 @@
 ---
 title: "タグ"
-sidebar_position: 100
+sidebar_position: 1000
 ---
 
 **タグ** は、Dagster でアセットを整理するための主な方法です。アセットを定義するときに複数のタグを添付することができ、それらは UI に表示されます。また、タグを使用して、Dagster+ の [アセットカタログ](/dagster-plus/features/asset-catalog/) 内のアセットを検索およびフィルタリングすることもできます。タグは、文字列のキーと値のペアとして構造化されています。
@@ -13,7 +13,7 @@ sidebar_position: 100
 
 `owners` と同様に、アセットを定義するときに、`tags` 引数にタグの辞書を渡すだけです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/tags.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/tags.py" language="python" />
 
 タグにはキーと値として文字列のみを含める必要があることに注意してください。また、Dagster UI は、空の文字列を含むタグをキーと値のペアではなく「ラベル」としてレンダリングします。
 
@@ -33,6 +33,22 @@ sidebar_position: 100
 - 63文字以内
 - 英数字、ダッシュ (`-`)、アンダースコア (`_`)、ドット (`.`) のみを含めます。
 - 文字列または文字列にシリアル化可能なJSONであること
+
+### Labels
+
+A label is a tag that only contains a key. To create a label, set the tag value to an empty string:
+
+```python
+@dg.asset(
+    tags={"private":""}
+)
+def my_asset() -> None:
+    ...
+```
+
+A label will look like the following in the UI:
+
+![Label in UI](/images/guides/build/assets/metadata-tags/label-ui.png)
 
 ### タグを使用して実行をカスタマイズする
 

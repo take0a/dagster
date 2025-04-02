@@ -34,7 +34,7 @@ Dagster では、アセットはデータ パイプラインの構成要素で�
 
 アセット間でデータを渡すための一般的な推奨アプローチは、外部ストレージを使用してデータを明示的に管理することです。このサンプル パイプラインでは、外部ストレージとして SQLite データベースを使用します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-explicit.py" language="python" title="Using External Storage" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/passing-data-assets/passing-data-explicit.py" language="python" title="Using External Storage" />
 
 この例では、最初のアセットは SQLite データベースへの接続を開き、そこにデータを書き込みます。2 番目のアセットは同じデータベースへの接続を開き、そこからデータを読み取ります。最初のアセットと 2 番目のアセット間の依存関係は、アセットの `deps` 引数によって明示的に示されます。
 
@@ -59,7 +59,7 @@ I/O マネージャーは以下を処理します:
 
 I/O マネージャーについてさらに詳しく知りたい場合は、[I/O マネージャーについて](/guides/build/io-managers/) ガイドをご覧ください。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-io-manager.py" language="python" title="Using I/O managers" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/passing-data-assets/passing-data-io-manager.py" language="python" title="Using I/O managers" />
 
 この例では、`DuckDBPandasIOManager` がインスタンス化され、ローカルファイルを使用して実行されます。I/O マネージャーは、データベースの読み取りと書き込みの両方を処理します。
 
@@ -87,7 +87,7 @@ I/O マネージャーについてさらに詳しく知りたい場合は、[I/O
 
 次の例を考えてみましょう:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-avoid.py" language="python" title="Avoid Passing Data Between Assets" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/passing-data-assets/passing-data-avoid.py" language="python" title="Avoid Passing Data Between Assets" />
 
 この例では、Google ドライブから zip ファイルをダウンロードし、解凍して、データを Pandas DataFrame に読み込みます。これらの操作を実行するには、同じファイル システムで実行されている各アセットに依存します。
 
@@ -95,7 +95,7 @@ I/O マネージャーについてさらに詳しく知りたい場合は、[I/O
 
 このリファクタリングでは、`download_files`、`unzip_files`、および `load_data` アセットが 1 つのアセット `my_dataset` に結合されます。このアセットは、ファイルをダウンロードして解凍し、データをデータ ウェアハウスに読み込みます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/passing-data-assets/passing-data-rewrite-assets.py" language="python" title="Avoid Passing Data Between Assets" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/passing-data-assets/passing-data-rewrite-assets.py" language="python" title="Avoid Passing Data Between Assets" />
 
 このアプローチでは、データの受け渡しは引き続き明示的に処理されますが、アセット間で行われるのではなく、単一のアセット内で行われます。このパイプラインでは、依然としてデータを処理するために十分なディスクとメモリが利用可能であると想定されますが、データセットが小さい場合はうまく機能します。
 

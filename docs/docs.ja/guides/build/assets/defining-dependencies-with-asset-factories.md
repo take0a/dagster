@@ -1,6 +1,6 @@
 ---
 title: 'アセットファクトリーによる依存関係の定義'
-sidebar_position: 800
+sidebar_position: 600
 ---
 
 データエンジニアリングでは、コードを再利用して類似のアセットを定義すると便利なことがよくあります。たとえば、ディレクトリ内のすべてのファイルをアセットとして表したい場合があります。
@@ -11,7 +11,7 @@ sidebar_position: 800
 
 :::note
 
-このガイドでは、[アセットファクトリ](creating-asset-factories) に精通していることを前提としています。
+このガイドでは、[アセットファクトリ](/guides/build/assets/creating-asset-factories) に精通していることを前提としています。
 :::
 
 ---
@@ -22,14 +22,14 @@ sidebar_position: 800
 
 各テーブルは、名前、アップストリーム アセットの依存関係、およびクエリによって YAML で表すことができます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/table_definitions.yaml" language="yaml" title="YAML Definition for ETL tables" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories-with-deps/table_definitions.yaml" language="yaml" title="YAML Definition for ETL tables" />
 
 Dagster でこれらのアセットを定義するために Python ロジックを追加する方法は次のとおりです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/asset-factory-with-deps.py" language="python" title="Programmatically defining asset dependencies" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories-with-deps/asset-factory-with-deps.py" language="python" title="Programmatically defining asset dependencies" />
 
 ## ファクトリーアセットと通常のアセット間の依存関係を定義する
 
 ファクトリアセットの下流に Dagster アセットを定義する Python ロジックを追加する方法は次のとおりです。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/asset-factories-with-deps/asset_downstream_of_factory_assets.py" language="python" title="Defining dependencies between factory assets and regular assets" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-factories-with-deps/asset_downstream_of_factory_assets.py" language="python" title="Defining dependencies between factory assets and regular assets" />

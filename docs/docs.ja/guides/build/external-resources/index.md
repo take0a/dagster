@@ -10,7 +10,7 @@ Dagster リソースは、外部システム、データベース、またはサ
 - データが取り込まれるSnowflake/Databricks/BigQueryアカウント
 - ダッシュボードが作成されたBIツール
 
-Dagster リソースを使用すると、[アセット定義](/guides/build/assets)、[スケジュール](/guides/automate/schedules)、[センサー](/guides/automate/sensors)、[ジョブ](/guides/build/assets/asset-jobs) などの Dagster 定義全体でこれらのツールへの接続と統合を標準化できます。
+Dagster リソースを使用すると、[アセット定義](/guides/build/assets)、[スケジュール](/guides/automate/schedules)、[センサー](/guides/automate/sensors)、[ジョブ](/guides/build/jobs/) などの Dagster 定義全体でこれらのツールへの接続と統合を標準化できます。
 
 リソースを使用すると次のことが可能になります:
 

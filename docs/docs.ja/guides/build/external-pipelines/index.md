@@ -21,8 +21,8 @@ Dagster 外部でコードを呼び出すように設定するには、まずア
 
 次の例では、外部コードは Dagster アセット内で呼び出す Python スクリプト内にあります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/pipes/external_code_opaque.py" language="python" title="/usr/bin/external_code.py" />
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/pipes/asset_wrapper.py" language="python" title="Asset invoking external compute using Dagster Pipes" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/pipes/external_code_opaque.py" language="python" title="/usr/bin/external_code.py" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/pipes/asset_wrapper.py" language="python" title="Asset invoking external compute using Dagster Pipes" />
 
 UI またはセンサー/スケジュールから Dagster でこのアセットを実体化すると、その外部コードの実行が開始されます。
 
@@ -30,6 +30,6 @@ UI またはセンサー/スケジュールから Dagster でこのアセット�
 
 Dagster Pipes は、オプションでログとメタデータを Dagster に送り返すための外部コード用のプロトコルも確立します。このプロトコルの Python クライアントは、[`dagster-pipes`](/api/python-api/libraries/dagster-pipes) パッケージの一部として利用できます。ログとメタデータを Dagster に送り返すには、外部コード内に `PipesContext` オブジェクトを作成します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/pipes/external_code_data_passing.py" language="python" title="/usr/bin/external_code.py" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/pipes/external_code_data_passing.py" language="python" title="/usr/bin/external_code.py" />
 
 `PipesContext` を使用して送り返されたログは、そのアセットのマテリアライゼーションの実行の構造化されたログに表示され、マテリアライゼーションのメタデータはアセット履歴に反映されます。

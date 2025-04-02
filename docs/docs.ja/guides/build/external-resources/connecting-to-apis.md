@@ -28,13 +28,13 @@ sidebar_position: 500
 
 `ConfigurableResource` を使用して、場所の日の出時刻を返すメソッドを持つ Dagster リソースを定義します。このリソースの最初のバージョンでは、場所はサンフランシスコ国際空港にハードコードされています。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/minimal_resource.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/apis/minimal_resource.py" language="python" />
 
 ## Step 2: アセット内のリソースを使用する
 
 リソースを使用するには、それをアセットのパラメータとして提供し、`Definitions` オブジェクトに含めます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/use_minimal_resource_in_asset.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/apis/use_minimal_resource_in_asset.py" language="python" />
 
 `sfo_sunrise` を具体化すると、Dagster は初期化された `SunResource` を `sun_resource` パラメータに提供します。
 
@@ -42,7 +42,7 @@ sidebar_position: 500
 
 多くの API には、使用方法をカスタマイズするために設定できる構成があります。次の例では、クエリの場所を設定できるように構成でリソースを更新します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/use_configurable_resource_in_asset.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/apis/use_configurable_resource_in_asset.py" language="python" />
 
 構成可能なリソースは、これまでとまったく同じようにアセットに提供できます。リソースが初期化されると、各構成オプションの値を渡すことができます。
 
@@ -54,7 +54,7 @@ sidebar_position: 500
 
 この例では、新しい `home_sunrise` アセットがあります。自宅の場所をハードコーディングするのではなく、環境変数に設定し、その値を読み取って `SunResource` を構成することができます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/apis/env_var_configuration.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/apis/env_var_configuration.py" language="python" />
 
 `home_sunrise` を具体化すると、Dagster は `HOME_LATITUDE`、`HOME_LONGITUDE`、および `HOME_TIMZONE` 環境変数に設定された値を読み取り、それらの値で `SunResource` を初期化します。
 

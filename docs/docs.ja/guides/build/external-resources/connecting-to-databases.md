@@ -31,13 +31,13 @@ sidebar_position: 400
 
 この例では、Snowflake データベースを表すリソースを作成します。`SnowflakeResource` を使用して、Snowflake データベースに接続する Dagster リソースを定義します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/snowflake-resource.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/databases/snowflake-resource.py" language="python" />
 
 ## Step 2: アセット内のリソースを使用する \{#step-two}
 
 リソースを使用するには、それをアセットのパラメータとして提供し、`Definitions` オブジェクトに含めます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/use-in-asset.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/databases/use-in-asset.py" language="python" />
 
 これらのアセットを具体化すると、Dagster は初期化された `SnowflakeResource` をアセットの `iris_db` パラメータに提供します。
 
@@ -47,7 +47,7 @@ sidebar_position: 400
 
 この例では、`production` という名前の Snowflake リソースの 2 番目のインスタンスが追加されています:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/databases/use-envvars.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/databases/use-envvars.py" language="python" />
 
 アセットが実体化されると、Dagster は `deployment_name` 環境変数を使用して、使用する Snowflake リソース (`local` または `production`) を決定します。次に、Dagster は各リソースの環境変数に設定された値 (例: `DEV_SNOWFLAKE_PASSWORD`) を読み取り、それらの値で `SnowflakeResource` を初期化します。
 
@@ -59,5 +59,5 @@ sidebar_position: 400
 
 ## 次は
 
-- [API への接続](connecting-to-apis) のリソースの使用方法を調べる
+- [API への接続](/guides/build/external-resources/connecting-to-apis) のリソースの使用方法を調べる
 - [リソース](/guides/build/external-resources/) の理解を深める

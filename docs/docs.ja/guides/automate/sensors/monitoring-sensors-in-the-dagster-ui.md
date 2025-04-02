@@ -9,4 +9,4 @@ UI を使用して、センサーを監視および操作できます。UI に�
 
 ![Sensors overview](/images/guides/automate/sensors/all-sensors.png)
 
-任意のセンサーをクリックすると、[センサーをテストし](testing-sensors)、タイムライン上のすべてのセンサー評価を監視し、センサーによって開始された実行のテーブルを表示できます。
+任意のセンサーをクリックすると、[センサーをテストし](/guides/automate/sensors/testing-sensors)、タイムライン上のすべてのセンサー評価を監視し、センサーによって開始された実行のテーブルを表示できます。

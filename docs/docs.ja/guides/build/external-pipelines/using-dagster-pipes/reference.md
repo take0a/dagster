@@ -3,7 +3,7 @@ title: "Dagster パイプ サブプロセスリファレンス"
 description: "This page shows ways to execute external code with Dagster Pipes with different entities in the Dagster system."
 ---
 
-このリファレンスでは、Dagster システム内の他のエンティティでの Dagster Pipes の使用法を示します。ステップごとのチュートリアルについては、[Dagster Pipes チュートリアル](index.md) を参照してください。
+このリファレンスでは、Dagster システム内の他のエンティティでの Dagster Pipes の使用法を示します。ステップごとのチュートリアルについては、[Dagster Pipes チュートリアル](/guides/build/external-pipelines/using-dagster-pipes) を参照してください。
 
 ## 環境変数と extra の指定
 
@@ -14,7 +14,8 @@ description: "This page shows ways to execute external code with Dagster Pipes w
 
 外部コードでは、`PipesContext` オブジェクトを介して extra にアクセスできます:
 
-<CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_extras_env/external_code.py" lineStart="3" />
+<CodeExample path="docs_snippets/docs_snippets/guides/dagster/dagster_pipes/subprocess/with_extras_env/external_code.py" lineStart="2" />
+
 
 </TabItem>
 <TabItem value="dagster_code.py の Dagster コード">

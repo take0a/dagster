@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Ops
 sidebar_position: 100
 ---
@@ -13,4 +13,4 @@ sidebar_position: 100
 - API をクエリし、その結果をデータ ウェアハウスに保存する
 - メールまたはSlackメッセージを送信する
 
-![ops](/images/guides/build/ops/ops.png)
+![ops](/images/guides/build/ops/ops.png) -->

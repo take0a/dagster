@@ -39,11 +39,11 @@ Dagster の I/O マネージャーを使用すると、データ処理用のコ�
 
 次の例を検討してください。この例には、DuckDB 接続オブジェクトを構築し、上流テーブルからデータを読み取り、メモリ内変換を適用し、その結果を DuckDB の新しいテーブルに書き込むアセットが含まれています:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-without-io-managers.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/assets-without-io-managers.py" language="python" />
 
 I/O マネージャーを使用すると、アセット自体からデータを読み書きするコードが削除され、代わりに I/O マネージャーに委任されます。アセットには、変換を適用するコードや初期 CSV ファイルを取得するコードのみが残ります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-with-io-managers.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/assets-with-io-managers.py" language="python" />
 
 I/O マネージャーを使用して上流アセットをロードするには、アセット関数への入力パラメーターとしてアセットを指定します。この例では、`DuckDBPandasIOManager` I/O マネージャーは、上流アセット (`raw_sales_data`) と同じ名前の DuckDB テーブルを読み取り、そのデータを Pandas DataFrame として `clean_sales_data` に渡します。
 
@@ -57,7 +57,7 @@ I/O マネージャーでは、データストアのスワッピングは、I/O 
 
 次の例では、Snowflake I/O マネージャーが DuckDB I/O マネージャーに置き換えられました。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/external-systems/assets-with-snowflake-io-manager.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/external-systems/assets-with-snowflake-io-manager.py" language="python" />
 
 ## 組み込み I/O マネージャー \{#built-in}
 

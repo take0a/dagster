@@ -7,14 +7,18 @@ sidebar_position: 500
 
 :::note
 
-この記事では、[リソース](/guides/build/external-resources/)、[コードの場所と定義](/guides/deploy/code-locations/)、[テストのスケジュール](testing-schedules)に関する知識があることを前提としています。
+この記事では、[リソース](/guides/build/external-resources/)、[コードの場所と定義](/guides/deploy/code-locations/)、[テストのスケジュール](/guides/automate/schedules/testing-schedules)に関する知識があることを前提としています。
 
 スケジュールやリソースを含むすべての Dagster 定義は、<PyObject section="definitions" module="dagster" object="Definitions" /> 呼び出しに添付する必要があります。
 
 :::
 
-{/* TODO add dedent=4 prop to CodeExample below when implemented */}
-<CodeExample path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py" startAfter="start_new_resource_on_schedule" endBefore="end_new_resource_on_schedule" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/resources/pythonic_resources.py"
+  startAfter="start_new_resource_on_schedule"
+  endBefore="end_new_resource_on_schedule"
+  dedent="4"
+/>
 
 ## このガイドのAPI
 

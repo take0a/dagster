@@ -1,5 +1,6 @@
 ---
-title: "アセットメタデータ"
+title: "アセットメタデータとタグ"
+sidebar_position: 800
 ---
 
 [アセット](/guides/build/assets/) は Dagster UI で重要な位置を占めています。アセットに情報を添付すると、アセットがどこに保存されているか、何が含まれているか、どのように整理するかを理解できます。
@@ -15,7 +16,7 @@ Dagsterのメタデータを使用すると:
 
 大規模な組織では、特定のデータ資産に対してどの個人とチームが責任を負っているかを把握することが重要です。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/owners.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/owners.py" language="python" />
 
 :::note
 
@@ -29,7 +30,7 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 
 ## タグによるアセットの整理 \{#tags}
 
-[**タグ**](tags) は、Dagster でアセットを整理するための主な方法です。アセットを定義するときに複数のタグを添付することができ、それらは UI に表示されます。また、タグを使用してアセットカタログ内のアセットを検索およびフィルタリングすることもできます。タグは、文字列のキーと値のペアとして構造化されています。
+[**タグ**](/guides/build/assets/metadata-and-tags/tags) は、Dagster でアセットを整理するための主な方法です。アセットを定義するときに複数のタグを添付することができ、それらは UI に表示されます。また、タグを使用してアセットカタログ内のアセットを検索およびフィルタリングすることもできます。タグは、文字列のキーと値のペアとして構造化されています。
 
 アセットに適用できるタグの例を次に示します:
 
@@ -39,7 +40,7 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 
 `owners` と同様に、アセットを定義するときに、`tags` 引数にタグの辞書を渡すことができます:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/tags.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/tags.py" language="python" />
 
 タグにはキーと値として文字列のみを含める必要があることに注意してください。また、Dagster UI は、空の文字列を含むタグをキーと値のペアではなく「ラベル」としてレンダリングします。
 
@@ -53,7 +54,7 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 
 定義メタデータを使用してアセットを記述すると、自分やチームにコンテキストを簡単に提供できます。このメタデータには、アセットの説明、アセットの種類、または関連するドキュメントへのリンクなどがあります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/definition-metadata.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/definition-metadata.py" language="python" />
 
 添付できるさまざまな種類のメタデータの詳細については、<PyObject section="metadata" module="dagster" object="MetadataValue" /> API ドキュメントを参照してください。
 
@@ -67,7 +68,7 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 
 値を指定するときは、<PyObject section="metadata" module="dagster" object="MetadataValue" /> ユーティリティ クラスを使用してデータをラップし、UI に正しく表示されるようにします。値は Python のプリミティブ型にすることもでき、Dagster はそれを適切な `MetadataValue` に変換します。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/runtime-metadata.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/runtime-metadata.py" language="python" />
 
 :::note
 
@@ -95,9 +96,9 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 
 ### テーブルスキーマメタデータ \{#table-schema}
 
-次の例では、定義時と実行時の両方で [テーブルと列のスキーマ メタデータ](table-metadata) をアタッチします。
+次の例では、定義時と実行時の両方で [テーブルと列のスキーマ メタデータ](/guides/build/assets/metadata-and-tags/table-metadata) をアタッチします。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/table-schema-metadata.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/table-schema-metadata.py" language="python" />
 
 <PyObject section="metadata" module="dagster" object="TableColumn" /> オブジェクトでは、いくつかのデータ型と制約を使用できます。詳細については、API ドキュメントを参照してください。
 
@@ -107,9 +108,9 @@ Dagster+ Pro を使用すると、トリガーされるとアセットの所有�
 [dbt](/integrations/libraries/dbt/) などの多くの統合では、列系統メタデータがすぐに使用できる状態で自動的に添付されます。
 :::
 
-[列系統メタデータ](column-level-lineage)は、テーブル内の列が他の列からどのように派生しているかを追跡するための強力な方法です:
+[列系統メタデータ](/guides/build/assets/metadata-and-tags/column-level-lineage)は、テーブル内の列が他の列からどのように派生しているかを追跡するための強力な方法です:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/table-column-lineage-metadata.py" language="python" title="Table column lineage metadata" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/table-column-lineage-metadata.py" language="python" title="Table column lineage metadata" />
 
 :::tip
 Dagster+ は、アセット カタログ内の列の系統の豊富な視覚化とナビゲーションを提供します。詳細については、[Dagster+ のドキュメント](/dagster-plus/features/asset-catalog/)を参照してください。
@@ -117,7 +118,7 @@ Dagster+ は、アセット カタログ内の列の系統の豊富な視覚化�
 
 ## アセットをソースコードにリンクする \{#source-code}
 
-import Beta from '../../../../partials/\_Beta.md';
+import Beta from '@site/docs/partials/\_Beta.md';
 
 <Beta />
 
@@ -134,13 +135,13 @@ import Beta from '../../../../partials/\_Beta.md';
 
 Dagster は、ローカル開発中にアセットにコード参照を自動的に添付できます:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/python-local-references.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/python-local-references.py" language="python" />
 
 ### コード参照のカスタマイズ \{#custom-references}
 
 コード参照の添付方法をカスタマイズしたい場合（[アセットファクトリを使用したドメイン固有言語](/guides/build/assets/creating-asset-factories)を構築する場合など）は、アセット定義に `dagster/code_references` メタデータを手動で追加できます:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/custom-local-references.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/custom-local-references.py" language="python" />
 
 ### 本番環境でのコード参照の添付 \{#production-references}
 
@@ -149,14 +150,14 @@ Dagster は、ローカル開発中にアセットにコード参照を自動的
 
 Dagster+ は、GitHub や GitLab などのソース管理へのコード参照を使用してアセットに自動的に注釈を付けることができます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/plus-references.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/plus-references.py" language="python" />
 
 </TabItem>
 <TabItem value="dagster-open-source" label="OSS">
 
 Dagster+ を使用していない場合は、ソースコントロールへのコード参照を使用してアセットに注釈を付けることができますが、手動でのマッピングが必要です。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-modeling/metadata/oss-references.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/metadata/oss-references.py" language="python" />
 
 `link_code_references_to_git` は現在、GitHub および GitLab リポジトリをサポートしています。また、ファイル パスのマッピング方法のカスタマイズもサポートしています。詳細については、`AnchorBasedFilePathMapping` API ドキュメントを参照してください。
 

@@ -3,7 +3,7 @@ title: スケジュールの実行タイムゾーンのカスタマイズ
 sidebar_position: 300
 ---
 
-タイムゾーンが設定されていない [スケジュール](index.md) は、デフォルトでは [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) で実行されます。このガイドを読み終えると、次のことが分かるようになります:
+タイムゾーンが設定されていないスケジュールは、デフォルトでは [UTC](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) で実行されます。このガイドを読み終えると、次のことが分かるようになります:
 
 - スケジュール定義にカスタムタイムゾーンを設定する
 - パーティション化されたジョブにカスタムタイムゾーンを設定する
@@ -13,8 +13,8 @@ sidebar_position: 300
 
 このガイドでは、以下の知識があることを前提としています:
 
-- [スケジュール](index.md)
-- ジョブで[アセット](/guides/build/assets/asset-jobs)ベースまたはopベースのいずれか
+- スケジュール
+- ジョブで[アセット](/guides/build/jobs/asset-jobs)ベースまたはopベースのいずれか
 - [パーティション](/guides/build/partitions-and-backfills/partitioning-assets)
 
 :::
@@ -29,7 +29,11 @@ sidebar_position: 300
 
 このパラメータは、任意の [`tz` タイムゾーン](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) を受け入れます。たとえば、次のスケジュールは、**米国太平洋時間 (America/Los_Angeles) で毎日午前 9 時に実行されます**。
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedules.py" startAfter="start_timezone" endBefore="end_timezone" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedules/schedules.py"
+  startAfter="start_timezone"
+  endBefore="end_timezone"
+/>
 
 ## パーティションジョブのタイムゾーンの設定
 

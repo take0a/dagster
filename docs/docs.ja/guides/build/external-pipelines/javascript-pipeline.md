@@ -35,7 +35,7 @@ sidebar_position: 20
 
 次の内容を含む `tensorflow/main.js` という名前のファイルを作成します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-contrived-javascript.js" language="javascript" title="tensorflow/main.js" />
+<CodeExample path="docs_snippets/docs_snippets/guides/non-python/pipes-contrived-javascript.js" language="javascript" title="tensorflow/main.js" />
 
 ## Step 2: スクリプトを実行するDagsterアセットを作成する
 
@@ -44,7 +44,7 @@ Dagster で、次のアセットを作成します:
 - `PipesSubprocessClient` リソースを使用して、`node` でスクリプトを実行します。
 - `compute_kind` を `javascript` に設定します。これにより、代替コンピューティングが実体化に使用されることを簡単に識別できます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-asset.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/non-python/pipes-asset.py" language="python" />
 
 アセットがマテリアライズされると、stdout と stderr が自動的にキャプチャされ、アセット ログに表示されます。Pipes に渡されたコマンドが正常終了コードを返すと、Dagster はアセットのマテリアライズ結果を生成します。
 
@@ -57,7 +57,7 @@ Dagster で、次のアセットを作成します:
 
 環境変数を読み取り、データをデコードし、メッセージを Dagster に書き戻す次のヘルパー関数を含む新しいファイルを作成します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-javascript-utility.js" language="javascript" />
+<CodeExample path="docs_snippets/docs_snippets/guides/non-python/pipes-javascript-utility.js" language="javascript" />
 
 両方の環境変数は、base64 でエンコードされ、zip で圧縮された JSON オブジェクトです。各 JSON オブジェクトには、データの読み取りまたは書き込み先を示すパスが含まれています。
 
@@ -70,7 +70,7 @@ Dagster で、次のアセットを作成します:
 - Dagsterコンテキストからモデル構成を取得し、
 - モデル メタデータを使用してアセットの実体化を Dagster に報告する
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-full-featured-javascript.js" language="javascript" />
+<CodeExample path="docs_snippets/docs_snippets/guides/non-python/pipes-full-featured-javascript.js" language="javascript" />
 
 :::tip
 
@@ -82,7 +82,7 @@ Dagster で、次のアセットを作成します:
 
 最後に、スクリプトで使用されるモデル情報を渡せるように Dagster アセットを更新します:
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/non-python/pipes-asset-with-context.py" language="python" />
+<CodeExample path="docs_snippets/docs_snippets/guides/non-python/pipes-asset-with-context.py" language="python" />
 
 ## 次は？
 

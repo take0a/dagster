@@ -5,7 +5,11 @@ sidebar_position: 200
 
 どのセンサーも、評価関数の実行中にログ メッセージを出力できます:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensors.py" startAfter="start_sensor_logging" endBefore="end_sensor_logging" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensors.py"
+  startAfter="start_sensor_logging"
+  endBefore="end_sensor_logging"
+/>
 
 これらのログは、対応するセンサー ページのティック履歴ビューでティックを検査するときに表示できます。
 

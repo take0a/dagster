@@ -1,7 +1,7 @@
 ---
 title: "種類タグ"
-description: "Use kind tags to easily categorize assets within you Dagster project."
-sidebar_position: 200
+description: "Use kind tags to easily categorize assets within your Dagster project."
+sidebar_position: 2000
 ---
 
 種類タグを使用すると、Dagster UI で特定のアセットに使用されている基盤となるシステムまたはテクノロジーをすばやく識別できます。これらのタグを使用すると、Dagster プロジェクト内でアセットを整理したり、すべてのアセットをフィルタリングまたは検索したりすることができます。

@@ -1,7 +1,7 @@
 ---
 title: "列レベルの系統"
 description: "Column lineage enables data and analytics engineers alike to understand how a column is created and used in your data platform."
-sidebar_position: 400
+sidebar_position: 4000
 ---
 
 # 列レベルの系統

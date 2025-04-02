@@ -7,7 +7,11 @@ sidebar_position: 500
 
 以下は、実行が成功した場合に `status_reporting_job` の実行を開始する実行ステータス センサーの例です:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/run_status_run_requests.py" startAfter="start" endBefore="end" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/run_status_run_requests.py"
+  startAfter="start"
+  endBefore="end"
+/>
 
 `request_job` は、`RunRequest` が返されたときに実行されるジョブです:
 
@@ -15,10 +19,18 @@ sidebar_position: 500
 
 以下は、Slack メッセージでジョブの成功を報告するセンサーの例です:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensor_alert.py" startAfter="start_success_sensor_marker" endBefore="end_success_sensor_marker" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensor_alert.py"
+  startAfter="start_success_sensor_marker"
+  endBefore="end_success_sensor_marker"
+/>
 
 実行ステータス センサーが実行によってトリガーされたが何も返されない場合、Dagster はセンサーが実行されたことを示すイベントを実行に報告します。
 
 センサーを記述したら、そのセンサーを <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに追加して、他のセンサーと同じように有効化して使用できるようになります。
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensor_alert.py" startAfter="start_definitions_marker" endBefore="end_definitions_marker" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/sensors/sensor_alert.py"
+  startAfter="start_definitions_marker"
+  endBefore="end_definitions_marker"
+/>

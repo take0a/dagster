@@ -33,7 +33,8 @@ Dagsterには4種類のアセットデコレータがある:
 
 Dagster でデータ アセットを定義する最も簡単な方法は、<PyObject section="assets" module="dagster" object="asset" decorator /> デコレータを使用することです。このデコレータは、Python 関数をアセットとしてマークします。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/asset_decorator.py" language="python" title="Using @dg.asset decorator" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/data-assets/asset_decorator.py" language="python" title="Using @dg.asset decorator" />
+
 
 この例では、`weekly_sales_report` は出力をログに記録するアセットです。Dagster は依存関係を自動的に追跡し、パイプライン内で実行を処理します。
 
@@ -46,7 +47,7 @@ Dagster でデータ アセットを定義する最も簡単な方法は、<PyOb
 
 この例では、`my_multi_asset` は `asset_one` と `asset_two` の 2 つのアセットを生成します。それぞれは同じ関数から派生しているため、関連するデータ変換をまとめて処理しやすくなります。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/multi_asset_decorator.py" language="python" title="Using @dg.multi_asset decorator" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/data-assets/multi_asset_decorator.py" language="python" title="Using @dg.multi_asset decorator" />
 
 この例は次のように表現できます:
 
@@ -74,7 +75,7 @@ flowchart LR
 
 複数の操作を実行して単一のアセットを生成する必要がある場合は、<PyObject section="assets" module="dagster" object="graph_asset" decorator /> デコレータを使用できます。このアプローチでは、一連の操作をカプセル化して単一のアセットとして公開するため、最終出力のみを公開しながら複雑なパイプラインをモデル化できます。
 
-<CodeExample path="docs_beta_snippets/docs_beta_snippets/guides/data-assets/data-assets/graph_asset_decorator.py" language="python" title="Using @dg.graph_asset decorator" />
+<CodeExample path="docs_snippets/docs_snippets/guides/data-assets/data-assets/graph_asset_decorator.py" language="python" title="Using @dg.graph_asset decorator" />
 
 この例では、`complex_asset` は `step_one` と `step_two` の 2 つの操作の結果であるアセットです。これらのステップは 1 つのアセットに結合され、中間表現が抽象化されます。
 

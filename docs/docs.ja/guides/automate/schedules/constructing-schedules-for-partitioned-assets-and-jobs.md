@@ -1,6 +1,6 @@
 ---
-title: "パーティション分割されたアセットとジョブからスケジュールを構築する"
-description: "Learn to construct schedules for your partitioned jobs."
+title: 'パーティション分割されたアセットとジョブからスケジュールを構築する'
+description: 'Learn to construct schedules for your partitioned jobs.'
 sidebar_position: 400
 ---
 
@@ -15,7 +15,7 @@ sidebar_position: 400
 
 この記事は、以下の知識があることを前提としています。
 
-- [スケジュール](index.md)
+- スケジュール
 - [パーティション](/guides/build/partitions-and-backfills/partitioning-assets)
 - [アセット定義](/guides/build/assets/defining-assets)
 - [アセットジョブ](/guides/build/assets/asset-jobs) and op jobs
@@ -35,7 +35,11 @@ sidebar_position: 400
 
 アセット ジョブは、<PyObject section="assets" module="dagster" object="define_asset_job" /> を使用して定義されます。この例では、`partitioned_job` という名前のアセット ジョブを作成し、次に <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用して `asset_partitioned_schedule` を構築しました:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_partitioned_asset_schedule" endBefore="end_partitioned_asset_schedule" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py"
+  startAfter="start_partitioned_asset_schedule"
+  endBefore="end_partitioned_asset_schedule"
+/>
 
 </TabItem>
 <TabItem value="Op ジョブ">
@@ -44,7 +48,11 @@ sidebar_position: 400
 
 Op ジョブは、<PyObject section="jobs" module="dagster" object="job" decorator /> を使用して定義されます。この例では、`partitioned_op_job` という名前のパーティション化されたジョブを作成し、次に <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job"/> を使用して `partitioned_op_schedule` を構築しました:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_marker" endBefore="end_marker" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py"
+  startAfter="start_marker"
+  endBefore="end_marker"
+/>
 
 </TabItem>
 </Tabs>
@@ -55,7 +63,11 @@ Op ジョブは、<PyObject section="jobs" module="dagster" object="job" decorat
 
 次のジョブを考えてみましょう:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_partitioned_schedule_with_offset" endBefore="end_partitioned_schedule_with_offset" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py"
+  startAfter="start_partitioned_schedule_with_offset"
+  endBefore="end_partitioned_schedule_with_offset"
+/>
 
 2024 年 5 月 20 日、スケジュールは午前 1 時 30 分 (UTC) に評価され、前日のパーティション キー `2024-05-19` の実行が開始されます。
 
@@ -86,7 +98,11 @@ Op ジョブは、<PyObject section="jobs" module="dagster" object="job" decorat
 
 セット内の最後のパーティションまたは最新のパーティションをカスタマイズする必要がある場合は、パーティションの設定で `end_offset` パラメータを使用します:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py" startAfter="start_offset_partition" endBefore="end_offset_partition" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/schedule_from_partitions.py"
+  startAfter="start_offset_partition"
+  endBefore="end_offset_partition"
+/>
 
 このパラメータを設定すると、各スケジュール ティックで埋められるパーティションが変更されます。正と負の整数が受け入れられ、次のような効果があります:
 
@@ -113,15 +129,27 @@ current_date - 1 type_of_partition + end_offset
 
 この例では、ジョブは大陸ごとに分割されています:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_job" endBefore="end_job" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py"
+  startAfter="start_job"
+  endBefore="end_job"
+/>
 
 <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator /> デコレータを使用して、各パーティション、つまり `continent` を対象とするスケジュールを記述します:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_schedule_all_partitions" endBefore="end_schedule_all_partitions" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py"
+  startAfter="start_schedule_all_partitions"
+  endBefore="end_schedule_all_partitions"
+/>
 
 `Antarctica` パーティションのみをターゲットにしたい場合は、次のようなスケジュールを作成できます:
 
-<CodeExample path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py" startAfter="start_single_partition" endBefore="end_single_partition" />
+<CodeExample
+  path="docs_snippets/docs_snippets/concepts/partitions_schedules_sensors/static_partitioned_asset_job.py"
+  startAfter="start_single_partition"
+  endBefore="end_single_partition"
+/>
 
 ## このガイドのAPI
 
@@ -130,5 +158,5 @@ current_date - 1 type_of_partition + end_offset
 | <PyObject section="schedules-sensors" module="dagster" object="schedule" decorator />                  | 指定された cron スケジュールに従って実行されるスケジュールを定義するデコレータ。                 |
 | <PyObject section="schedules-sensors" module="dagster" object="build_schedule_from_partitioned_job" /> | パーティション化されたジョブのパーティション分割と一致する間隔を持つスケジュールを構築する関数。 |
 | <PyObject section="schedules-sensors" module="dagster" object="RunRequest" />                          | 1 回の実行を開始するために必要なすべての情報を表すクラス。                        |
-| <PyObject section="assets" module="dagster" object="define_asset_job" />                    |選択したアセットからジョブを定義する機能。            |
+| <PyObject section="assets" module="dagster" object="define_asset_job" />                    |[選択したアセット](/guides/build/assets/asset-selection-syntax)からジョブを定義する機能。            |
 | <PyObject section="jobs" module="dagster" object="job" decorator />                       | ジョブを定義するために使用されるデコレータ。               |

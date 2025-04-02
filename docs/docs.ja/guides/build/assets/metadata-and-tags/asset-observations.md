@@ -1,7 +1,7 @@
 ---
 title: "アセットの監視"
 description: Dagster provides functionality to record metadata about assets.
-sidebar_position: 500
+sidebar_position: 5000
 ---
 
 アセットの監視は、特定のアセットに関するメタデータを記録するイベントです。アセットの実体化とは異なり、アセットの監視はアセットが変更されたことを意味するものではありません。
