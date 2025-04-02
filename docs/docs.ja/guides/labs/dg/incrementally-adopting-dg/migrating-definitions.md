@@ -1,27 +1,27 @@
 ---
-title: 'Autoloading existing Dagster definitions'
+title: '既存の Dagster 定義の自動読み込み'
 sidebar_position: 100
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
 :::note
 
-This guide covers using existing Dagster definitions with a `dg`-compatible project. To convert an existing project to use `dg`, see "[Converting an existing project to use `dg`](/guides/labs/dg/incrementally-adopting-dg/migrating-project)".
+このガイドでは、`dg` 互換プロジェクトで既存の Dagster 定義を使用する方法について説明します。既存のプロジェクトを `dg` を使用するように変換するには、「[既存のプロジェクトを `dg` を使用するように変換する](/guides/labs/dg/incrementally-adopting-dg/migrating-project)」を参照してください。
 
 :::
 
-In projects that heavily use `dg`, you would typically keep all definitions in the `defs/` directory. However, if you've converted an existing project to use `dg`, you may have definitions located in various other modules. This guide will show you how to move these existing definitions into the `defs` directory in a way that will allow them to be automatically loaded.
+`dg` を多用するプロジェクトでは、通常、すべての定義を `defs/` ディレクトリに保存します。ただし、既存のプロジェクトを `dg` を使用するように変換した場合、さまざまな他のモジュールに定義が配置されている可能性があります。このガイドでは、これらの既存の定義を `defs` ディレクトリに移動して、自動的に読み込まれるようにする方法を説明します。
 
-## Example project structure
+## プロジェクト構造の例
 
-Let's walk through an example of migrating your existing definitions, with a project that has the following structure:
+次の構造を持つプロジェクトを使用して、既存の定義を移行する例を見てみましょう:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/1-tree.txt" />
 
-At the top level, we load definitions from various modules:
+最上位レベルでは、さまざまなモジュールから定義を読み込みます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/2-definitions-before.py"
@@ -29,45 +29,45 @@ At the top level, we load definitions from various modules:
   title="my_existing_project/definitions.py"
 />
 
-Each of these modules contains a variety of Dagster definitions, including assets, jobs, and schedules.
+これらの各モジュールには、アセット、ジョブ、スケジュールなど、さまざまな Dagster 定義が含まれています。
 
-Let's migrate the `elt` module to a component.
+`elt` モジュールをコンポーネントに移行してみましょう。
 
-## Move definitions to `defs`
+## 定義を `defs` に移動する
 
-We'll start by moving the top-level `elt` module into `defs/elt`:
+まず、トップレベルの `elt` モジュールを `defs/elt` に移動します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/3-mv.txt" />
 
-Now that our definitions are in the `defs` directory, we can update the root `definitions.py` file to no longer explicitly load the `elt` module's `Definitions`:
+定義が `defs` ディレクトリにあるので、ルート `definitions.py` ファイルを更新して、`elt` モジュールの `Definitions` を明示的にロードしないようにすることができます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/4-definitions-after.py"
   title="my_existing_project/definitions.py"
 />
 
-Our project structure now looks like this:
+プロジェクト構造は次のようになります:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/5-tree-after.txt" />
 
-The `load_defs` command in our `definitions.py` file will automatically load any definitions found within the `defs` module. This means that all of our definitions are now automatically loaded, with no need to import them up into any top-level organization scheme.
+`definitions.py` ファイルの `load_defs` コマンドは、`defs` モジュール内にある定義を自動的にロードします。つまり、すべての定義が自動的にロードされるようになり、トップレベルの組織スキームにインポートする必要がなくなりました。
 
-We can repeat the same process for our other modules.
+他のモジュールについても同じプロセスを繰り返すことができます。
 
-## Fully migrated project structure
+## 完全に移行されたプロジェクト構造
 
-Once each of our definitions modules are migrated, our project is left with a standardized structure:
+各定義モジュールが移行されると、プロジェクトには標準化された構造が残ります:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/6-tree-after-all.txt" />
 
-Our project root now only constructs definitions from the `defs` module:
+プロジェクト ルートは、`defs` モジュールからの定義のみを構築するようになりました:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/7-definitions-after-all.py"
   title="my_existing_project/definitions.py"
 />
 
-We can run `dg list defs` to confirm that all of our definitions are being loaded correctly:
+すべての定義が正しくロードされていることを確認するには、`dg list defs` を実行します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/migrating-definitions/8-list-defs-after-all.txt"
@@ -76,4 +76,4 @@ We can run `dg list defs` to confirm that all of our definitions are being loade
 
 ## Next steps
 
-- [Add a new definition to your project](/guides/labs/dg/dagster-definitions)
+- [プロジェクトに新しい定義を追加する](/guides/labs/dg/dagster-definitions)

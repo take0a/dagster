@@ -1,97 +1,80 @@
 ---
-title: 'Converting an existing project to use dg'
+title: '既存のプロジェクトを dg を使用するように変換する'
 sidebar_position: 200
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
 :::note
 
-This guide is only relevant if you are starting from an _existing_ Dagster project. This setup is unnecessary if you [scaffolded a new project](/guides/labs/dg/scaffolding-a-project) with `dg scaffold project`.
+このガイドは、_既存の_ Dagster プロジェクトから開始する場合にのみ関連します。`dg scaffold project` を使用して [新しいプロジェクトをスキャフォールディング](/guides/labs/dg/scaffolding-a-project) した場合、このセットアップは不要です。
 
 :::
 
-We have a basic existing Dagster project and have been using `pip` to manage
-our Python environment. Our project defines a Python package with a `setup.py`
-and a single Dagster asset. The asset is exposed in a top-level `Definitions`
-object in `my_existing_project/definitions.py`.
+基本的な既存の Dagster プロジェクトがあり、`pip` を使用して Python 環境を管理しています。プロジェクトでは、`setup.py` と単一の Dagster アセットを含む Python パッケージを定義します。アセットは、`my_existing_project/definitions.py` の最上位の `Definitions` オブジェクトで公開されます。
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/1-tree.txt" />
 
-## Install dependencies
+## 依存関係をインストールする
 
-### Install the `dg` command line tool
+### `dg`コマンドラインツールをインストールする
 
-Let's start with a fresh Python virtual environment (you may already have one):
+新しい Python 仮想環境から始めましょう (すでに存在している場合もあります)。
 
 <CliInvocationExample contents="python -m venv .venv && source .venv/bin/activate" />
 
-We'll need to install the `dg` command line tool. You can install it into the
-virtual environment using `pip`:
+`dg` コマンドライン ツールをインストールする必要があります。`pip` を使用して仮想環境にインストールできます:
 
 <CliInvocationExample contents="pip install dagster-dg" />
 
 :::note
-For simplicity in this tutorial, we are installing the `dg` executable into the
-same virtual environment as our project. However, we generally recommend
-installing `dg` globally using the
-[`uv`](https://docs.astral.sh/uv/getting-started/installation/) package manager
-via `uv tool install dagster-dg`. This will install `dagster-dg` into an
-isolated environment and make it a globally available executable. This makes it
-easier to work with multiple projects using `dg`.
+このチュートリアルでは、わかりやすくするために、`dg` 実行ファイルをプロジェクトと同じ仮想環境にインストールします。ただし、通常は、[`uv`](https://docs.astral.sh/uv/getting-started/installation/) パッケージ マネージャーを使用して、`uv tool install dagster-dg` で `dg` をグローバルにインストールすることをお勧めします。これにより、`dagster-dg` が分離された環境にインストールされ、グローバルに使用可能な実行ファイルになります。これにより、`dg` を使用して複数のプロジェクトで作業しやすくなります。
 :::
 
-### Install `dagster-components`
+### `dagster-components` をインストールする
 
-Next, we'll need to add `dagster-components` as a dependency of our project. Add it to `install_requires` in `setup.py`:
+次に、プロジェクトの依存関係として `dagster-components` を追加する必要があります。`setup.py` の `install_requires` に追加します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/2-setup.py" language="python" title="setup.py" />
 
-Now we install (or reinstall) our project into the active virtual environment:
+次に、プロジェクトをアクティブな仮想環境にインストール (または再インストール) します:
 
 <CliInvocationExample contents="pip install -e ." />
 
-## Update project structure
+## プロジェクト構造の更新
 
-### Add `pyproject.toml`
+### `pyproject.toml` を追加する
 
-The `dg` command recognizes Dagster projects through the presence of a
-`pyproject.toml` file with a `tool.dg` section. If you are already using
-`pyproject.toml` for your project, you can just add the requisite `tool.dg`
-to the file. Since our sample project has a `setup.py` and no `pyproject.toml`,
-we need to create a new `pyproject.toml` file. This can co-exist with
-`setup.py`-- it is purely a source of config for `dg`. Here is the config we
-need to put in `pyproject.toml`:
+`dg` コマンドは、`tool.dg` セクションを含む `pyproject.toml` ファイルの存在によって Dagster プロジェクトを認識します。プロジェクトですでに `pyproject.toml` を使用している場合は、必要な `tool.dg` をファイルに追加するだけです。サンプル プロジェクトには `setup.py` があり、`pyproject.toml` がないため、新しい `pyproject.toml` ファイルを作成する必要があります。これは `setup.py` と共存できます。これは純粋に `dg` の設定ソースです。`pyproject.toml` に追加する必要がある設定は次のとおりです:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/3-pyproject.toml" language="toml" title="pyproject.toml" />
 
-There are three settings:
+設定は 3 つあります:
 
-- `tool.dg.directory_type = "project"`: This is how `dg` identifies your package as a Dagster project. This is required.
-- `tool.dg.project.root_module = "my_existing_project"`: This points to the root module of your project. This is also required.
-- `tool.dg.project.code_location_target_module = "my_existing_project.definitions"`: This tells `dg` where to find the top-level `Definitions` object in your project. This actually defaults to `[root_module].definitions`, so it is not strictly necessary for us to set it here, but we are including this setting in order to be explicit--existing projects might have the top-level `Definitions` object defined in a different module, in which case this setting is required.
-Now that these settings are in place, you can interact with your project using `dg`. If we run `dg list defs` we can see the sole existing asset in our project:
+- `tool.dg.directory_type = "project"`: これは `dg` がパッケージを Dagster プロジェクトとして識別する方法です。これは必須です。
+- `tool.dg.project.root_module = "my_existing_project"`: これはプロジェクトのルート モジュールを指します。これも必須です。
+- `tool.dg.project.code_location_target_module = "my_existing_project.definitions"`: これは `dg` にプロジェクト内の最上位の `Definitions` オブジェクトの場所を伝えます。これは実際にはデフォルトで `[root_module].definitions` になっているため、ここで設定する必要は厳密にはありませんが、明示するためにこの設定を含めています。既存のプロジェクトでは最上位の `Definitions` オブジェクトが別のモジュールで定義されている可能性があり、その場合はこの設定が必要です。
+
+これらの設定が完了したら、`dg` を使用してプロジェクトを操作できます。`dg list defs` を実行すると、プロジェクトに存在する唯一のアセットが表示されます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/4-list-defs.txt"  />
 
-### Create a `defs` directory
+### `defs`ディレクトリを作成する
 
-Part of the `dg` experience is _autoloading_ definitions. This means
-automatically picking up any definitions that exist in a particular module. We
-are going to create a new submodule named `my_existing_project.defs` (`defs` is
-the conventional name of the module for where definitions live in `dg`) from which we will autoload definitions.
+`dg` エクスペリエンスの一部は、定義の _自動読み込み_ です。これは、特定のモジュール内に存在する定義を自動的に取得することを意味します。`my_existing_project.defs` (`defs` は、`dg` 内で定義が存在するモジュールの慣例的な名前です) という名前の新しいサブモジュールを作成し、そこから定義を自動読み込みします。
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/5-mkdir-defs.txt" />
 
-## Modify top-level definitions
+## トップレベルの定義を変更する
 
-Autoloading is provided by a function from `dagster-components` that returns a `Definitions` object. Because we already have some other definitions in our project, we'll combine those with the autoloaded ones from `my_existing_project.defs`.
+自動ロードは、`Definitions` オブジェクトを返す `dagster-components` の関数によって提供されます。プロジェクトにはすでに他の定義がいくつかあるため、それらを `my_existing_project.defs` から自動ロードされた定義と組み合わせます。
 
-To do so, you'll need to modify your `definitions.py` file, or whichever file contains your top-level `Definitions` object.
+これを行うには、`definitions.py` ファイル、または最上位の `Definitions` オブジェクトを含むファイルを変更する必要があります。
 
-You'll autoload definitions using `load_defs`, then merge them with your existing definitions using `Definitions.merge`. You pass `load_defs` the `defs` module you just created:
+`load_defs` を使用して定義を自動ロードし、`Definitions.merge` を使用して既存の定義とマージします。`load_defs` に、作成した `defs` モジュールを渡します:
+
 <Tabs>
   <TabItem value="before" label="Before">
     <CodeExample
@@ -107,19 +90,17 @@ You'll autoload definitions using `load_defs`, then merge them with your existin
   </TabItem>
 </Tabs>
 
-Now let's add an asset to the new `defs` module. Create
-`my_existing_project/defs/autoloaded_asset.py` with the following contents:
+次に、新しい `defs` モジュールにアセットを追加しましょう。次の内容で `my_existing_project/defs/autoloaded_asset.py` を作成します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/8-autoloaded-asset.py" />
 
-Finally, let's confirm the new asset is being autoloaded. Run `dg list defs`
-again and you should see both the new `autoloaded_asset` and old `my_asset`:
+最後に、新しいアセットが自動ロードされていることを確認しましょう。もう一度 `dg list defs` を実行すると、新しい `autoloaded_asset` と古い `my_asset` の両方が表示されます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/migrating-project/9-list-defs.txt"  />
 
-Now your project is fully compatible with `dg`!
+これで、プロジェクトは `dg` と完全に互換性を持つようになりました！
 
 ## Next steps
 
-- [Restructure existing definitions](/guides/labs/dg/incrementally-adopting-dg/migrating-definitions)
-- [Add a new definition to your project](/guides/labs/dg/dagster-definitions)
+- [既存の定義を再構築する](/guides/labs/dg/incrementally-adopting-dg/migrating-definitions)
+- [プロジェクトに新しい定義を追加する](/guides/labs/dg/dagster-definitions)

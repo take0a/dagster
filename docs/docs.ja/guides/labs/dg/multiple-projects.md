@@ -1,43 +1,43 @@
 ---
-title: 'Managing multiple projects with dg'
+title: 'dg で複数のプロジェクトを管理する'
 sidebar_position: 300
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
 :::note
 
-If you're just getting started, we recommend [scaffolding a single project](/guides/labs/dg/scaffolding-a-project) instead of a workspace with multiple projects.
+始めたばかりの場合は、複数のプロジェクトを含むワークスペースではなく、[単一のプロジェクトのスキャフォールディング](/guides/labs/dg/scaffolding-a-project)をお勧めします。
 
 :::
 
-If you need to collaborate with multiple teams, or work with conflicting dependencies that require isolation from each other, you can scaffold a workspace directory that contains multiple projects, each with their own separate Python environment.
+複数のチームと共同作業する必要がある場合、または相互に分離する必要がある競合する依存関係を扱う場合は、それぞれ独自の Python 環境を持つ複数のプロジェクトを含むワークスペース ディレクトリをスキャフォールディングできます。
 
-A workspace directory contains a root `pyproject.toml` with workspace-level settings, and a `projects` directory with one or more projects.
+ワークスペース ディレクトリには、ワークスペース レベルの設定を含むルート `pyproject.toml` と、1 つ以上のプロジェクトを含む `projects` ディレクトリが含まれます。
 
 :::note
 
-A workspace does not define a Python environment by default. Instead, Python environments are defined per project.
+ワークスペースでは、デフォルトでは Python 環境は定義されません。代わりに、Python 環境はプロジェクトごとに定義されます。
 
 :::
 
-## Scaffold a new workspace and first project
+## 新しいワークスペースと最初のプロジェクトを構築する
 
-To scaffold a new workspace with an initial project called `project-1`, run `dg init` with the `--workspace-name` option:
+`project-1` という初期プロジェクトで新しいワークスペースをスキャフォールディングするには、`--workspace-name` オプションを指定して `dg init` を実行します。
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/workspace/1-dg-init.txt" />
 
-This will create a new directory called `dagster-workspace` with a `projects` subdirectory that contains `project-1`. It will also set up a new `uv`-managed Python environment for this project.
+これにより、`project-1` を含む `projects` サブディレクトリを持つ `dagster-workspace` という新しいディレクトリが作成されます。また、このプロジェクト用に新しい `uv` 管理 Python 環境もセットアップされます。
 
-### Review workspace structure
+### ワークスペース構造を確認する
 
-The new workspace has the following structure:
+新しいワークスペースの構造は次のとおりです:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/workspace/2-tree.txt" />
 
-The `pyproject.toml` file for the `workspace` folder contains an `is_workspace` setting that marks this directory as a workspace:
+`workspace` フォルダの `pyproject.toml` ファイルには、このディレクトリをワークスペースとしてマークする `is_workspace` 設定が含まれています。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/workspace/3-pyproject.toml"
@@ -47,12 +47,11 @@ The `pyproject.toml` file for the `workspace` folder contains an `is_workspace` 
 
 :::note
 
-`project-1` also contains a virtual environment directory called `.venv` that is not shown above. This environment is managed by `uv` and its contents are specified in the `uv.lock` file.
+`project-1` には、上記には示されていない `.venv` という仮想環境ディレクトリも含まれています。この環境は `uv` によって管理され、その内容は `uv.lock` ファイルで指定されます。
 
 :::
 
-The `project-1` directory contains a `pyproject.toml` file that defines
-it as a Dagster project:
+`project-1` ディレクトリには、それを Dagster プロジェクトとして定義する `pyproject.toml` ファイルが含まれています。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dg/workspace/4-project-pyproject.toml"
@@ -60,21 +59,21 @@ it as a Dagster project:
   title="workspace/projects/project-1/pyproject.toml"
 />
 
-## Add a second project to the workspace
+## ワークスペースに2番目のプロジェクトを追加する
 
-As noted above, environments are scoped per project. `dg` commands will only use the environment of `project-1` when you are inside the `project-1` directory.
+上で述べたように、環境はプロジェクトごとにスコープが設定されます。`dg` コマンドは、`project-1` ディレクトリ内にいる場合にのみ `project-1` の環境を使用します。
 
-Let's create another project:
+別のプロジェクトを作成しましょう:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/workspace/5-scaffold-project.txt" />
 
-Now we have two projects. We can list them with:
+これで 2 つのプロジェクトができました。次のようにリストできます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/workspace/6-project-list.txt" />
 
-## Load workspace with `dg`
+## `dg` でワークスペースをロードする
 
-Finally, let's load up our two projects with `dg dev`. `dg dev` will automatically recognize the projects in your workspace and launch them in their respective environments. Let's run `dg dev` back in the workspace root directory and load up the Dagster UI in a browser:
+最後に、`dg dev` で 2 つのプロジェクトをロードしましょう。`dg dev` はワークスペース内のプロジェクトを自動的に認識し、それぞれの環境で起動します。ワークスペースのルート ディレクトリで `dg dev` を実行し、ブラウザーで Dagster UI をロードしましょう:
 
 <CliInvocationExample contents="cd ../.. && dg dev" />
 

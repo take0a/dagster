@@ -1,18 +1,18 @@
 ---
-title: Getting started
+title: はじめる
 sidebar_position: 200
 ---
 
-Dagster orchestrates dbt alongside other technologies, so you can schedule dbt with Spark, Python, etc. in a single data pipeline. Dagster's asset-oriented approach allows Dagster to understand dbt at the level of individual dbt models.
+Dagster は dbt を他のテクノロジーと一緒にオーケストレーションするため、単一のデータ パイプラインで Spark、Python などを使用して dbt をスケジュールできます。Dagster のアセット指向のアプローチにより、Dagster は個々の dbt モデルのレベルで dbt を理解できます。
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、次のものが必要です:
 
-- A basic understanding of dbt, DuckDB, and Dagster concepts such as [assets](/guides/build/assets/) and [resources](/guides/build/external-resources/)
-- To install the [dbt](https://docs.getdbt.com/docs/core/installation-overview) and [DuckDB CLIs](https://duckdb.org/docs/api/cli/overview.html)
-- To install the following packages:
+- [assets](/guides/build/assets/) や [resources](/guides/build/external-resources/) などの dbt、DuckDB、および Dagster の概念に関する基本的な理解
+- [dbt](https://docs.getdbt.com/docs/core/installation-overview) および [DuckDB CLI](https://duckdb.org/docs/api/cli/overview.html) をインストールする
+- 次のパッケージをインストールする:
 
 ```shell
 pip install dagster duckdb plotly pandas dagster-dbt dbt-duckdb
@@ -20,15 +20,15 @@ pip install dagster duckdb plotly pandas dagster-dbt dbt-duckdb
 
 </details>
 
-## Setting up a basic dbt project
+## 基本的な dbt プロジェクトの設定
 
-Start by downloading this basic dbt project, which includes a few models and a DuckDB backend:
+まず、いくつかのモデルと DuckDB バックエンドを含むこの基本的な dbt プロジェクトをダウンロードします:
 
 ```bash
 git clone https://github.com/dagster-io/basic-dbt-project
 ```
 
-The project structure should look like this:
+プロジェクト構造は次のようになります:
 
 ```
 ├── README.md
@@ -41,7 +41,7 @@ The project structure should look like this:
 │       └── schema.yml
 ```
 
-First, you need to point Dagster at the dbt project and ensure Dagster has what it needs to build an asset graph. Create a `definitions.py` in the same directory as the dbt project:
+まず、Dagster を dbt プロジェクトに向け、Dagster にアセット グラフの構築に必要なものがあることを確認する必要があります。dbt プロジェクトと同じディレクトリに `definitions.py` を作成します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/dbt_definitions.py"
@@ -49,9 +49,9 @@ First, you need to point Dagster at the dbt project and ensure Dagster has what 
   title="definitions.py"
 />
 
-## Adding upstream dependencies
+## 上流依存関係の追加
 
-Oftentimes, you'll want Dagster to generate data that will be used by downstream dbt models. To do this, add an upstream asset that the dbt project will as a source:
+多くの場合、下流の dbt モデルで使用されるデータを Dagster で生成する必要があります。これを行うには、dbt プロジェクトがソースとして使用する上流アセットを追加します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/dbt_definitions_with_upstream.py"
@@ -59,7 +59,7 @@ Oftentimes, you'll want Dagster to generate data that will be used by downstream
   title="definitions.py"
 />
 
-Next, you'll add a dbt model that will source the `raw_customers` asset and define the dependency for Dagster. Create the dbt model:
+次に、`raw_customers` アセットをソースし、Dagster の依存関係を定義する dbt モデルを追加します。dbt モデルを作成します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/basic-dbt-project/models/example/customers.sql"
@@ -67,7 +67,7 @@ Next, you'll add a dbt model that will source the `raw_customers` asset and defi
   title="customers.sql"
 />
 
-Next, create a `_source.yml` file that points dbt to the upstream `raw_customers` asset:
+次に、dbt をアップストリームの `raw_customers` アセットにポイントする `_source.yml` ファイルを作成します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/basic-dbt-project/models/example/_source.yml"
@@ -77,9 +77,9 @@ Next, create a `_source.yml` file that points dbt to the upstream `raw_customers
 
 ![Screenshot of dbt lineage](/images/integrations/dbt/dbt-lineage.png)
 
-## Adding downstream dependencies
+## 下流の依存関係の追加
 
-You may also have assets that depend on the output of dbt models. Next, create an asset that depends on the result of the new `customers` model. This asset will create a histogram of the first names of the customers:
+dbt モデルの出力に依存するアセットもあるかもしれません。次に、新しい `customers` モデルの結果に依存するアセットを作成します。このアセットは、顧客のファーストネームのヒストグラムを作成します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/dbt_definitions_with_downstream.py"
@@ -87,9 +87,9 @@ You may also have assets that depend on the output of dbt models. Next, create a
   title="definitions.py"
 />
 
-## Scheduling dbt models
+## スケジュール dbt モデル
 
-You can schedule your dbt models by using the `dagster-dbt`'s `build_schedule_from_dbt_selection` function:
+`dagster-dbt` の `build_schedule_from_dbt_selection` 関数を使用して、dbt モデルをスケジュールできます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/etl/transform-dbt/dbt_definitions_with_schedule.py"

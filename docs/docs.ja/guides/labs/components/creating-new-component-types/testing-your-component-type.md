@@ -1,9 +1,9 @@
 ---
-title: 'Testing your component type'
+title: 'コンポーネントタイプのテスト'
 sidebar_position: 300
 unlisted: true
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />

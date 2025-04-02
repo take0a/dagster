@@ -1,23 +1,23 @@
 ---
-title: 'Components ETL pipeline tutorial'
+title: 'コンポーネント ETL パイプライン チュートリアル'
 sidebar_position: 10
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-## Setup
+## 設定
 
-### 1. Install project dependencies
+### 1. プロジェクトの依存関係をインストールする
 
 :::info Prerequisites
 
-To complete this tutorial, you must [install `uv` and `dg`](/guides/labs/components/index.md#installation).
+このチュートリアルを完了するには、[`uv` と `dg` をインストール](/guides/labs/components/index.md#installation)する必要があります。
 
 :::
 
-First, install [`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=macos&download_method=package_manager) for a local database and [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) to visualize project structure:
+まず、ローカル データベース用の [`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=macos&download_method=package_manager) と、プロジェクト構造を視覚化するための [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) をインストールします:
 
 <Tabs>
 
@@ -29,13 +29,13 @@ First, install [`duckdb`](https://duckdb.org/docs/installation/?version=stable&e
 
 <TabItem value="windows" label="Windows">
 
-See the [`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=win&download_method=package_manager) Windows installation instructions and [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) installation instructions.
+[`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=win&download_method=package_manager) Windows インストール手順と [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) インストール手順を参照してください。
 
 </TabItem>
 
 <TabItem value="linux" label="Linux">
 
-See the [`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=linux&download_method=direct&architecture=x86_64) and [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) Linux installation instructions.
+[`duckdb`](https://duckdb.org/docs/installation/?version=stable&environment=cli&platform=linux&download_method=direct&architecture=x86_64) および [`tree`](https://oldmanprogrammer.net/source.php?dir=projects/tree/INSTALL) Linux インストール手順を参照してください。
 
 </TabItem>
 
@@ -43,58 +43,57 @@ See the [`duckdb`](https://duckdb.org/docs/installation/?version=stable&environm
 
 :::note
 
-`tree` is optional and is only used to produce a nicely formatted representation of the project structure on the comand line. You can also use `find`, `ls`, `dir`, or any other directory listing command.
+`tree` はオプションであり、コマンドラインでプロジェクト構造の適切にフォーマットされた表現を生成するためにのみ使用されます。`find`、`ls`、`dir`、またはその他のディレクトリ一覧コマンドを使用することもできます。
 
 :::
 
-### 2. Scaffold a new project
+### 2. 新しいプロジェクトを準備する
 
-After installing dependencies, scaffold a components-ready project:
+依存関係をインストールしたら、コンポーネント対応プロジェクトをスキャフォールディングします:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/2-scaffold.txt" />
 
-The `dg scaffold project` command builds a project at `jaffle-platform` and initializes a new Python
-virtual environment inside it. When you use `dg`'s default environment management behavior, you won't need to worry about activating this virtual environment yourself.
+`dg scaffold project` コマンドは、`jaffle-platform` でプロジェクトをビルドし、その中に新しい Python 仮想環境を初期化します。`dg` のデフォルトの環境管理動作を使用すると、この仮想環境を自分でアクティブ化する必要はありません。
 
-To learn more about the files, directories, and default settings in a project scaffolded with `dg scaffold project`, see "[Creating a project with components](/guides/labs/components/building-pipelines-with-components/creating-a-project-with-components#project-structure)".
+`dg scaffold project` でスキャフォールディングされたプロジェクトのファイル、ディレクトリ、およびデフォルト設定の詳細については、「[コンポーネントを使用したプロジェクトの作成](/guides/labs/components/building-pipelines-with-components/creating-a-project-with-components#project-structure)」を参照してください。
 
-## Ingest data
+## データの取り込み
 
-### 1. Add the Sling component type to your environment
+### 1. Slingコンポーネントタイプを環境に追加する
 
-To ingest data, you must set up [Sling](https://slingdata.io/). However, if you list the available component types in your environment at this point, the Sling component won't appear, since the basic `dagster-components` package that was installed when you scaffolded your project doesn't include components for specific integrations (like Sling):
+データを取り込むには、[Sling](https://slingdata.io/) を設定する必要があります。ただし、この時点で環境で使用可能なコンポーネント タイプを一覧表示しても、Sling コンポーネントは表示されません。これは、プロジェクトのスキャフォールディング時にインストールされた基本的な `dagster-components` パッケージに、特定の統合 (Sling など) 用のコンポーネントが含まれていないためです:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/7-dg-list-component-types.txt" />
 
-To make the Sling component available in your environment, install the `sling` extra of `dagster-components`:
+Sling コンポーネントを環境で使用できるようにするには、`dagster-components` の `sling` エクストラをインストールします。
 
 <CliInvocationExample contents="uv add 'dagster-components[sling]'" />
 
 :::note
 
-`dg` always operates in an isolated environment, but it is able to access the set of component types available in your project environment because it attempts to resolve a project root whenever it is run. If `dg` finds a `pyproject.toml` file with a `tool.dg.is_project = true` setting, then it will expect a `uv`-managed virtual environment to be present in the same directory. (This can be confirmed by the presence of a `uv.lock` file.)
+`dg` は常に分離された環境で動作しますが、実行されるたびにプロジェクト ルートを解決しようとするため、プロジェクト環境で使用可能なコンポーネント タイプのセットにアクセスできます。`dg` が `tool.dg.is_project = true` 設定の `pyproject.toml` ファイルを見つけた場合、`uv` 管理の仮想環境が同じディレクトリに存在すると想定されます。(これは `uv.lock` ファイルの存在によって確認できます。)
 
-When you run commands like `dg list component-type` , `dg` obtains the results by identifying the in-scope project environment and querying it. In this case, the project environment was set up as part of the `dg scaffold project` command.
+`dg list component-type` のようなコマンドを実行すると、`dg` はスコープ内のプロジェクト環境を識別してクエリを実行し、結果を取得します。この場合、プロジェクト環境は `dg scaffold project` コマンドの一部として設定されています。
 
 :::
 
-### 2. Confirm availability of the Sling component type
+### 2. Slingコンポーネントタイプの可用性を確認する
 
-To confirm that the `dagster_components.sling_replication` component type is now available, run the `dg list component-type` command again:
+`dagster_components.sling_replication` コンポーネントタイプが使用可能になったことを確認するには、`dg list component-type` コマンドを再度実行します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/8-dg-list-component-types.txt" />
 
-### 3. Create a new instance of the Sling component
+### 3. Slingコンポーネントの新しいインスタンスを作成する
 
-Next, create a new instance of this component type:
+次に、このコンポーネント タイプの新しいインスタンスを作成します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/9-dg-scaffold-sling-replication.txt" />
 
-This adds a component instance to the project at `jaffle_platform/defs/ingest_files`:
+これにより、プロジェクトの `jaffle_platform/defs/ingest_files` にコンポーネント インスタンスが追加されます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/10-tree-jaffle-platform.txt" />
 
-A single file, `component.yaml`, was created in the component folder. The `component.yaml` file is common to all Dagster components, and specifies the component type and any parameters used to scaffold definitions from the component at runtime.
+コンポーネント フォルダーに `component.yaml` という単一のファイルが作成されました。`component.yaml` ファイルはすべての Dagster コンポーネントに共通であり、実行時にコンポーネントから定義をスキャフォールディングするために使用されるコンポーネント タイプとパラメーターを指定します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/11-component.yaml"
@@ -102,27 +101,27 @@ A single file, `component.yaml`, was created in the component folder. The `compo
   title="jaffle-platform/jaffle_platform/defs/ingest_files/component.yaml"
 />
 
-Right now the parameters define a single "replication"-- this is a Sling concept that specifies how data should be replicated from a source to a target. The details are specified in a `replication.yaml` file that is read by Sling. This file does not yet exist-- we are going to create it shortly.
+現在、パラメータは単一の「レプリケーション」を定義します。これは、ソースからターゲットにデータをレプリケートする方法を指定する Sling の概念です。詳細は、Sling によって読み取られる `replication.yaml` ファイルで指定されます。このファイルはまだ存在していませんが、すぐに作成する予定です。
 
 :::note
-The `path` parameter for a replication is relative to the same folder containing component.yaml. This is a convention for components.
+レプリケーションの `path` パラメータは、component.yaml を含む同じフォルダを基準とします。これはコンポーネントの規則です。
 :::
 
-### 4. Set up DuckDB
+### 4. DuckDBをセットアップする
 
-Set up and test DuckDB:
+DuckDB をセットアップしてテストします:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/12-sling-setup-duckdb.txt" />
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/13-sling-test-duckdb.txt" />
 
-### 5. Download files for Sling source
+### 5. Sling ソースのファイルをダウンロード
 
-Next, you will need to download some files locally to use your Sling source, since Sling doesn't support reading from the public internet:
+次に、Sling はパブリック インターネットからの読み取りをサポートしていないため、Sling ソースを使用するにはいくつかのファイルをローカルにダウンロードする必要があります:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/14-curl.txt" />
 
-Finally, create a `replication.yaml` file that references the downloaded files:
+最後に、ダウンロードしたファイルを参照する `replication.yaml` ファイルを作成します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/15-replication.yaml"
@@ -130,45 +129,45 @@ Finally, create a `replication.yaml` file that references the downloaded files:
   title="jaffle-platform/jaffle_platform/defs/ingest_files/replication.yaml"
 />
 
-### 6. View and materialize assets in the Dagster UI
+### 6. Dagster UI でアセットを表示およびマテリアライズする
 
-Load your project in the Dagster UI to see what you've built so far. To materialize assets and load tables in the DuckDB instance, click **Materialize All**:
+Dagster UI にプロジェクトをロードして、これまでに構築した内容を確認します。アセットをマテリアライズして DuckDB インスタンスにテーブルをロードするには、**Materialize All** をクリックします。
 
 <CliInvocationExample contents="dg dev" />
 
 ![](/images/guides/build/projects-and-components/components/sling.png)
 
-Verify the DuckDB tables on the command line:
+コマンドラインで DuckDB テーブルを確認します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/16-duckdb-select.txt" />
 
-## Transform data
+## データの変換
 
-To transform the data, you will need to download a sample dbt project from GitHub and use the data ingested with Sling as an input for the dbt project.
+データを変換するには、GitHub からサンプル dbt プロジェクトをダウンロードし、Sling で取り込んだデータを dbt プロジェクトの入力として使用する必要があります。
 
-### 1. Clone a sample dbt project from GitHub
+### 1. GitHub からサンプル dbt プロジェクトをクローンする
 
-First, clone the project and delete the embedded git repo:
+まず、プロジェクトをクローンし、埋め込まれた git リポジトリを削除します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/17-jaffle-clone.txt" />
 
-### 2. Install the dbt project component type
+### 2. dbtプロジェクトコンポーネントタイプをインストールする
 
-To interface with the dbt project, you will need to instantiate a Dagster dbt project component. To access the dbt project component type, install `dagster-components[dbt]` and `dbt-duckdb`:
+dbt プロジェクトとインターフェースするには、Dagster dbt プロジェクト コンポーネントをインスタンス化する必要があります。dbt プロジェクト コンポーネント タイプにアクセスするには、`dagster-components[dbt]` と `dbt-duckdb` をインストールします:
 
 <CliInvocationExample contents="uv add 'dagster-components[dbt]' dbt-duckdb" />
 
-To confirm that the `dagster_components.dbt_project` component type is now available, run `dg list component-type`:
+`dagster_components.dbt_project` コンポーネント タイプが使用可能になったことを確認するには、`dg list component-type` を実行します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/18-dg-list-component-types.txt" />
 
-### 3. Scaffold a new instance of the dbt project component
+### 3. dbt プロジェクト コンポーネントの新しいインスタンスをスキャフォールディングする
 
-Next, scaffold a new instance of the `dagster_components.dbt_project` component, providing the path to the dbt project you cloned earlier as the `project_path` scaffold parameter:
+次に、`dagster_components.dbt_project` コンポーネントの新しいインスタンスをスキャフォールディングし、先ほどクローンした dbt プロジェクトへのパスを `project_path` スキャフォールディング パラメータとして指定します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/19-dg-scaffold-jdbt.txt" />
 
-This creates a new component instance in the project at `jaffle_platform/defs/jdbt`. To see the component configuration, open `component.yaml` in that directory:
+これにより、プロジェクトの `jaffle_platform/defs/jdbt` に新しいコンポーネント インスタンスが作成されます。コンポーネント構成を確認するには、そのディレクトリの `component.yaml` を開きます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/20-component-jdbt.yaml"
@@ -176,17 +175,17 @@ This creates a new component instance in the project at `jaffle_platform/defs/jd
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
 
-### 4. Update the dbt project component configuration
+### 4. dbtプロジェクトコンポーネント構成を更新する
 
-Let’s see the project in the Dagster UI:
+Dagster UI でプロジェクトを見てみましょう:
 
 <CliInvocationExample contents="dg dev" />
 
 ![](/images/guides/build/projects-and-components/components/dbt-1.png)
 
-You can see that there appear to be two copies of the `raw_customers`, `raw_orders`, and `raw_payments` tables. If you click on the assets, you can see their full asset keys. The keys generated by the dbt component are of the form `main/*`, whereas the keys generated by the Sling component are of the form `target/main/*`.
+`raw_customers`、`raw_orders`、および `raw_payments` テーブルのコピーが 2 つあることがわかります。アセットをクリックすると、アセットの完全なキーが表示されます。dbt コンポーネントによって生成されるキーは `main/*` の形式ですが、Sling コンポーネントによって生成されるキーは `target/main/*` の形式です。
 
-We need to update the configuration of the `dagster_components.dbt_project` component to match the keys generated by the Sling component. Update `components/jdbt/component.yaml` with the configuration below:
+Sling コンポーネントによって生成されたキーと一致するように、`dagster_components.dbt_project` コンポーネントの設定を更新する必要があります。以下の設定で `components/jdbt/component.yaml` を更新します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/21-project-jdbt-incorrect.yaml"
@@ -194,11 +193,11 @@ We need to update the configuration of the `dagster_components.dbt_project` comp
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
 
-You might notice the typo in the above file--after updating a component file, it's useful to validate that the changes match the component's schema. You can do this by running `dg check yaml`:
+上記のファイルにはタイプミスがあることに気付いたかもしれません。コンポーネント ファイルを更新した後は、変更がコンポーネントのスキーマと一致しているかどうかを検証すると便利です。これは、`dg check yaml` を実行することで実行できます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/22-dg-component-check-error.txt" />
 
-You can see that the error message includes the filename, line number, and a code snippet showing the exact nature of the error. Let's fix the typo:
+エラー メッセージには、ファイル名、行番号、およびエラーの正確な内容を示すコード スニペットが含まれていることがわかります。タイプミスを修正しましょう:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/23-project-jdbt.yaml"
@@ -206,29 +205,29 @@ You can see that the error message includes the filename, line number, and a cod
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
 
-Finally, run `dg check yaml` again to validate the fix:
+最後に、`dg check yaml` を再度実行して修正を検証します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/24-dg-component-check.txt" />
 
-Reload the project in Dagster UI to verify that the keys load properly:
+Dagster UI でプロジェクトを再ロードして、キーが正しくロードされていることを確認します:
 
 ![](/images/guides/build/projects-and-components/components/dbt-2.png)
 
-Now the keys generated by the Sling and dbt project components match, and the asset graph is correct. To materialize the new assets defined via the dbt project component, click **Materialize All**.
+これで、Sling と dbt プロジェクト コンポーネントによって生成されたキーが一致し、アセット グラフが正しくなりました。dbt プロジェクト コンポーネントを介して定義された新しいアセットをマテリアライズするには、**Materialize All** をクリックします。
 
-To verify the fix, you can view a sample of the newly materialized assets in DuckDB from the command line:
+修正を確認するには、コマンド ラインから DuckDB に新しくマテリアライズされたアセットのサンプルを表示します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/25-duckdb-select-orders.txt" />
 
-## Automate the pipeline
+## パイプラインを自動化する
 
-Now that you've defined some assets, let's schedule them.
+いくつかの資産を定義したので、それらをスケジュールしましょう。
 
-First scaffold in a schedule:
+スケジュールの最初のスキャフォールド:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/26-scaffold-daily-jaffle.txt" />
 
-And now target `*` and schedule `@daily`:
+そして、`*` をターゲットにして `@daily` をスケジュールします:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/27-daily-jaffle.py"
@@ -238,4 +237,4 @@ And now target `*` and schedule `@daily`:
 
 ## Next steps
 
-To continue your journey with components, you can [add more components to your project](/guides/labs/components/building-pipelines-with-components/adding-components) or learn how to [manage multiple components-ready projects with `dg`](/guides/labs/dg/multiple-projects).
+コンポーネントの使用を続けるには、[プロジェクトにコンポーネントを追加する](/guides/labs/components/building-pipelines-with-components/adding-components)か、[`dg` を使用して複数のコンポーネント対応プロジェクトを管理する](/guides/labs/dg/multiple-projects)方法を学習します。

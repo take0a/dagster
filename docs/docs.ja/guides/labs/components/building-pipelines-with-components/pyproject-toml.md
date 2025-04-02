@@ -1,13 +1,13 @@
 ---
-title: 'pyproject.toml settings'
+title: 'pyproject.toml 設定'
 sidebar_position: 500
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-`pyproject.toml` contains `tool.dagster` and `tool.dg` sections:
+`pyproject.toml` には `tool.dagster` セクションと `tool.dg` セクションが含まれています:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/4-pyproject.toml"
@@ -15,19 +15,19 @@ import Preview from '@site/docs/partials/\_Preview.md';
   title="jaffle-platform/pyproject.toml"
 />
 
-### `tool.dagster` section
+### `tool.dagster` セクション
 
-The `tool.dagster` section of `pyproject.toml` is not `dg`-specific. This section specifies that a set of definitions can be loaded from the `jaffle_platform.definitions` module.
+`pyproject.toml` の `tool.dagster` セクションは `dg` 固有ではありません。このセクションでは、一連の定義を `jaffle_platform.definitions` モジュールからロードできることを指定します。
 
-### `tool.dg` section
+### `tool.dg` セクション
 
-The `tool.dg` section contains `is_project` and `is_component_lib` settings.
+`tool.dg` セクションには `is_project` と `is_component_lib` の設定が含まれています。
 
-#### `is_project` setting
+#### `is_project` 設定
 
-`is_project = true` specifies that this project is a `dg`-managed Dagster project. Projects created with components are regular Dagster projects with a particular structure.
+`is_project = true` は、このプロジェクトが `dg` 管理の Dagster プロジェクトであることを指定します。コンポーネントを使用して作成されたプロジェクトは、特定の構造を持つ通常の Dagster プロジェクトです。
 
-To understand the structure, let's look at the content of `jaffle_platform/definitions.py`:
+構造を理解するために、`jaffle_platform/definitions.py` の内容を見てみましょう:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/5-definitions.py"
@@ -35,21 +35,21 @@ To understand the structure, let's look at the content of `jaffle_platform/defin
   title="jaffle-platform/jaffle_platform/definitions.py"
 />
 
-This call to `load_defs` will:
+この `load_defs` の呼び出しにより、次の処理が行われます:
 
-- discover the set of components defined in the project
-- compute a set of `Definitions` from each component
-- merge the component-specific definitions into a single `Definitions` object
+- プロジェクトで定義されているコンポーネントのセットを検出します
+- 各コンポーネントから `Definitions` のセットを計算します
+- コンポーネント固有の定義を 1 つの `Definitions` オブジェクトにマージします
 
-`is_project` is telling `dg` that the project is structured in this way and therefore contains component instances. In the current project, component instances will be placed in the default location at `jaffle_platform/components`.
+`is_project` は、プロジェクトがこの方法で構造化されているため、コンポーネント インスタンスが含まれていることを `dg` に伝えます。現在のプロジェクトでは、コンポーネント インスタンスは `jaffle_platform/components` のデフォルトの場所に配置されます。
 
-#### `is_component_lib` setting
+#### `is_component_lib` 設定
 
-`is_component_lib = true` specifies that the project is a component library. This means that the project may contain component types that can be referenced when generating component instances.
+`is_component_lib = true` は、プロジェクトがコンポーネント ライブラリであることを指定します。つまり、プロジェクトには、コンポーネント インスタンスを生成するときに参照できるコンポーネント タイプが含まれている可能性があります。
 
-In a typical project, most components are likely to be instances of types defined in external libraries (e.g. `dagster-components`), but you can also define custom component types scoped to your project. That is why `is_component_lib` is set to `true` by default. Any scaffolded component types in `jaffle_platform` will be placed in the default location at `jaffle_platform/lib`.
+一般的なプロジェクトでは、ほとんどのコンポーネントは外部ライブラリ (`dagster-components` など) で定義されたタイプのインスタンスである可能性が高いですが、プロジェクトにスコープを設定したカスタム コンポーネント タイプを定義することもできます。そのため、`is_component_lib` はデフォルトで `true` に設定されています。`jaffle_platform` 内のスキャフォールディングされたコンポーネント タイプはすべて、`jaffle_platform/lib` のデフォルトの場所に配置されます。
 
-You can also see that this module is registered under the `dagster_dg.library` entry point in `pyproject.toml`. This is what makes the components discoverable to `dg`:
+また、このモジュールは `pyproject.toml` の `dagster_dg.library` エントリ ポイントに登録されていることもわかります。これにより、コンポーネントが `dg` で検出可能になります:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/index/6-pyproject.toml"

@@ -1,20 +1,20 @@
 ---
-title: 'Creating a library of components'
+title: 'コンポーネントのライブラリを作成する'
 sidebar_position: 200
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-To let the `dg` CLI know that your Python package contains component types, update your `pyproject.toml` file with the following configuration:
+`dg` CLI に Python パッケージにコンポーネント タイプが含まれていることを知らせるには、次の構成で `pyproject.toml` ファイルを更新します:
 
 ```toml
 [tool.dg]
 is_component_lib = true
 ```
 
-By default, it is assumed that all component types will be defined in `your_package.lib`. If you'd like to define your components in a different directory, you can specify this in your `pyproject.toml` file:
+デフォルトでは、すべてのコンポーネント タイプが `your_package.lib` で定義されると想定されています。別のディレクトリでコンポーネントを定義する場合は、`pyproject.toml` ファイルでこれを指定できます:
 
 ```toml
 [tool.dg]
@@ -22,4 +22,4 @@ is_component_lib = true
 component_lib_package="your_package.other_module"
 ```
 
-Once this is done, as long as this package is installed in your environment, you'll be able to use the `dg` command-line utility to interact with your component types.
+これが完了すると、このパッケージが環境にインストールされている限り、`dg` コマンドライン ユーティリティを使用してコンポーネント タイプを操作できるようになります。

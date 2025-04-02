@@ -1,23 +1,23 @@
 ---
-title: 'Adding components to your project with Python'
+title: 'Pythonでプロジェクトにコンポーネントを追加する'
 sidebar_position: 300
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-In some cases, you may want to add a component to your project with Python rather than a `component.yaml` file.
+場合によっては、`component.yaml` ファイルではなく、Python を使用してプロジェクトにコンポーネントを追加したい場合があります。
 
 :::note Prerequisites
 
-Before adding a component with Python, you must either [create a project with components](/guides/labs/components/building-pipelines-with-components/creating-a-project-with-components) or [migrate an existing project to `dg`](/guides/labs/dg/incrementally-adopting-dg/migrating-project).
+Python を使用してコンポーネントを追加する前に、[コンポーネントを含むプロジェクトを作成する](/guides/labs/components/building-pipelines-with-components/creating-a-project-with-components)か、[既存のプロジェクトを `dg` に移行する](/guides/labs/dg/incrementally-adopting-dg/migrating-project)必要があります。
 
 :::
 
-1. First, create a new subdirectory in your `components/` directory to contain the component definition.
-2. In the subdirectory, create a `component.py` file to define your component instance. In this file, you will define a single `@component`-decorated function that instantiates the component type that you're interested in:
+1. まず、`components/` ディレクトリにコンポーネント定義を格納する新しいサブディレクトリを作成します。
+2. サブディレクトリに、コンポーネント インスタンスを定義する `component.py` ファイルを作成します。このファイルでは、対象のコンポーネント タイプをインスタンス化する単一の `@component` で装飾された関数を定義します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/components/python-components/component.py" language="python" />
 
-This function needs to return an instance of your desired component type. In the example above, we've used this functionality to customize the `translator` argument of the `DbtProjectcomponent` class.
+この関数は、必要なコンポーネント タイプのインスタンスを返す必要があります。上記の例では、この機能を使用して、`DbtProjectcomponent` クラスの `translator` 引数をカスタマイズしました。

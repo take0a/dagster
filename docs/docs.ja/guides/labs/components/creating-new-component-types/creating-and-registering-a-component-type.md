@@ -1,31 +1,31 @@
 ---
-title: 'Creating and registering a component type'
+title: 'コンポーネントタイプの作成と登録'
 sidebar_position: 100
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-The `dagster-components` system makes it easy to create new component types that can be reused across your project.
+`dagster-components` システムを使用すると、プロジェクト全体で再利用できる新しいコンポーネント タイプを簡単に作成できます。
 
-In most cases, component types map to a specific technology. For example, you might have a `DockerScriptComponent` that executes a script in a Docker container, or a `SnowflakeQueryComponent` that runs a query on Snowflake.
+ほとんどの場合、コンポーネント タイプは特定のテクノロジーにマップされます。たとえば、Docker コンテナーでスクリプトを実行する `DockerScriptComponent` や、Snowflake でクエリを実行する `SnowflakeQueryComponent` などがあります。
 
 :::note
 
-Refer to the project structuring guide to learn how to create a components-compatible project.
+コンポーネント互換プロジェクトを作成する方法については、プロジェクト構造ガイドを参照してください。
 
 :::
 
-## Scaffolding component type files
+## コンポーネントタイプファイルのスキャフォールディング
 
-For this example, we'll write a lightweight component that executes a shell command.
+この例では、シェル コマンドを実行する軽量コンポーネントを作成します。
 
-First, we use the `dg` command-line utility to scaffold a new component type:
+まず、`dg` コマンドライン ユーティリティを使用して、新しいコンポーネント タイプをスキャフォールディングします:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/shell-script-component/1-dg-scaffold-shell-command.txt" />
 
-This will add a new file to your project in the `lib` directory:
+これにより、プロジェクトの `lib` ディレクトリに新しいファイルが追加されます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/2-shell-command-empty.py"
@@ -33,20 +33,20 @@ This will add a new file to your project in the `lib` directory:
   title="my_component_library/lib/shell_command.py"
 />
 
-This file contains the basic structure for the new component type. Our goal is to implement the `build_defs` method to return a `Definitions`. This will require some input input which we will define as what our component class is instantiated with.
+このファイルには、新しいコンポーネント タイプの基本構造が含まれています。私たちの目標は、`build_defs` メソッドを実装して `Definitions` を返すことです。これには、コンポーネント クラスをインスタンス化するために定義する入力が必要です。
 
-## Defining the Python class
+## Pythonクラスの定義
 
-The first step is to define what information this component needs. This means determining what aspects of the component should be customizable.
+最初のステップは、このコンポーネントに必要な情報を定義することです。つまり、コンポーネントのどの側面をカスタマイズ可能にするか決定するということです。
 
-In this case, we'll want to define a few things:
+この場合、次の項目を定義します:
 
-- The path to the shell script that we'll want to run.
-- The assets that we expect this script to produce.
+- 実行するシェル スクリプトへのパス。
+- このスクリプトで生成されると予想されるアセット。
 
-Our class inherits from `Resolvable` in addition to `Component`. This will handle deriving a yaml schema for our class based on what the class is annotated with. To simplify common use cases, `dagster-components` provides annotations for common bits of configuration, such as `ResolvedAssetSpec`, which will handle exposing a schema for defining `AssetSpec`s from yaml and resolving them before instantiating our component.
+クラスは、`Component` に加えて `Resolvable` からも継承します。これにより、クラスに注釈が付けられている内容に基づいて、クラスの yaml スキーマを導出します。一般的なユース ケースを簡素化するために、`dagster-components` は、yaml から `AssetSpec` を定義するためのスキーマを公開し、コンポーネントをインスタンス化する前にそれらを解決するための `ResolvedAssetSpec` などの一般的な構成の注釈を提供します。
 
-We can the schema for our component and add it to our class as follows:
+次のように、コンポーネントのスキーマを作成してクラスに追加できます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-config-schema.py"
@@ -56,16 +56,16 @@ We can the schema for our component and add it to our class as follows:
 
 :::tip
 
-When defining a field on a component that isn't on the schema, or is of a different type, the components system allows you to provide custom resolution logic for that field. See the [Providing resolution logic for non-standard types](#advanced-providing-resolution-logic-for-non-standard-types) section for more information.
+スキーマにない、または異なるタイプのコンポーネントのフィールドを定義する場合、コンポーネント システムでは、そのフィールドに対してカスタム解決ロジックを提供できます。詳細については、[非標準タイプの解決ロジックの提供](#advanced-providing-resolution-logic-for-non-standard-types)セクションを参照してください。
 :::
 
-## Building definitions
+## 定義の構築
 
-Now that we've defined how the component is parameterized, we need to define how to turn those parameters into a `Definitions` object.
+コンポーネントのパラメータ化方法を定義したので、それらのパラメータを `Definitions` オブジェクトに変換する方法を定義する必要があります。
 
-To do so, we'll want to override the `build_defs` method, which is responsible for returning a `Definitions` object containing all definitions related to the component.
+そのためには、コンポーネントに関連するすべての定義を含む `Definitions` オブジェクトを返す `build_defs` メソッドをオーバーライドする必要があります。
 
-Our `build_defs` method will create a single `@asset` that executes the provided shell script. By convention, we'll put the code to actually execute this asset inside of a function called `execute`. This makes it easier for future developers to create subclasses of this component.
+`build_defs` メソッドは、提供されたシェル スクリプトを実行する単一の `@asset` を作成します。慣例により、このアセットを実際に実行するコードは `execute` という関数内に配置します。これにより、将来の開発者がこのコンポーネントのサブクラスを作成しやすくなります。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-build-defs.py"
@@ -73,29 +73,29 @@ Our `build_defs` method will create a single `@asset` that executes the provided
   title="my_component_library/lib/shell_command.py"
 />
 
-## Component registration
+## コンポーネントの登録
 
-Following the steps above will automatically register your component type in your environment. You can now run:
+上記の手順に従うと、コンポーネント タイプが環境に自動的に登録されます。これで、以下を実行できます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/shell-script-component/3-dg-list-component-types.txt" />
 
-and see your new component type in the list of available component types.
+使用可能なコンポーネント タイプのリストに新しいコンポーネント タイプが表示されます。
 
-You can also view automatically generated documentation describing your new component type by running:
+また、次のコマンドを実行して、新しいコンポーネント タイプを説明する自動生成されたドキュメントを表示することもできます:
 
 <CliInvocationExample contents="dg docs serve" />
 
-Now, you can use this component type to create new component instances.
+これで、このコンポーネント タイプを使用して新しいコンポーネント インスタンスを作成できるようになりました。
 
-## Configuring custom scaffolding
+## カスタムスキャフォールディングの設定
 
-Once your component type is registered, instances of the component type can be scaffolded using the `dg scaffold component` command:
+コンポーネント タイプが登録されると、`dg scaffold component` コマンドを使用してコンポーネント タイプのインスタンスをスキャフォールディングできます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/shell-script-component/4-scaffold-instance-of-component.txt" />
 
-By default, this will create a new directory alongside an unpopulated `component.yaml` file. However, you can customize this behavior by decorating your component_type with `scaffoldable`.
+デフォルトでは、未入力の `component.yaml` ファイルとともに新しいディレクトリが作成されます。ただし、component_type を `scaffoldable` で装飾することで、この動作をカスタマイズできます。
 
-In this case, we might want to scaffold a template shell script alongside a filled-out `component.yaml` file, which we accomplish with a custom scaffolder:
+この場合、入力済みの `component.yaml` ファイルとともにテンプレート シェル スクリプトをスキャフォールディングする必要があります。これは、カスタム スキャフォールダーを使用して実現します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-scaffolder.py"
@@ -103,7 +103,7 @@ In this case, we might want to scaffold a template shell script alongside a fill
   title="my_component_library/lib/shell_command.py"
 />
 
-Now, when we run `dg scaffold component`, we'll see that a template shell script is created alongside a filled-out `component.yaml` file:
+ここで、`dg scaffold component` を実行すると、入力された `component.yaml` ファイルとともにテンプレート シェル スクリプトが作成されることがわかります:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/5-scaffolded-component.yaml"
@@ -117,31 +117,31 @@ Now, when we run `dg scaffold component`, we'll see that a template shell script
   title="my_component_library/components/my_shell_command/script.sh"
 />
 
-## [Advanced] Providing resolution logic for non-standard types
+## [上級] 非標準型の解決ロジックを提供する
 
-In most cases, the types you use in your component schema and in the component class will be the same, or will have out-of-the-box resolution logic, as in the case of `ResolvedAssetSpec`.
+ほとんどの場合、コンポーネント スキーマとコンポーネント クラスで使用する型は同じか、`ResolvedAssetSpec` の場合のように、すぐに使用できる解決ロジックが備わります。
 
-However, in some cases you may want to use a type that doesn't have an existing schema equivalent. In this case, you can provide a function that will resolve the value to the desired type by providing an annotation on the field with `Annotated[<type>, Resolver(...)]`.
+ただし、既存のスキーマに相当するものがない型を使用する必要がある場合もあります。この場合、フィールドに `Annotated[<type>, Resolver(...)]` という注釈を付けることで、値を目的の型に解決する関数を提供できます。
 
-For example, we might want to provide an API client to our component, which can be configured with an API key in YAML, or a mock client in tests:
+たとえば、YAML で API キーを使用して構成できる API クライアントや、テストでモック クライアントをコンポーネントに提供したい場合があります:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/custom-schema-resolution.py"
   language="python"
 />
 
-## [Advanced] Customize rendering of YAML values
+## [上級] YAML値のレンダリングをカスタマイズする
 
-The components system supports a rich templating syntax that allows you to load arbitrary Python values based off of your `component.yaml` file. All string values in a `Resolvable` can be templated using the Jinja2 templating engine, and may be resolved into arbitrary Python types. This allows you to expose complex object types, such as `PartitionsDefinition` or `AutomationCondition` to users of your component, even if they're working in pure YAML.
+コンポーネント システムは、`component.yaml` ファイルに基づいて任意の Python 値をロードできる豊富なテンプレート構文をサポートしています。`Resolvable` 内のすべての文字列値は、Jinja2 テンプレート エンジンを使用してテンプレート化でき、任意の Python 型に解決できます。これにより、純粋な YAML で作業している場合でも、`PartitionsDefinition` や `AutomationCondition` などの複雑なオブジェクト型をコンポーネントのユーザーに公開できます。
 
-You can define custom values that will be made available to the templating engine by defining a `get_additional_scope` classmethod on your component. In our case, we can define a `"daily_partitions"` function which returns a `DailyPartitionsDefinition` object with a pre-defined start date:
+コンポーネントで `get_additional_scope` クラスメソッドを定義することで、テンプレート エンジンで使用できるカスタム値を定義できます。この場合、事前定義された開始日を持つ `DailyPartitionsDefinition` オブジェクトを返す `"daily_partitions"` 関数を定義できます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-custom-scope.py"
   language="python"
 />
 
-When a user instantiates this component, they will be able to use this custom scope in their `component.yaml` file:
+ユーザーがこのコンポーネントをインスタンス化すると、`component.yaml` ファイルでこのカスタム スコープを使用できるようになります:
 
 ```yaml
 component_type: my_component
@@ -155,4 +155,4 @@ attributes:
 
 ## Next steps
 
-- [Add a new component to your project](/guides/labs/components/building-pipelines-with-components/adding-components)
+- [プロジェクトに新しいコンポーネントを追加する](/guides/labs/components/building-pipelines-with-components/adding-components)

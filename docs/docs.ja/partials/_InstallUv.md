@@ -1,5 +1,5 @@
-First, install the Python package manager `uv`:
+まず、Python パッケージ マネージャー `uv` をインストールします:
 
 <CliInvocationExample contents="brew install uv" />
 
-For more information on `uv`, including installation instructions for non-Mac systems, see the [`uv` docs](https://docs.astral.sh/uv/).
+Mac 以外のシステムへのインストール手順を含む `uv` の詳細については、[`uv` ドキュメント](https://docs.astral.sh/uv/) を参照してください。

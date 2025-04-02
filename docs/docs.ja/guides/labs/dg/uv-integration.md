@@ -1,41 +1,38 @@
 ---
-title: 'uv integration'
+title: 'UV統合'
 sidebar_position: 500
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-To make development easier, particularly with multiple projects, `dg` integrates with the [`uv` package manager](https://docs.astral.sh/uv/).
+特に複数のプロジェクトでの開発を容易にするために、`dg` は [`uv` パッケージ マネージャー](https://docs.astral.sh/uv/) と統合されます。
 
 :::note
 
-We are working on streamlining the configuration of the `uv` integration, and it
-is likely to change in the next few releases.
+私たちは `uv` 統合の構成を合理化する作業を進めており、今後数回のリリースで変更される可能性があります。
 
 :::
 
-## Default `dg` behavior (`uv run`)
+## デフォルトの `dg` 動作 (`uv run`)
 
-`dg` itself is installed globally and always executes in an isolated environment. However, many `dg` commands need to spawn subprocesses in environments scoped to specific projects. For example, when you run `dg list component-type` in a project directory, `dg` only lists the component types available in that project.
+`dg` 自体はグローバルにインストールされ、常に分離された環境で実行されます。ただし、多くの `dg` コマンドは、特定のプロジェクトにスコープされた環境でサブプロセスを生成する必要があります。たとえば、プロジェクト ディレクトリで `dg list component-type` を実行すると、`dg` はそのプロジェクトで使用可能なコンポーネント タイプのみを一覧表示します。
 
-When using `dg` with default settings, the Python subprocess is spawned after detecting a virtual environment in the project directory. This means that, rather than finding the first `python` executable on your shell `PATH`, it will instead use the Python executable from a locally detected virtual environment even if that virtual environment is not currently activated.
+`dg` をデフォルト設定で使用する場合、Python サブプロセスは、プロジェクト ディレクトリで仮想環境を検出した後に生成されます。つまり、シェル `PATH` で最初の `python` 実行可能ファイルを見つけるのではなく、その仮想環境が現在アクティブ化されていない場合でも、ローカルで検出された仮想環境の Python 実行可能ファイルを使用します。
 
-By default, `dg` uses a special `uv` command called `uv run` for environment detection and command execution. `uv run` resolves a local virtual environment (`.venv` in an ancestor directory) before running a command, and additionally makes sure that the environment is up to date with the project's specified dependencies before running the command.
+デフォルトでは、`dg` は環境の検出とコマンドの実行に `uv run` という特別な `uv` コマンドを使用します。`uv run` は、コマンドを実行する前にローカル仮想環境 (祖先ディレクトリの `.venv`) を解決し、さらにコマンドを実行する前に、環境がプロジェクトの指定された依存関係で最新であることを確認します。
 
-`dg`'s use of `uv run` means you don't need to manage global shell state by activating and deactivating virtual environments during development. Instead, `dg` expects (and will scaffold for you) a `.venv` directory in the root of each project, and will use that virtual environment when executing commands (such as `dg scaffold defs` or `dg list component-type`) against that project.
+`dg` が `uv run` を使用するということは、開発中に仮想環境をアクティブ化および非アクティブ化してグローバル シェルの状態を管理する必要がないことを意味します。代わりに、`dg` は各プロジェクトのルートに `.venv` ディレクトリがあることを想定し (スキャフォールディングも行います)、そのプロジェクトに対してコマンド (`dg scaffold defs` や `dg list component-type` など) を実行するときにその仮想環境を使用します。
 
-## Disabling use of `uv run`
+## `uv run` の使用を無効にする
 
-You can disable `dg`'s use of `uv run` by passing the `--no-use-dg-managed-environment` flag to `dg` commands. This will cause `dg` to still try to resolve local virtual environments by looking up the ancestor tree for `.venv`, but instead launch Python processes directly rather than going through `uv run`.
+`--no-use-dg-managed-environment` フラグを `dg` コマンドに渡すことで、`dg` による `uv run` の使用を無効にすることができます。これにより、`dg` は引き続き `.venv` の祖先ツリーを検索してローカル仮想環境を解決しようとしますが、`uv run` を経由せずに Python プロセスを直接起動します。
 
-If you want to opt out of virtual environment detection entirely and just use your ambient Python environment (system Python or an activated virtual env), you should also (a) set `--no-require-local-venv`, and (b) ensure there are no `.venv` directories in
-the ancestor tree of your project.
+仮想環境の検出を完全にオプトアウトし、アンビエント Python 環境 (システム Python またはアクティブ化された仮想環境) のみを使用する場合は、(a) `--no-require-local-venv` を設定し、(b) プロジェクトの祖先ツリーに `.venv` ディレクトリがないことを確認する必要があります。
 
 :::info
 
-Disabling `uv` integration with `--no-use-dg-managed-environment` will
-currently disable the `dg cache`. This will make some operations noticeably slower.
+`--no-use-dg-managed-environment` を使用して `uv` 統合を無効にすると、現在 `dg cache` が無効になります。これにより、一部の操作が著しく遅くなります。
 
 :::

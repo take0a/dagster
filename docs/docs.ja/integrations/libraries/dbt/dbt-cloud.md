@@ -18,24 +18,24 @@ sidebar_custom_props:
   logo: images/integrations/dbt/dbt.svg
 ---
 
-import Beta from '@site/docs/partials/\_Beta.md';
+import Beta from '@site/docs.ja/partials/\_Beta.md';
 
 <Beta />
 
-Dagster allows you to run dbt Cloud jobs alongside other technologies. You can schedule them to run as a step in a larger pipeline and manage them as a data asset.
+Dagster を使用すると、dbt Cloud ジョブを他のテクノロジーと並行して実行できます。ジョブを大規模なパイプラインのステップとして実行するようにスケジュールし、データ アセットとして管理できます。
 
-### Installation
+### インストール
 
 ```bash
 pip install dagster-dbt
 ```
 
-### Example
+### 例
 
 <CodeExample path="docs_snippets/docs_snippets/integrations/dbt_cloud.py" language="python" />
 
-### About dbt Cloud
+### dbt Cloud について
 
-**dbt Cloud** is a hosted service for running dbt jobs. It helps data analysts and engineers productionize dbt deployments. Beyond dbt open source, dbt Cloud provides scheduling , CI/CD, serving documentation, and monitoring & alerting.
+**dbt Cloud** は、dbt ジョブを実行するためのホスト型サービスです。データ アナリストやエンジニアが dbt デプロイメントを本番環境に移行するのに役立ちます。dbt オープンソース以外にも、dbt Cloud はスケジュール、CI/CD、ドキュメントの提供、監視とアラート機能を提供します。
 
-If you're currently using dbt Cloud™, you can also use Dagster to run `dbt-core` in its place. You can read more about [how to do that here](https://dagster.io/blog/migrate-off-dbt-cloud).
+現在 dbt Cloud™ を使用している場合は、代わりに Dagster を使用して `dbt-core` を実行することもできます。[その方法](https://dagster.io/blog/migrate-off-dbt-cloud) の詳細については、こちらをご覧ください。

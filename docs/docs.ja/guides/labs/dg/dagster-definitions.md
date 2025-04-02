@@ -3,33 +3,33 @@ title: 'Scaffolding Dagster definitions'
 sidebar_position: 200
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-`dg` can be used to help scaffold Dagster definitions such as [assets](/guides/build/assets/), [schedules](/guides/automate/schedules/), and [sensors](/guides/automate/sensors/). When you use a project that has been scaffolded using `dg`, any new definitions added underneath the `defs` directory will be automatically loaded into the top-level `Definitions` object. This allows you to easily add new definitions to your project without needing to explicitly import these definitions to your top-level definitions file.
+`dg` は、[assets](/guides/build/assets/)、[schedules](/guides/automate/schedules/)、[sensors](/guides/automate/sensors/) などの Dagster 定義のスキャフォールディングに役立ちます。`dg` を使用してスキャフォールディングされたプロジェクトを使用すると、`defs` ディレクトリの下に追加された新しい定義は、トップレベルの `Definitions` オブジェクトに自動的にロードされます。これにより、トップレベルの定義ファイルにこれらの定義を明示的にインポートしなくても、プロジェクトに新しい定義を簡単に追加できます。
 
-This guide will walk through how to use `dg` to scaffold a new asset.
+このガイドでは、`dg` を使用して新しいアセットをスキャフォールディングする方法について説明します。
 
-## Scaffold an asset
+## アセットの足場
 
-You can use the `dg scaffold` command to scaffold a new asset underneath the `defs` folder. In this example, we scaffold an asset named `my_asset.py` and write it to the `defs/assets` directory:
+`dg scaffold` コマンドを使用して、`defs` フォルダの下に新しいアセットをスキャフォールディングできます。この例では、`my_asset.py` という名前のアセットをスキャフォールディングし、それを `defs/assets` ディレクトリに書き込みます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/dagster-definitions/1-scaffold.txt" />
 
-Once this is done, we can see that a new file has been added to this location, and view its contents:
+これが完了すると、この場所に新しいファイルが追加され、その内容を表示できるようになります:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/dagster-definitions/2-tree.txt" />
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/dagster-definitions/3-cat.txt" />
 
-### Write a definition
+### 定義を書く
 
-As seen in the above example, the scaffolded asset contains a basic commented-out definition. We can replace this definition with whatever asset code we're interested in:
+上記の例でわかるように、スキャフォールディングされたアセットには基本的なコメントアウトされた定義が含まれています。この定義を、必要なアセット コードに置き換えることができます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/dagster-definitions/4-written-asset.py" />
 
-### Check your work
+### 作業を確認する
 
-Finally, we can run `dg list defs` to confirm that the new asset now appears in the list of definitions:
+最後に、`dg list defs` を実行して、新しいアセットが定義リストに表示されていることを確認できます:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/dagster-definitions/5-list-defs.txt" />

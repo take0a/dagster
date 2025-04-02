@@ -3,7 +3,7 @@ title: 'Labs'
 sidebar_class_name: hidden
 ---
 
-The features in this section are considered in a preview stage and are under active development. They can change significantly, or be removed completely, and are not considered ready for production use.
+このセクションの機能はプレビュー段階にあり、現在開発中です。大幅に変更されるか、完全に削除される可能性があり、実稼働環境での使用には適していません。
 
 - [`dg` CLI](/guides/labs/dg/)
 - [Components](/guides/labs/components/)

@@ -18,30 +18,30 @@ sidebar_custom_props:
   logo: images/integrations/dbt/dbt.svg
 ---
 
-Dagster orchestrates dbt alongside other technologies, so you can schedule dbt with Spark, Python, etc. in a single data pipeline.
+Dagster は dbt を他のテクノロジーと連携してオーケストレーションするため、単一のデータ パイプラインで Spark、Python などを使用して dbt をスケジュールできます。
 
-Dagster assets understand dbt at the level of individual dbt models. This means that you can:
+Dagster アセットは、個々の dbt モデルのレベルで dbt を理解します。つまり、次のことが可能になります。
 
-- Use Dagster's UI or APIs to run subsets of your dbt models, seeds, and snapshots.
-- Track failures, logs, and run history for individual dbt models, seeds, and snapshots.
-- Define dependencies between individual dbt models and other data assets. For example, put dbt models after the Fivetran-ingested table that they read from, or put a machine learning after the dbt models that it's trained from.
+- Dagster の UI または API を使用して、dbt モデル、シード、スナップショットのサブセットを実行します。
+- 個々の dbt モデル、シード、スナップショットの障害、ログ、実行履歴を追跡します。
+- 個々の dbt モデルと他のデータ アセット間の依存関係を定義します。たとえば、dbt モデルを、その読み取り元である Fivetran が取り込んだテーブルの後に配置するか、機械学習を、そのトレーニング元である dbt モデルの後に配置します。
 
-### Installation
+### インストール
 
 ```bash
 pip install dagster-dbt
 ```
 
-### Example
+### 例
 
 <CodeExample path="docs_snippets/docs_snippets/integrations/dbt.py" language="python" />
 
-### About dbt
+### dbt について
 
-**dbt** is a SQL-first transformation workflow that lets teams quickly and collaboratively deploy analytics code following software engineering best practices like modularity, portability, CI/CD, and documentation.
+**dbt** は、モジュール性、移植性、CI/CD、ドキュメントなどのソフトウェア エンジニアリングのベスト プラクティスに従って、チームが分析コードを迅速かつ共同でデプロイできるようにする SQL ファーストの変換ワークフローです。
 
 <aside className="rounded-lg">
 
-Are you looking to learn more on running Dagster with dbt? Explore the [Dagster University dbt course](https://courses.dagster.io/courses/dagster-dbt).
+dbt を使用して Dagster を実行する方法について詳しく知りたいですか? [Dagster University dbt コース](https://courses.dagster.io/courses/dagster-dbt) をご覧ください。
 
 </aside>

@@ -1,19 +1,19 @@
 ---
-title: 'Customizing components'
+title: 'コンポーネントのカスタマイズ'
 sidebar_position: 400
 ---
 
-import Preview from '@site/docs/partials/\_Preview.md';
+import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-You can customize the behavior of a component beyond what is available in the `component.yaml` file.
+`component.yaml` ファイルで利用可能なものを超えて、コンポーネントの動作をカスタマイズできます。
 
-To do so, you can create a subclass of your desired component in a file named `component.py` in the same directory as your `component.yaml` file.
+これを行うには、`component.yaml` ファイルと同じディレクトリにある `component.py` という名前のファイルに、目的のコンポーネントのサブクラスを作成します。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/components/custom-subclass/basic-subclass.py" language="python" />
 
-You can then update the `type:` field in your `component.yaml` file to reference this new component type. It should be the fully qualified name of the type.
+次に、`component.yaml` ファイルの `type:` フィールドを更新して、この新しいコンポーネント タイプを参照します。これは、タイプの完全修飾名である必要があります。
 
 ```yaml
 type: my_project.defs.my_def.CustomSubclass
@@ -21,26 +21,26 @@ type: my_project.defs.my_def.CustomSubclass
 attributes: ...
 ```
 
-## Customizing execution
+## 実行のカスタマイズ
 
-For example, we can create a subclass of the `SlingReplicationCollectionComponent` that adds a debug log message during execution. `SlingReplicationCollectionComponent` has an `execute` method that can be overriden by subclasses.
+たとえば、実行中にデバッグ ログ メッセージを追加する `SlingReplicationCollectionComponent` のサブクラスを作成できます。`SlingReplicationCollectionComponent` には、サブクラスによってオーバーライドできる `execute` メソッドがあります。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/components/custom-subclass/debug-mode.py" language="python" />
 
-## Adding component-level templating scope
+## コンポーネントレベルのテンプレートスコープの追加
 
-By default, the scopes available for use in the template are:
+デフォルトでは、テンプレートで使用できるスコープは次のとおりです:
 
-- `env`: A function that allows you to access environment variables.
-- `automation_condition`: A scope allowing you to access all static constructors of the `AutomationCondition` class.
+- `env`: 環境変数にアクセスできる関数。
+- `automation_condition`: `AutomationCondition` クラスのすべての静的コンストラクターにアクセスできるスコープ。
 
-However, it can be useful to add additional scope options to your component type. For example, you may have a custom automation condition that you'd like to use in your component.
+ただし、コンポーネント タイプに追加のスコープ オプションを追加すると便利な場合があります。たとえば、コンポーネントで使用したいカスタム自動化条件がある場合があります。
 
-To do so, you can define a function that returns an `AutomationCondition` and define a `get_additional_scope` method on your subclass:
+これを行うには、`AutomationCondition` を返す関数を定義し、サブクラスで `get_additional_scope` メソッドを定義します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/components/custom-subclass/custom-scope.py" language="python" />
 
-This can then be used in your `component.yaml` file:
+これを `component.yaml` ファイルで使用できます:
 
 ```yaml
 type: my_project.defs.my_def.CustomSubclass

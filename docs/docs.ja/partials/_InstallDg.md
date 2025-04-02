@@ -1,15 +1,15 @@
-Next, use `uv` to install `dg`:
+次に、`uv` を使用して `dg` をインストールします:
 
 <CliInvocationExample contents="uv tool install dagster-dg" />
 
 :::tip
 
-`uv tool install` installs Python packages from PyPI into isolated environments and exposes their executables on your shell path. This means the `dg` command will always execute in an isolated environment separate from any project environment.
+`uv tool install` は、PyPI から分離された環境に Python パッケージをインストールし、その実行ファイルをシェル パスに公開します。つまり、`dg` コマンドは常にプロジェクト環境とは別の分離された環境で実行されます。
 
 :::
 
 :::note
 
-If you have a local clone of the `dagster` repo, you can install a local version of `dg` by running `make install_editable_uv_tools` in the root folder of the repo. This will create an isolated environment for `dg` like the standard `uv tool install`, but the environment will contain an editable installation of `dagster-dg`.
+`dagster` リポジトリのローカル クローンがある場合は、リポジトリのルート フォルダーで `make install_editable_uv_tools` を実行して、`dg` のローカル バージョンをインストールできます。これにより、標準の `uv tool install` と同様に `dg` の分離された環境が作成されますが、その環境には `dagster-dg` の編集可能なインストールが含まれます。
 
 :::
