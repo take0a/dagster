@@ -1,80 +1,80 @@
 ---
-title: 'Load dbt models as Dagster assets'
+title: 'dbt モデルを Dagster アセットとしてロードする'
 description: Dagster can orchestrate dbt alongside other technologies.
 sidebar_position: 200
 ---
 
-At this point, you should have a [fully-configured dbt project](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project) that's ready to work with Dagster.
+この時点で、Dagster で使用できる [完全に構成された dbt プロジェクト](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project) が完成しているはずです。
 
-In this section, you'll finally begin integrating dbt with Dagster. To do so, you'll:
+このセクションでは、最終的に dbt と Dagster の統合を開始します。これを行うには、次の操作を行います。
 
-- [Create a Dagster project that wraps your dbt project](#step-1-create-a-dagster-project-that-wraps-your-dbt-project)
-- [Inspect your Dagster project in Dagster's UI](#step-2-inspect-your-dagster-project-in-dagsters-ui)
-- [Build your dbt models in Dagster](#step-3-build-your-dbt-models-in-dagster)
-- [Understand the Python code in your Dagster project](#step-4-understand-the-python-code-in-your-dagster-project)
+- [dbt プロジェクトをラップする Dagster プロジェクトを作成する](#step-1-create-a-dagster-project-that-wraps-your-dbt-project)
+- [Dagster の UI で Dagster プロジェクトを検査する](#step-2-inspect-your-dagster-project-in-dagsters-ui)
+- [Dagster で dbt モデルを構築する](#step-3-build-your-dbt-models-in-dagster)
+- [Dagster プロジェクトの Python コードを理解する](#step-4-understand-the-python-code-in-your-dagster-project)
 
-## Step 1: Create a Dagster project that wraps your dbt project
+## Step 1: dbt プロジェクトをラップする Dagster プロジェクトを作成する {#step-1-create-a-dagster-project-that-wraps-your-dbt-project}
 
-You can create a Dagster project that wraps your dbt project by using the `dagster-dbt` command line interface. Make sure you're in the directory where your `dbt_project.yml` is. If you're continuing from the previous section, then you'll already be in this directory. Then, run:
+`dagster-dbt` コマンドライン インターフェイスを使用して、dbt プロジェクトをラップする Dagster プロジェクトを作成できます。`dbt_project.yml` があるディレクトリにいることを確認してください。前のセクションから続行している場合は、すでにこのディレクトリにいるはずです。次に、以下を実行します:
 
 ```shell
 dagster-dbt project scaffold --project-name jaffle_dagster
 ```
 
-This creates a directory called `jaffle_dagster/` inside the current directory. The `jaffle_dagster/` directory contains a set of files that define a Dagster project.
+これにより、現在のディレクトリ内に `jaffle_dagster/` というディレクトリが作成されます。`jaffle_dagster/` ディレクトリには、Dagster プロジェクトを定義する一連のファイルが含まれています。
 
-In general, it's up to you where to put your Dagster project. It's most common to put your Dagster project at the root of your git repository. Therefore, in this case, because the `dbt_project.yml` was at the root of the `jaffle_shop` git repository, we created our Dagster project there.
+一般的に、Dagster プロジェクトをどこに置くかはあなた次第です。Dagster プロジェクトを Git リポジトリのルートに置くのが最も一般的です。したがって、この場合、`dbt_project.yml` が `jaffle_shop` Git リポジトリのルートにあったため、そこに Dagster プロジェクトを作成しました。
 
-**Note**: The `dagster-dbt project scaffold` command creates the Dagster project in whatever directory you run it from. If that's a different directory from where your `dbt_project.yml` lives, then you'll need to provide a value for the `--dbt-project-dir` option so that Dagster knows where to look for your dbt project.
+**注**: `dagster-dbt project scaffold` コマンドは、実行したディレクトリに Dagster プロジェクトを作成します。それが `dbt_project.yml` があるディレクトリと異なる場合は、Dagster が dbt プロジェクトを探す場所を認識できるように、`--dbt-project-dir` オプションの値を指定する必要があります。
 
-## Step 2: Inspect your Dagster project in Dagster's UI
+## Step 2: Dagster の UI で Dagster プロジェクトを検査する {#step-2-inspect-your-dagster-project-in-dagsters-ui}
 
-Now that you have a Dagster project, you can run Dagster's UI to take a look at it.
+Dagster プロジェクトが作成されたので、Dagster の UI を実行して確認することができます。
 
-1. Change directories to the Dagster project directory:
+1. ディレクトリを Dagster プロジェクト ディレクトリに変更します:
 
    ```shell
    cd jaffle_dagster/
    ```
 
-2. To start Dagster's UI, run the following:
+2. Dagster の UI を起動するには、次のコマンドを実行します:
 
    ```shell
    dagster dev
    ```
 
-   Which will result in output similar to:
+   次のような出力が得られます:
 
    ```shell
    Serving dagster-webserver on http://127.0.0.1:3000 in process 70635
    ```
 
-3. In your browser, navigate to [http://127.0.0.1:3000](http://127.0.0.1:3000) The page will display the assets:
+3. ブラウザで [http://127.0.0.1:3000](http://127.0.0.1:3000) に移動します。ページに次のアセットが表示されます:
 
 ![Asset graph in Dagster's UI, containing dbt models loaded as Dagster assets](/images/integrations/dbt/using-dbt-with-dagster/load-dbt-models/asset-graph.png)
 
-## Step 3: Build your dbt models in Dagster
+## Step 3: Dagster で dbt モデルを構築する {#step-3-build-your-dbt-models-in-dagster}
 
-You can do more than view your dbt models in Dagster – you can also run them. In Dagster, running a dbt model corresponds to _materializing_ an asset. Materializing an asset means running some computation to update its contents in persistent storage. In this tutorial, that persistent storage is our local DuckDB database.
+Dagster では、dbt モデルを表示するだけでなく、実行することもできます。Dagster では、dbt モデルを実行することは、アセットを _具体化_ することに対応します。アセットを具体化するということは、永続ストレージ内のコンテンツを更新するために何らかの計算を実行することを意味します。このチュートリアルでは、その永続ストレージはローカルの DuckDB データベースです。
 
-To build your dbt project, i.e. materialize your assets, click the **Materialize all** button near the top right corner of the page. This will launch a run to materialize the assets. When finished, the **Materialized** and **Latest Run** attributes in the asset will be populated:
+dbt プロジェクトをビルドする、つまりアセットを具体化するには、ページの右上隅にある [**Materialize all**] ボタンをクリックします。これにより、アセットを具体化する実行が開始されます。完了すると、アセットの [**Materialized**] 属性と [**Latest Run**] 属性が入力されます。
 
 ![Asset graph in Dagster's UI, showing materialized assets](/images/integrations/dbt/using-dbt-with-dagster/load-dbt-models/asset-graph-materialized.png)
 
-After the run completes, you can:
+実行が完了したら、次の操作を実行できます。
 
-- Click the **asset** to open a sidebar containing info about the asset, including its last materialization stats and a link to view the **Asset details** page
-- Click the ID of the **Latest Run** in an asset to view the **Run details** page. This page contains detailed info about the run, including timing information, errors, and logs.
+- **asset** をクリックすると、アセットに関する情報 (最後のマテリアライズ統計や **Asset details** ページを表示するためのリンクなど) を含むサイドバーが開きます。
+- アセット内の **Latest Run** の ID をクリックすると、**Run details** ページが表示されます。このページには、タイミング情報、エラー、ログなど、実行に関する詳細情報が含まれています。
 
-## Step 4: Understand the Python code in your Dagster project
+## Step 4: Dagster プロジェクトの Python コードを理解する {#step-4-understand-the-python-code-in-your-dagster-project}
 
-You saw how you can create a Dagster project that loads a dbt project. How does this work? Understanding how Dagster loads a dbt project will give you a foundation for customizing how Dagster runs your dbt project, as well as for connecting it to other data assets outside of dbt.
+dbt プロジェクトをロードする Dagster プロジェクトを作成する方法を説明しました。これはどのように機能しますか? Dagster が dbt プロジェクトをロードする方法を理解することで、Dagster が dbt プロジェクトを実行する方法をカスタマイズしたり、dbt 以外の他のデータ アセットに接続したりするための基礎が得られます。
 
-The most important file is the Python file that contains the set of definitions for Dagster to load: `jaffle_shop/definitions.py`. Dagster executes the code in this file to find out what assets it should be aware of, as well as details about those assets. For example, when you ran `dagster dev` in the previous step, Dagster executed the code in this file to determine what assets to display in the UI.
+最も重要なファイルは、Dagster がロードする定義のセットを含む Python ファイル `jaffle_shop/definitions.py` です。Dagster はこのファイル内のコードを実行して、認識する必要があるアセットとそれらのアセットの詳細を調べます。たとえば、前の手順で `dagster dev` を実行したとき、Dagster はこのファイル内のコードを実行して、UI に表示するアセットを決定しました。
 
-In our `definitions.py` Python file, we import from `assets.py`, which contains the code to model our dbt models as Dagster assets. To return a Dagster asset for each dbt model, the code in this `assets.py` file needs to know what dbt models you have. It finds out what models you have by reading a file called a `manifest.json`, which is a file that dbt can generate for any dbt project and contains information about every model, seed, snapshot, test, etc. in the project.
+`definitions.py` Python ファイルでは、dbt モデルを Dagster アセットとしてモデル化するコードを含む `assets.py` からインポートします。各 dbt モデルの Dagster アセットを返すには、この `assets.py` ファイルのコードで、所有している dbt モデルを把握する必要があります。`manifest.json` というファイルを読み取ることで、所有しているモデルを特定します。このファイルは、dbt が任意の dbt プロジェクトに対して生成できるファイルで、プロジェクト内のすべてのモデル、シード、スナップショット、テストなどの情報が含まれています。
 
-To retrieve the `manifest.json`, `assets.py` imports from `project.py`, which defines an internal representation of your dbt project. Then, in `assets.py`, the path to the `manifest.json` file can be accessed with `jaffle_shop_project.manifest_path`:
+`manifest.json` を取得するために、`assets.py` は `project.py` からインポートします。これは、dbt プロジェクトの内部表現を定義します。次に、`assets.py` で、`jaffle_shop_project.manifest_path` を使用して、`manifest.json` ファイルへのパスにアクセスできます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/integrations/dbt/tutorial/load_dbt_models/project.py"
@@ -82,13 +82,13 @@ To retrieve the `manifest.json`, `assets.py` imports from `project.py`, which de
   endBefore="end_load_project"
 />
 
-Generating the `manifest.json` file for a dbt project is time-consuming, so it's best to avoid doing so every time this Python module is imported. Thus, in production deployments of Dagster, you'll typically have the CI/CD system that packages up your code generate your `manifest.json`.
+dbt プロジェクトの `manifest.json` ファイルの生成には時間がかかるため、この Python モジュールをインポートするたびに生成するのは避けた方がよいでしょう。したがって、Dagster の運用環境では通常、コードをパッケージ化する CI/CD システムで `manifest.json` を生成します。
 
-However, in development, you typically want changes made to files in your dbt project to be immediately reflected in the Dagster UI without needing to regenerate the manifest.
+ただし、開発環境では通常、dbt プロジェクトのファイルに加えた変更を、マニフェストを再生成せずに Dagster UI にすぐに反映させたいものです。
 
-`jaffle_shop_project.prepare_if_dev()` helps with this – it re-generates your `manifest.json` at the time Dagster imports your code, _but_ only if it's being imported by the `dagster dev` command.
+`jaffle_shop_project.prepare_if_dev()` はこれに役立ちます。Dagster がコードをインポートするときに `manifest.json` を再生成しますが、_ただし_ `dagster dev` コマンドによってインポートされている場合のみです。
 
-Once you've got a `manifest.json` file, it's time to define your Dagster assets using it. The following code, in your project's `assets.py`, does this:
+`manifest.json` ファイルを作成したら、それを使用して Dagster アセットを定義します。プロジェクトの `assets.py` にある次のコードは、次のことを実行します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/integrations/dbt/tutorial/load_dbt_models/assets.py"
@@ -96,14 +96,14 @@ Once you've got a `manifest.json` file, it's time to define your Dagster assets 
   endBefore="end_dbt_assets"
 />
 
-This code might look a bit fancy, because it uses a decorator. Here's a breakdown of what's going on:
+このコードはデコレータを使用しているため、少し凝ったものに見えるかもしれません。何が起こっているかの内訳は次のとおりです。
 
-- It creates a variable named `jaffle_shop_dbt_assets` that holds an object that represents a set of Dagster assets.
-- These Dagster assets reflect the dbt models described in the manifest file. The manifest file is passed in using the `manifest` argument.
-- The decorated function defines what should happen when you materialize one of these Dagster assets, e.g. by clicking the **Materialize** button in the UI or materializing it automatically by putting it on a schedule. In this case, it will invoke the `dbt build` command on the selected assets. The `context` parameter that's provided along with `dbt build` carries the selection.
+- Dagster アセットのセットを表すオブジェクトを保持する `jaffle_shop_dbt_assets` という変数を作成します。
+- これらの Dagster アセットは、マニフェスト ファイルに記述されている dbt モデルを反映します。マニフェスト ファイルは、`manifest` 引数を使用して渡されます。
+- デコレートされた関数は、これらの Dagster アセットの 1 つをマテリアライズするときに何が起こるかを定義します。たとえば、UI の **Materialize** ボタンをクリックするか、スケジュールに入れて自動的にマテリアライズします。この場合、選択されたアセットに対して `dbt build` コマンドが呼び出されます。`dbt build` とともに提供される `context` パラメータは、選択内容を保持します。
 
-If you later want to customize how your dbt models are translated into Dagster assets, you'll do so by editing its definition in `assets.py`.
+後で dbt モデルを Dagster アセットに変換する方法をカスタマイズする場合は、`assets.py` でその定義を編集します。
 
-## What's next?
+## 次は？
 
-At this point, you've loaded your dbt models into Dagster as assets, viewed them in Dagster's asset graph UI, and materialized them. Next, you'll learn how to [add upstream Dagster assets](/integrations/libraries/dbt/using-dbt-with-dagster/upstream-assets).
+この時点で、dbt モデルをアセットとして Dagster に読み込み、Dagster のアセット グラフ UI で表示し、マテリアライズしました。次に、[上流の Dagster アセットを追加する](/integrations/libraries/dbt/using-dbt-with-dagster/upstream-assets) 方法を学習します。

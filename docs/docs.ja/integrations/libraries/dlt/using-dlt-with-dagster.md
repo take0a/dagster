@@ -1,23 +1,23 @@
 ---
-title: 'Using dlt with Dagster'
+title: 'Dagster で dlt を使用する'
 description: Ingest data with ease using Dagster and dlt
 ---
 
-The [data load tool (dlt)](https://dlthub.com/) open-source library defines a standardized approach for creating data pipelines that load often messy data sources into well-structured data sets. It offers many advanced features, such as:
+[データ ロード ツール (dlt)](https://dlthub.com/) オープンソース ライブラリは、乱雑になりがちなデータ ソースを構造化されたデータ セットにロードするデータ パイプラインを作成するための標準化されたアプローチを定義します。次のような高度な機能が多数用意されています。
 
-- Handling connection secrets
-- Converting data into the structure required for a destination
-- Incremental updates and merges
+- 接続シークレットの処理
+- 宛先に必要な構造へのデータの変換
+- 増分更新とマージ
 
-dlt also provides a large collection of [pre-built, verified sources](https://dlthub.com/docs/dlt-ecosystem/verified-sources/) and [destinations](https://dlthub.com/docs/dlt-ecosystem/destinations/), allowing you to write less code (if any!) by leveraging the work of the dlt community.
+dlt は、[事前に構築された検証済みのソース](https://dlthub.com/docs/dlt-ecosystem/verified-sources/) と [宛先](https://dlthub.com/docs/dlt-ecosystem/destinations/) の大規模なコレクションも提供しており、dlt コミュニティの成果を活用することで、記述するコード (まったく記述しなくてもかまいません!) を減らすことができます。
 
-In this guide, we'll explain how the dlt integration works, how to set up a Dagster project for dlt, and how to use a pre-defined dlt source.
+このガイドでは、dlt 統合の仕組み、dlt 用の Dagster プロジェクトの設定方法、定義済みの dlt ソースの使用方法について説明します。
 
-## How it works
+## 仕組み
 
-The Dagster dlt integration uses [multi-assets](/guides/build/assets/defining-assets#multi-asset), a single definition that results in multiple assets. These assets are derived from the `DltSource`.
+Dagster dlt 統合では、[multi-assets](/guides/build/assets/defining-assets#multi-asset) を使用します。これは、複数のアセットを生成する単一の定義です。これらのアセットは、`DltSource` から派生します。
 
-The following is an example of a dlt source definition where a source is made up of two resources:
+以下は、ソースが 2 つのリソースで構成されている dlt ソース定義の例です。
 
 ```python
 @dlt.source
@@ -36,9 +36,9 @@ def example(api_key: str = dlt.secrets.value):
     return courses, users
 ```
 
-Each resource queries an API endpoint and yields the data that we wish to load into our data warehouse. The two resources defined on the source will map to Dagster assets.
+各リソースは API エンドポイントをクエリし、データ ウェアハウスにロードするデータを生成します。ソースで定義された 2 つのリソースは、Dagster アセットにマップされます。
 
-Next, we defined a dlt pipeline that specifies how we want the data to be loaded:
+次に、データのロード方法を指定する dlt パイプラインを定義しました:
 
 ```python
 pipeline = dlt.pipeline(
@@ -49,38 +49,38 @@ pipeline = dlt.pipeline(
 )
 ```
 
-A dlt source and pipeline are the two components required to load data using dlt. These will be the parameters of our multi-asset, which will integrate dlt and Dagster.
+dlt ソースとパイプラインは、dlt を使用してデータをロードするために必要な 2 つのコンポーネントです。これらは、dlt と Dagster を統合するマルチアセットのパラメーターになります。
 
-## Prerequisites
+## 前提条件
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、次のものが必要です:
 
-- **To read the [dlt introduction](https://dlthub.com/docs/intro)**, if you've never worked with dlt before.
-- **[To install](/getting-started/installation) the following libraries**:
+- **dlt をこれまで使用したことがない場合は、[dlt の概要](https://dlthub.com/docs/intro)** をお読みください。
+- **次のライブラリを[インストールする](/getting-started/installation)**:
 
   ```bash
   pip install dagster dagster-dlt
   ```
 
-  Installing `dagster-dlt` will also install the `dlt` package.
+  `dagster-dlt` をインストールすると、`dlt` パッケージもインストールされます。
 
-## Step 1: Configure your Dagster project to support dlt
+## Step 1: dltをサポートするようにDagsterプロジェクトを構成する
 
-The first step is to define a location for the `dlt` code used for ingesting data. We recommend creating a `dlt_sources` directory at the root of your Dagster project, but this code can reside anywhere within your Python project.
+最初のステップは、データの取り込みに使用する `dlt` コードの場所を定義することです。Dagster プロジェクトのルートに `dlt_sources` ディレクトリを作成することをお勧めしますが、このコードは Python プロジェクト内のどこにでも配置できます。
 
-Run the following to create the `dlt_sources` directory:
+`dlt_sources` ディレクトリを作成するには、以下を実行します:
 
 ```bash
 cd $DAGSTER_HOME && mkdir dlt_sources
 ```
 
-## Step 2: Initialize dlt ingestion code
+## Step 2: dlt 取り込みコードを初期化する
 
-In the `dlt_sources` directory, you can write ingestion code following the [dlt tutorial](https://dlthub.com/docs/tutorial/load-data-from-an-api) or you can use a verified source.
+`dlt_sources` ディレクトリでは、[dlt チュートリアル](https://dlthub.com/docs/tutorial/load-data-from-an-api) に従って取り込みコードを記述するか、検証済みのソースを使用できます。
 
-In this example, we'll use the [GitHub source](https://dlthub.com/docs/dlt-ecosystem/verified-sources/github) provided by dlt.
+この例では、dlt が提供する [GitHub ソース](https://dlthub.com/docs/dlt-ecosystem/verified-sources/github) を使用します。
 
-1. Run the following to create a location for the dlt source code and initialize the GitHub source:
+1. 次のコマンドを実行して、dlt ソース コードの場所を作成し、GitHub ソースを初期化します:
 
    ```bash
    cd dlt_sources
@@ -88,14 +88,14 @@ In this example, we'll use the [GitHub source](https://dlthub.com/docs/dlt-ecosy
    dlt init github snowflake
    ```
 
-   At which point you'll see the following in the command line:
+   この時点で、コマンド ラインに次の内容が表示されます:
 
    ```bash
    Looking up the init scripts in https://github.com/dlt-hub/verified-sources.git...
    Cloning and configuring a verified source github (Source that load github issues, pull requests and reactions for a specific repository via customizable graphql query. Loads events incrementally.)
    ```
 
-2. When prompted to proceed, enter `y`. You should see the following confirming that the GitHub source was added to the project:
+2. 続行するように求められたら、「y」と入力します。GitHub ソースがプロジェクトに追加されたことを確認する次の画面が表示されます:
 
    ```bash
    Verified source github was added to your project!
@@ -106,7 +106,7 @@ In this example, we'll use the [GitHub source](https://dlthub.com/docs/dlt-ecosy
    * Read https://dlthub.com/docs/walkthroughs/create-a-pipeline for more information
    ```
 
-This downloaded the code required to collect data from the GitHub API. It also created a `requirements.txt` and a `.dlt/` configuration directory. These files can be removed, as we will configure our pipelines through Dagster, however, you may still find it informative to reference.
+これにより、GitHub API からデータを収集するために必要なコードがダウンロードされました。また、`requirements.txt` と `.dlt/` 構成ディレクトリも作成されました。パイプラインは Dagster を通じて構成するため、これらのファイルは削除できますが、参照すると役立つ場合があります。
 
 ```bash
 $ tree -a
@@ -126,16 +126,16 @@ $ tree -a
 └── requirements.txt   # can be removed
 ```
 
-## Step 3: Define dlt environment variables
+## Step 3: dlt 環境変数を定義する
 
-This integration manages connections and secrets using environment variables as `dlt`. The `dlt` library can infer required environment variables used by its sources and resources. Refer to [dlt's Secrets and Configs](https://dlthub.com/docs/general-usage/credentials/configuration) documentation for more information.
+この統合では、`dlt` として環境変数を使用して接続とシークレットを管理します。`dlt` ライブラリは、ソースとリソースで使用される必要な環境変数を推測できます。詳細については、[dlt のシークレットと構成](https://dlthub.com/docs/general-usage/credentials/configuration) ドキュメントを参照してください。
 
-In the example we've been using:
+これまで使用してきた例では、次のようになります:
 
-- The `github_reactions` source requires a GitHub access token
-- The Snowflake destination requires database connection details
+- `github_reactions` ソースには GitHub アクセス トークンが必要です
+- Snowflake の宛先にはデータベース接続の詳細が必要です
 
-This results in the following required environment variables:
+これにより、次の環境変数が必要になります:
 
 ```bash
 SOURCES__GITHUB__ACCESS_TOKEN=""
@@ -147,11 +147,11 @@ DESTINATION__SNOWFLAKE__CREDENTIALS__WAREHOUSE=""
 DESTINATION__SNOWFLAKE__CREDENTIALS__ROLE=""
 ```
 
-Ensure that these variables are defined in your environment, either in your `.env` file when running locally or in the [Dagster deployment's environment variables](/guides/deploy/using-environment-variables-and-secrets).
+これらの変数が、ローカルで実行している場合は `.env` ファイルで、または [Dagster デプロイメントの環境変数](/guides/deploy/using-environment-variables-and-secrets) で環境で定義されていることを確認します。
 
-## Step 4: Define a DagsterDltResource
+## Step 4: DagsterDltResourceを定義する
 
-Next, we'll define a <PyObject section="libraries" module="dagster_dlt" object="DagsterDltResource" />, which provides a wrapper of a dlt pipeline runner. Use the following to define the resource, which can be shared across all dlt pipelines:
+次に、dlt パイプライン ランナーのラッパーを提供する <PyObject section="libraries" module="dagster_dlt" object="DagsterDltResource" /> を定義します。以下を使用して、すべての dlt パイプラインで共有できるリソースを定義します:
 
 ```python
 from dagster_dlt import DagsterDltResource
@@ -159,17 +159,17 @@ from dagster_dlt import DagsterDltResource
 dlt_resource = DagsterDltResource()
 ```
 
-We'll add the resource to our <PyObject section="definitions" module="dagster" object="Definitions" /> in a later step.
+後の手順で、 <PyObject section="definitions" module="dagster" object="Definitions" /> にリソースを追加します。
 
-## Step 5: Create a dlt_assets definition for GitHub
+## Step 5: GitHub 用の dlt_assets 定義を作成する
 
-The <PyObject section="libraries" object="dlt_assets" module="dagster_dlt" decorator /> decorator takes a `dlt_source` and `dlt_pipeline` parameter. In this example, we used the `github_reactions` source and created a `dlt_pipeline` to ingest data from Github to Snowflake.
+<PyObject section="libraries" object="dlt_assets" module="dagster_dlt" decorator /> デコレータは、`dlt_source` および `dlt_pipeline` パラメータを受け取ります。この例では、`github_reactions` ソースを使用し、`dlt_pipeline` を作成して Github から Snowflake にデータを取り込みました。
 
-In the same file containing your Dagster assets, you can create an instance of your <PyObject section="libraries" object="dlt_assets" module="dagster_dlt" decorator /> by doing something like the following:
+Dagster アセットを含む同じファイルで、次のようにして <PyObject section="libraries" object="dlt_assets" module="dagster_dlt" decorator /> のインスタンスを作成できます。
 
 :::
 
-If you are using the [sql_database](https://dlthub.com/docs/api_reference/sources/sql_database/__init__#sql_database) source, consider setting `defer_table_reflect=True` to reduce database reads. By default, the Dagster daemon will refresh definitions roughly every minute, which will query the database for resource definitions.
+[sql_database](https://dlthub.com/docs/api_reference/sources/sql_database/__init__#sql_database) ソースを使用している場合は、データベースの読み取りを減らすために `defer_table_reflect=True` を設定することを検討してください。デフォルトでは、Dagster デーモンはおよそ 1 分ごとに定義を更新し、データベースに対してリソース定義を照会します。
 
 :::
 
@@ -197,9 +197,9 @@ def dagster_github_assets(context: AssetExecutionContext, dlt: DagsterDltResourc
     yield from dlt.run(context=context)
 ```
 
-## Step 6: Create the Definitions object
+## Step 6: 定義オブジェクトを作成する
 
-The last step is to include the assets and resource in a <PyObject section="definitions" module="dagster" object="Definitions" /> object. This enables Dagster tools to load everything we've defined:
+最後のステップは、アセットとリソースを <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに含めることです。これにより、Dagster ツールは定義したすべてのものを読み込むことができます:
 
 ```python
 defs = Definitions(
@@ -212,38 +212,38 @@ defs = Definitions(
 )
 ```
 
-And that's it! You should now have two assets that load data to corresponding Snowflake tables: one for issues and the other for pull requests.
+これで完了です。これで、対応する Snowflake テーブルにデータをロードする 2 つのアセットが作成されました。1 つは問題用、もう 1 つはプル リクエスト用です。
 
-## Advanced usage
+## 高度な使い方
 
-### Overriding the translator to customize dlt assets
+### トランスレータをオーバーライドして dlt アセットをカスタマイズする
 
-The <PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" /> object can be used to customize how dlt properties map to Dagster concepts.
+<PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" /> オブジェクトを使用すると、dlt プロパティを Dagster コンセプトにマップする方法をカスタマイズできます。
 
-For example, to change how the name of the asset is derived, or if you would like to change the key of the upstream source asset, you can override the <PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" method="get_asset_spec" /> method.
+たとえば、アセットの名前の派生方法を変更する場合や、上流のソース アセットのキーを変更する場合は、<PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" method="get_asset_spec" /> メソッドをオーバーライドできます。
 
 <CodeExample path="docs_snippets/docs_snippets/integrations/dlt/dlt_dagster_translator.py" />
 
-In this example, we customized the translator to change how the dlt assets' names are defined. We also hard-coded the asset dependency upstream of our assets to provide a fan-out model from a single dependency to our dlt assets.
+この例では、トランスレータをカスタマイズして、dlt アセットの名前の定義方法を変更しました。また、アセットの上流にアセット依存関係をハードコードして、単一の依存関係から dlt アセットへのファンアウト モデルを提供しました。
 
-### Assigning metadata to upstream external assets
+### 上流の外部アセットにメタデータを割り当てる
 
-A common question is how to define metadata on the external assets upstream of the dlt assets.
+よくある質問は、dlt アセットの上流にある外部アセットのメタデータをどのように定義するかということです。
 
-This can be accomplished by defining a <PyObject section="assets" module="dagster" object="AssetSpec" /> with a key that matches the one defined in the <PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" method="get_asset_spec" /> method.
+これは、<PyObject section="assets" module="dagster" object="AssetSpec" /> メソッドで定義されたキーと一致するキーを持つ <PyObject section="libraries" module="dagster_dlt" object="DagsterDltTranslator" method="get_asset_spec" /> を定義することで実現できます。
 
-For example, let's say we have defined a set of dlt assets named `thinkific_assets`, we can iterate over those assets and derive a <PyObject section="assets" module="dagster" object="AssetSpec" /> with attributes like `group_name`.
+たとえば、`thinkific_assets` という名前の dlt アセットのセットを定義したとします。これらのアセットを反復処理して、`group_name` などの属性を持つ <PyObject section="assets" module="dagster" object="AssetSpec" /> を導出できます。
 
 <CodeExample path="docs_snippets/docs_snippets/integrations/dlt/dlt_source_assets.py" />
 
-### Using partitions in your dlt assets
+### dlt アセットでのパーティションの使用
 
-It is possible to use partitions within your dlt assets. However, it should be noted that this may result in concurrency related issues as state is managed by dlt. For this reason, it is recommended to set concurrency limits for your partitioned dlt assets. See the [Limiting concurrency in data pipelines](/guides/operate/managing-concurrency) guide for more details.
+dlt アセット内でパーティションを使用することは可能です。ただし、状態は dlt によって管理されるため、同時実行性に関する問題が発生する可能性があることに注意してください。このため、パーティション化された dlt アセットには同時実行性の制限を設定することをお勧めします。詳細については、[データ パイプラインでの同時実行性の制限](/guides/operate/managing-concurrency) ガイドを参照してください。
 
-That said, here is an example of using static named partitions from a dlt source.
+とはいえ、DLT ソースからの静的な名前付きパーティションを使用する例を次に示します。
 
 <CodeExample path="docs_snippets/docs_snippets/integrations/dlt/dlt_partitions.py" />
 
-## What's next?
+## 次は？
 
-Want to see real-world examples of dlt in production? Check out how we use it internally at Dagster in the [Dagster Open Platform](https://github.com/dagster-io/dagster-open-platform) project.
+実際の運用環境での dlt の例をご覧になりたいですか? Dagster の [Dagster Open Platform](https://github.com/dagster-io/dagster-open-platform) プロジェクトで、Dagster 社内でどのように dlt が使用されているかを確認してください。

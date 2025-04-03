@@ -1,41 +1,41 @@
 ---
-title: 'Using dbt with Dagster'
+title: 'Dagster で dbt を使用する'
 description: Dagster can orchestrate dbt alongside other technologies.
 ---
 
 :::note
 
-Using dbt Cloud? Check out the [Dagster & dbt Cloud guide](/integrations/libraries/dbt/dbt-cloud).
+dbt Cloud をお使いですか? [Dagster & dbt Cloud ガイド](/integrations/libraries/dbt/dbt-cloud) をご覧ください。
 
 :::
 
-In this tutorial, we'll walk you through integrating dbt with Dagster using a smaller version of dbt's example [jaffle shop project](https://github.com/dbt-labs/jaffle_shop), the [dagster-dbt library](/api/python-api/libraries/dagster-dbt), and a data warehouse, such as [DuckDB](https://duckdb.org/).
+このチュートリアルでは、dbt のサンプル [jaffle shop プロジェクト](https://github.com/dbt-labs/jaffle_shop) の小規模バージョン、[dagster-dbt ライブラリ](/api/python-api/libraries/dagster-dbt)、および [DuckDB](https://duckdb.org/) などのデータ ウェアハウスを使用して、dbt と Dagster を統合する手順を説明します。
 
-By the end of this tutorial, you'll have your dbt models represented in Dagster along with other [Dagster asset definitions](/integrations/libraries/dbt/reference#dbt-models-and-dagster-asset-definitions) upstream and downstream of them:
+このチュートリアルの最後には、dbt モデルが、その上流および下流にある他の [Dagster アセット定義](/integrations/libraries/dbt/reference#dbt-models-and-dagster-asset-definitions) とともに Dagster で表現されるようになります:
 
 ![Asset group with dbt models and Python asset](/images/integrations/dbt/using-dbt-with-dagster/downstream-assets/asset-graph-materialized.png)
 
-To get there, you will:
+そこに到達するには、次の操作を行います:
 
-- [Set up a dbt project](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project)
-- [Load the dbt models into Dagster as assets](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models)
-- [Create and materialize upstream Dagster assets](/integrations/libraries/dbt/using-dbt-with-dagster/upstream-assets)
-- [Create and materialize a downstream asset](/integrations/libraries/dbt/using-dbt-with-dagster/downstream-assets) that outputs a plotly chart
+- [dbt プロジェクトをセットアップ](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project)
+- [dbt モデルをアセットとして Dagster にロード](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models)
+- [上流の Dagster アセットを作成して具体化](/integrations/libraries/dbt/using-dbt-with-dagster/upstream-assets)
+- plotly チャートを出力する[下流のアセットを作成して具体化](/integrations/libraries/dbt/using-dbt-with-dagster/downstream-assets)
 
-## Prerequisites
+## 前提条件
 
-To complete this tutorial, you'll need:
+このチュートリアルを完了するには、次のものが必要です:
 
-- **To have [git](https://en.wikipedia.org/wiki/Git) installed**. If it's not installed already (find out by typing `git` in your terminal), you can install it using the [instructions on the git website](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+- **[git](https://en.wikipedia.org/wiki/Git) がインストールされている**。まだインストールされていない場合 (ターミナルで `git` と入力して確認してください)、[git Web サイトの手順](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) を使用してインストールできます。
 
-- **To install dbt, Dagster, and the Dagster webserver/UI**. Run the following to install everything using pip:
+- **dbt、Dagster、および Dagster Web サーバー/UI をインストールする**。以下を実行して、pip を使用してすべてをインストールします:
 
   ```shell
   pip install dagster-dbt dagster-webserver dbt-duckdb
   ```
 
-  The `dagster-dbt` library installs both `dbt-core` and `dagster` as dependencies. `dbt-duckdb` is installed as you'll be using [DuckDB](https://duckdb.org/) as a database during this tutorial. Refer to the [dbt](https://docs.getdbt.com/dbt-cli/install/overview) and [Dagster](/getting-started/installation) installation docs for more info.
+  `dagster-dbt` ライブラリは、`dbt-core` と `dagster` の両方を依存関係としてインストールします。このチュートリアルでは [DuckDB](https://duckdb.org/) をデータベースとして使用するため、`dbt-duckdb` がインストールされます。詳細については、[dbt](https://docs.getdbt.com/dbt-cli/install/overview) および [Dagster](/getting-started/installation) のインストール ドキュメントを参照してください。
 
-## Ready to get started?
+## 始める準備はできましたか？
 
-When you've fulfilled all the prerequisites for the tutorial, you can get started by [setting up the dbt project](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project).
+チュートリアルの前提条件をすべて満たしたら、[dbt プロジェクトの設定](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project)から開始できます。

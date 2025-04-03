@@ -1,50 +1,50 @@
 ---
-title: 'Set up the dbt project'
+title: 'dbtプロジェクトを設定する'
 description: Dagster can orchestrate dbt alongside other technologies.
 sidebar_position: 100
 ---
 
-In this part of the tutorial, you will:
+チュートリアルのこの部分では、次の操作を行います:
 
-- [Download a dbt project](#step-1-download-the-sample-dbt-project)
-- [Configure your dbt project to run with DuckDB](#step-2-configure-your-dbt-project-to-run-with-duckdb)
-- [Build your dbt project](#step-3-build-your-dbt-project)
+- [dbt プロジェクトをダウンロード](#step-1-download-the-sample-dbt-project)
+- [dbt プロジェクトを DuckDB で実行するように構成](#step-2-configure-your-dbt-project-to-run-with-duckdb)
+- [dbt プロジェクトをビルド](#step-3-build-your-dbt-project)
 
-## Step 1: Download the sample dbt project
+## Step 1: dbt プロジェクトをダウンロード {#step-1-download-the-sample-dbt-project}
 
-Let's get started by downloading a sample dbt project. We'll use the standard dbt [Jaffle Shop](https://github.com/dbt-labs/jaffle_shop) example.
+まず、サンプルの dbt プロジェクトをダウンロードしましょう。標準の dbt [Jaffle Shop](https://github.com/dbt-labs/jaffle_shop) の例を使用します。
 
-1. First, create a folder that will ultimately contain both your dbt project and Dagster code.
+1. まず、最終的に dbt プロジェクトと Dagster コードの両方が含まれるフォルダーを作成します。
 
    ```shell
    mkdir tutorial-dbt-dagster
    ```
 
-2. Then, navigate into that folder:
+2. 次に、そのフォルダに移動します:
 
    ```shell
    cd tutorial-dbt-dagster
    ```
 
-3. Finally, download the sample dbt project into that folder.
+3. 最後に、サンプル dbt プロジェクトをそのフォルダーにダウンロードします。
 
    ```shell
    git clone https://github.com/dbt-labs/jaffle_shop.git
    ```
 
-## Step 2: Configure your dbt project to run with DuckDB
+## Step 2: dbt プロジェクトを DuckDB で実行するように構成 {#step-2-configure-your-dbt-project-to-run-with-duckdb}
 
-Running dbt requires a data warehouse to store the tables that are created from the dbt models. For our data warehouse, we'll use DuckDB, because setting it up doesn't require any long-running services or external infrastructure.
+dbt を実行するには、dbt モデルから作成されたテーブルを保存するためのデータ ウェアハウスが必要です。データ ウェアハウスには DuckDB を使用します。これは、セットアップに長時間実行されるサービスや外部インフラストラクチャが不要なためです。
 
-You'll set up dbt to work with DuckDB by configuring a dbt [profile](https://docs.getdbt.com/docs/core/connect-data-platform/connection-profiles):
+dbt [プロファイル](https://docs.getdbt.com/docs/core/connect-data-platform/connection-profiles) を構成して、dbt を DuckDB と連携するように設定します:
 
-1. Navigate into the `jaffle_shop` folder, which was created when you downloaded the project, inside your `tutorial-dbt-dagster` folder:
+1. プロジェクトをダウンロードしたときに作成された、`tutorial-dbt-dagster` フォルダ内の `jaffle_shop` フォルダに移動します:
 
    ```shell
    cd jaffle_shop
    ```
 
-2. In this folder, with your text editor of choice, create a file named `profiles.yml` and add the following code to it:
+2. このフォルダーで、任意のテキスト エディターを使用して `profiles.yml` という名前のファイルを作成し、次のコードを追加します:
 
    ```yaml
    jaffle_shop:
@@ -56,22 +56,22 @@ You'll set up dbt to work with DuckDB by configuring a dbt [profile](https://doc
          threads: 24
    ```
 
-## Step 3: Build your dbt project
+## Step 3: dbt プロジェクトをビルド {#step-3-build-your-dbt-project}
 
-With the profile configured above, your dbt project should now be usable. To test it out, run:
+上記のようにプロファイルを設定すると、dbt プロジェクトが使用可能になります。テストするには、次のコマンドを実行します:
 
 ```shell
 dbt build
 ```
 
-This will run all the models, seeds, and snapshots in the project and store a set of tables in your DuckDB database.
+これにより、プロジェクト内のすべてのモデル、シード、スナップショットが実行され、DuckDB データベースに一連のテーブルが保存されます。
 
 :::note
 
-For other dbt projects, you may need to run additional commands before building the project. For instance, a project with [dependencies](https://docs.getdbt.com/docs/collaborate/govern/project-dependencies) will require you to run [`dbt deps`](https://docs.getdbt.com/reference/commands/deps) before building the project. For more information, see the [official dbt Command reference page](https://docs.getdbt.com/reference/dbt-commands).
+その他の dbt プロジェクトでは、プロジェクトをビルドする前に追加のコマンドを実行する必要があります。たとえば、[依存関係](https://docs.getdbt.com/docs/collaborate/govern/project-dependencies) のあるプロジェクトでは、プロジェクトをビルドする前に [`dbt deps`](https://docs.getdbt.com/reference/commands/deps) を実行する必要があります。詳細については、[公式の dbt コマンド リファレンス ページ](https://docs.getdbt.com/reference/dbt-commands) を参照してください。
 
 :::note
 
-## What's next?
+## 次は？
 
-At this point, you should have a fully-configured dbt project that's ready to work with Dagster. The next step is to [load the dbt models into Dagster as assets](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models).
+この時点で、Dagster で使用できるように完全に構​​成された dbt プロジェクトが完成しているはずです。次の手順は、[dbt モデルをアセットとして Dagster にロード](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models) することです。

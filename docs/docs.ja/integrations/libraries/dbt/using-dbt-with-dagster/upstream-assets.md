@@ -1,35 +1,35 @@
 ---
-title: 'Define assets upstream of your dbt models'
+title: 'dbtモデルの上流のアセットを定義する'
 description: Dagster can orchestrate dbt alongside other technologies.
 sidebar_position: 300
 ---
 
-By this point, you've [set up a dbt project](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project) and [loaded dbt models into Dagster as assets](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models).
+この時点で、[dbt プロジェクトをセットアップ](/integrations/libraries/dbt/using-dbt-with-dagster/set-up-dbt-project)し、[dbt モデルをアセットとして Dagster にロード](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models)しました。
 
-However, the tables at the root of the pipeline are static: they're [dbt seeds](https://docs.getdbt.com/docs/build/seeds), CSVs that are hardcoded into the dbt project. In a more realistic data pipeline, these tables would typically be ingested from some external data source, for example by using a tool like Airbyte or Fivetran, or by Python code.
+ただし、パイプラインのルートにあるテーブルは静的です。これらは [dbt シード](https://docs.getdbt.com/docs/build/seeds) であり、dbt プロジェクトにハードコードされている CSV です。より現実的なデータ パイプラインでは、これらのテーブルは通常、Airbyte や Fivetran などのツールや Python コードを使用して、外部データ ソースから取り込まれます。
 
-These ingestion steps in the pipeline often don't make sense to define inside dbt, but they often still do make sense to define as Dagster assets. You can think of a Dagster asset definition as a more general version of a dbt model. A dbt model is one kind of asset, but another kind is one that's defined in Python, using Dagster's Python API. The dbt integration reference page includes a [section](/integrations/libraries/dbt/reference#dbt-models-and-dagster-asset-definitions) that outlines the parallels between dbt models and Dagster asset definitions.
+パイプラインのこれらの取り込み手順は、dbt 内で定義しても意味がないことがよくありますが、Dagster アセットとして定義すれば意味があることはよくあります。 Dagster アセット定義は、dbt モデルのより一般的なバージョンと考えることができます。dbt モデルはアセットの一種ですが、別の種類は、Dagster の Python API を使用して Python で定義されるものです。dbt 統合リファレンス ページには、dbt モデルと Dagster アセット定義の類似点を概説した [セクション](/integrations/libraries/dbt/reference#dbt-models-and-dagster-asset-definitions) が含まれています。
 
-In this section, you'll replace the `raw_customers` dbt seed with a Dagster asset that represents it. You'll write Python code that populates this table by fetching data from the web. This will allow you to launch runs that first execute Python code to populate the `raw_customers` table and then invoke dbt to populate the downstream tables.
+このセクションでは、`raw_customers` dbt シードを、それを表す Dagster アセットに置き換えます。Web からデータを取得してこのテーブルにデータを入力する Python コードを記述します。これにより、最初に Python コードを実行して `raw_customers` テーブルにデータを入力し、次に dbt を呼び出してダウンストリーム テーブルにデータを入力する実行を開始できます。
 
-You'll:
+次の操作を行います:
 
-- [Install the Pandas and DuckDB Python libraries](#step-1-install-the-pandas-and-duckdb-python-libraries)
-- [Define an upstream Dagster asset](#step-2-define-an-upstream-dagster-asset)
-- [In the dbt project, replace a seed with a source](#step-3-in-the-dbt-project-replace-a-seed-with-a-source)
-- [Materialize the assets using the Dagster UI](#step-4-materialize-the-assets-using-the-dagster-ui)
+- [Pandas および DuckDB Python ライブラリをインストールします](#step-1-install-the-pandas-and-duckdb-python-libraries)
+- [上流の Dagster アセットを定義します](#step-2-define-an-upstream-dagster-asset)
+- [dbt プロジェクトで、シードをソースに置き換えます](#step-3-in-the-dbt-project-replace-a-seed-with-a-source)
+- [Dagster UI を使用してアセットをマテリアライズします](#step-4-materialize-the-assets-using-the-dagster-ui)
 
-## Step 1: Install the Pandas and DuckDB Python libraries
+## Step 1: Pandas および DuckDB Python ライブラリをインストールします {#step-1-install-the-pandas-and-duckdb-python-libraries}
 
-The Dagster asset that you write will fetch data using [Pandas](https://pandas.pydata.org/) and write it out to your DuckDB warehouse using [DuckDB's Python API](https://duckdb.org/docs/api/python/overview.html). To use these, you'll need to install them:
+書き込む Dagster アセットは、[Pandas](https://pandas.pydata.org/) を使用してデータを取得し、[DuckDB の Python API](https://duckdb.org/docs/api/python/overview.html) を使用して DuckDB ウェアハウスに書き出します。これらを使用するには、以下をインストールする必要があります:
 
 ```shell
 pip install pandas duckdb pyarrow
 ```
 
-## Step 2: Define an upstream Dagster asset
+## Step 2: 上流の Dagster アセットを定義します {#step-2-define-an-upstream-dagster-asset}
 
-To fetch the data the dbt models require, we'll write a Dagster asset for `raw_customers`. We'll put this asset in our `assets.py` file, inside the `jaffle_dagster` directory. This is the file that contains the code that defines our dbt models, which we reviewed at the end of the [last section](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models#step-4-understand-the-python-code-in-your-dagster-project). Copy and paste this code to overwrite the existing contents of that file:
+dbt モデルに必要なデータを取得するには、`raw_customers` 用の Dagster アセットを作成します。このアセットを `assets.py` ファイルの `jaffle_dagster` ディレクトリ内に配置します。これは、[最後のセクション](/integrations/libraries/dbt/using-dbt-with-dagster/load-dbt-models#step-4-understand-the-python-code-in-your-dagster-project) の最後で確認した dbt モデルを定義するコードを含むファイルです。このコードをコピーして貼り付け、そのファイルの既存の内容を上書きします。
 
 <CodeExample
   path="docs_snippets/docs_snippets/integrations/dbt/tutorial/upstream_assets/assets.py"
@@ -37,15 +37,15 @@ To fetch the data the dbt models require, we'll write a Dagster asset for `raw_c
   endBefore="end_python_assets"
 />
 
-Let's review the changes we made:
+行った変更を確認しましょう:
 
-1. At the top, we added imports for `pandas` and `duckdb`, which we use for fetching data into a `DataFrame` and writing it to DuckDB.
+1. 上部に、`pandas` と `duckdb` のインポートを追加しました。これらは、`DataFrame` にデータを取得して DuckDB に書き込むために使用します。
 
-2. We added a `duckdb_database_path` variable, which holds the location of our DuckDB database. Remember that DuckDB databases are just regular files on the local filesystem. The path is the same path that we used when we configured our `profiles.yml` file. This variable is used in the implementations of the `raw_customers` asset.
+2. DuckDB データベースの場所を保持する `duckdb_database_path` 変数を追加しました。DuckDB データベースは、ローカル ファイル システム上の通常のファイルであることに注意してください。パスは、`profiles.yml` ファイルを構成するときに使用したパスと同じです。この変数は、`raw_customers` アセットの実装で使用されます。
 
-3. We added a definition for the `raw_customers` table by writing a function named `raw_customers` and decorating it with the <PyObject section="assets" module="dagster" object="asset" decorator /> decorator. We labeled it with `compute_kind="python"` to indicate in the Dagster UI that this is an asset defined in Python. The implementation inside the function fetches data from the internet and writes it to a table in our DuckDB database. Similar to how running a dbt model executes a select statement, materializing this asset will execute this Python code.
+3. `raw_customers` という名前の関数を記述し、<PyObject section="assets" module="dagster" object="asset" decorator /> デコレータで装飾して、`raw_customers` テーブルの定義を追加しました。 Dagster UI でこれが Python で定義されたアセットであることを示すために、`compute_kind="python"` というラベルを付けました。関数内の実装は、インターネットからデータを取得し、それを DuckDB データベースのテーブルに書き込みます。dbt モデルを実行すると select ステートメントが実行されるのと同様に、このアセットを具体化すると、この Python コードが実行されます。
 
-Finally, let's update the `assets` argument of our `Definitions` object, in `definitions.py`, to include the new asset we just defined:
+最後に、`definitions.py` の `Definitions` オブジェクトの `assets` 引数を更新して、定義したばかりの新しいアセットを含めます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/integrations/dbt/tutorial/upstream_assets/definitions.py"
@@ -53,18 +53,18 @@ Finally, let's update the `assets` argument of our `Definitions` object, in `def
   endBefore="end_defs"
 />
 
-## Step 3: In the dbt project, replace a seed with a source
+## Step 3: dbt プロジェクトで、シードをソースに置き換えます {#step-3-in-the-dbt-project-replace-a-seed-with-a-source}
 
-1. Because we're replacing it with a Dagster asset, we no longer need the dbt seed for `raw_customers`, so we can delete it:
+1. これを Dagster アセットに置き換えるため、`raw_customers` の dbt シードは不要になり、削除できます:
 
    ```shell
    cd ..
    rm seeds/raw_customers.csv
    ```
 
-2. Instead, we want to tell dbt that `raw_customers` is a table that is defined outside of the dbt project. We can do that by defining it inside a [dbt source](https://docs.getdbt.com/docs/build/sources).
+2. 代わりに、`raw_customers` は dbt プロジェクトの外部で定義されたテーブルであることを dbt に伝えます。これを行うには、[dbt ソース](https://docs.getdbt.com/docs/build/sources) 内で定義します。
 
-   Create a file called `sources.yml` inside the `models/` directory, and put this inside it:
+   `models/` ディレクトリ内に `sources.yml` というファイルを作成し、その中に次のコードを配置します:
 
    ```yaml
    version: 2
@@ -78,9 +78,9 @@ Finally, let's update the `assets` argument of our `Definitions` object, in `def
                asset_key: ['raw_customers'] # This metadata specifies the corresponding Dagster asset for this dbt source.
    ```
 
-This is a standard dbt source definition, with one addition: it includes metadata, under the `meta` property, that specifies the Dagster asset that it corresponds to. When Dagster reads the contents of the dbt project, it reads this metadata and infers the correspondence. For any dbt model that depends on this dbt source, Dagster then knows that the Dagster asset corresponding to the dbt model should depend on the Dagster asset corresponding to the source.
+   これは標準の dbt ソース定義ですが、1 つ追加されています。`meta` プロパティの下に、対応する Dagster アセットを指定するメタデータが含まれています。Dagster は dbt プロジェクトのコンテンツを読み取るときに、このメタデータを読み取って対応を推測します。この dbt ソースに依存するすべての dbt モデルについて、Dagster は、dbt モデルに対応する Dagster アセットがソースに対応する Dagster アセットに依存する必要があることを認識します。
 
-3. Then, update the model that depends on the `raw_customers` seed to instead depend on the source. Replace the contents of `model/staging/stg_customers.sql` with this:
+3. 次に、`raw_customers` シードに依存するモデルを更新して、ソースに依存するようにします。`model/staging/stg_customers.sql` の内容を次のように置き換えます:
 
    ```sql
    with source as (
@@ -106,27 +106,27 @@ This is a standard dbt source definition, with one addition: it includes metadat
    select * from renamed
    ```
 
-## Step 4: Materialize the assets using the Dagster UI
+## Step 4: Dagster UI を使用してアセットをマテリアライズします {#step-4-materialize-the-assets-using-the-dagster-ui}
 
-If the Dagster UI is still running from the previous section, click the "Reload Definitions" button in the upper right corner. If you shut it down, then you can launch it again with the same command from the previous section:
+前のセクションから Dagster UI がまだ実行されている場合は、右上隅の「定義の再読み込み」ボタンをクリックします。シャットダウンした場合は、前のセクションと同じコマンドで再度起動できます:
 
 ```shell
 dagster dev
 ```
 
-Our `raw_customers` model is now defined as a Python asset. We can also see that assets downstream of this new Python asset, such as `stg_customers` and `customers`, are now marked stale because the code definition of `raw_customers` has changed.
+これで、`raw_customers` モデルが Python アセットとして定義されました。また、`raw_customers` のコード定義が変更されたため、`stg_customers` や `customers` など、この新しい Python アセットの下流のアセットが古くなったとマークされていることもわかります。
 
 ![Asset group with dbt models and Python asset](/images/integrations/dbt/using-dbt-with-dagster/upstream-assets/asset-graph.png)
 
-Click the **Materialize all** button. This will launch a run with two steps:
+**Materialize all** ボタンをクリックします。これにより、次の 2 つの手順で実行が開始されます。
 
-- Run the `raw_customers` Python function to fetch data and write the `raw_customers` table to DuckDB.
-- Run all the dbt models using `dbt build`, like in the last section.
+- `raw_customers` Python 関数を実行してデータを取得し、`raw_customers` テーブルを DuckDB に書き込みます。
+- 前のセクションと同様に、`dbt build` を使用してすべての dbt モデルを実行します。
 
-If you click to view the run, you can see a graphical representation of these steps, along with logs.
+クリックして実行を表示すると、これらの手順のグラフィカルな表現とログが表示されます。
 
 ![Run page for run with dbt models and Python asset](/images/integrations/dbt/using-dbt-with-dagster/upstream-assets/run-page.png)
 
-## What's next?
+## 次は？
 
-At this point, you've built and materialized an upstream Dagster asset, providing source data to your dbt models. In the last section of the tutorial, we'll show you how to add a [downstream asset to the pipeline](/integrations/libraries/dbt/using-dbt-with-dagster/downstream-assets).
+この時点で、上流の Dagster アセットを構築してマテリアライズし、dbt モデルにソース データを提供しました。チュートリアルの最後のセクションでは、[パイプラインに下流のアセットを追加する](/integrations/libraries/dbt/using-dbt-with-dagster/downstream-assets) 方法を説明します。
