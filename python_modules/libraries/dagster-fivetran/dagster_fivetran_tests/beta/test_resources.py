@@ -1,4 +1,5 @@
 import re
+from typing import cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -9,9 +10,11 @@ from dagster._core.definitions.materialize import materialize
 from dagster._core.test_utils import environ
 from dagster._vendored.dateutil import parser
 from dagster_fivetran import FivetranOutput, FivetranWorkspace, fivetran_assets
-from dagster_fivetran.translator import MIN_TIME_STR
+from dagster_fivetran.translator import MIN_TIME_STR, FivetranConnectorSetupStateType
 
 from dagster_fivetran_tests.beta.conftest import (
+    FIVETRAN_API_BASE,
+    FIVETRAN_API_VERSION,
     SAMPLE_SCHEMA_CONFIG_FOR_CONNECTOR,
     SAMPLE_SUCCESS_MESSAGE,
     TEST_ACCOUNT_ID,
@@ -23,6 +26,7 @@ from dagster_fivetran_tests.beta.conftest import (
     TEST_TABLE_NAME,
     get_fivetran_connector_api_url,
     get_sample_connection_details,
+    list_connectors_for_group_sample,
 )
 
 
@@ -38,7 +42,7 @@ def test_basic_resource_request(
     client = resource.get_client()
 
     # fetch workspace data calls
-    client.get_connectors_for_group(group_id=group_id)
+    client.list_connectors_for_group(group_id=group_id)
     client.get_destination_details(destination_id=destination_id)
     client.get_groups()
     client.get_schema_config_for_connector(connector_id=connector_id)
@@ -128,6 +132,38 @@ def test_basic_resource_request(
             poll_timeout=2,
             poll_interval=1,
         )
+
+
+def test_list_connectors_for_group_cursor(connector_id: str, group_id: str):
+    resource = FivetranWorkspace(
+        account_id=TEST_ACCOUNT_ID, api_key=TEST_API_KEY, api_secret=TEST_API_SECRET
+    )
+    client = resource.get_client()
+
+    setup_state = FivetranConnectorSetupStateType.CONNECTED.value
+
+    # Create mock responses to mock API behavior for the "list connectors for group" endpoint
+    def _mock_interaction():
+        with responses.RequestsMock() as response:
+            # initial state, a cursor is returned, we will do a second call
+            response.add(
+                method=responses.GET,
+                url=f"{FIVETRAN_API_BASE}/{FIVETRAN_API_VERSION}/groups/{group_id}/connectors",
+                json=list_connectors_for_group_sample(
+                    setup_state=setup_state, next_cursor="some_cursor"
+                ),
+                status=200,
+            )
+            # final state, no cursor so we break after the second call
+            response.add(
+                method=responses.GET,
+                url=f"{FIVETRAN_API_BASE}/{FIVETRAN_API_VERSION}/groups/{group_id}/connectors",
+                json=list_connectors_for_group_sample(setup_state=setup_state, next_cursor=None),
+                status=200,
+            )
+            return client.list_connectors_for_group(group_id=group_id)
+
+    assert len(cast(list, _mock_interaction())) == 2
 
 
 @pytest.mark.parametrize(
@@ -227,6 +263,47 @@ def test_sync_and_poll_client_methods(method, n_polls, succeed_at_end, connector
             _mock_interaction()
 
 
+@pytest.mark.parametrize(
+    "method",
+    [
+        "sync_and_poll",
+        "resync_and_poll",
+    ],
+    ids=[
+        "sync_paused_connector",
+        "resync_paused_connector",
+    ],
+)
+def test_sync_and_poll_client_methods_with_paused_connector(method, connector_id):
+    resource = FivetranWorkspace(
+        account_id=TEST_ACCOUNT_ID, api_key=TEST_API_KEY, api_secret=TEST_API_SECRET
+    )
+    client = resource.get_client()
+
+    test_connector_api_url = get_fivetran_connector_api_url(connector_id)
+
+    # Create mock responses to mock sync and poll behavior with a paused connector
+    def _mock_interaction():
+        with responses.RequestsMock() as response:
+            response.add(
+                responses.GET,
+                f"{test_connector_api_url}/schemas",
+                json=SAMPLE_SCHEMA_CONFIG_FOR_CONNECTOR,
+            )
+            # initial state
+            response.add(
+                responses.GET,
+                test_connector_api_url,
+                json=get_sample_connection_details(
+                    succeeded_at=MIN_TIME_STR, failed_at=MIN_TIME_STR, paused=True
+                ),
+            )
+            test_method = getattr(client, method)
+            return test_method(connector_id, poll_interval=0.1)
+
+    assert _mock_interaction() is None
+
+
 def test_fivetran_sync_and_poll_materialization_method(
     connector_id: str,
     fetch_workspace_data_api_mocks: responses.RequestsMock,
@@ -296,4 +373,23 @@ def test_fivetran_sync_and_poll_materialization_method(
         )
         assert re.search(
             r"dagster - WARNING - (?s:.)+ - Assets were not materialized", captured.err
+        )
+
+        # Mocked FivetranClient.sync_and_poll returns None if the connector is paused
+        result = materialize(
+            [my_fivetran_assets],
+            resources={"fivetran": workspace},
+        )
+        assert result.success
+        asset_materializations = [
+            event
+            for event in result.events_for_node(connector_id)
+            if event.event_type_value == "ASSET_MATERIALIZATION"
+        ]
+        assert len(asset_materializations) == 0
+
+        captured = capsys.readouterr()
+        assert re.search(
+            r"dagster - WARNING - (?s:.)+ - The connector with ID (?s:.)+ has not been synced.",
+            captured.err,
         )

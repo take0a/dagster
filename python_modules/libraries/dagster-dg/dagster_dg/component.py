@@ -1,11 +1,13 @@
 import copy
 import json
-from collections.abc import Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING, Any, Optional
+import re
+from collections.abc import Iterable, Mapping, Sequence, Set
+from typing import TYPE_CHECKING, Any, Optional, Union
 
 import dagster_shared.check as check
 from dagster_shared.serdes import deserialize_value, serialize_value
-from dagster_shared.serdes.objects import ComponentTypeSnap, LibraryObjectKey, LibraryObjectSnap
+from dagster_shared.serdes.objects import PackageObjectKey, PackageObjectSnap
+from dagster_shared.serdes.objects.package_entry import PackageObjectFeature
 
 from dagster_dg.utils import is_valid_json
 
@@ -13,12 +15,12 @@ if TYPE_CHECKING:
     from dagster_dg.context import DgContext
 
 
-class RemoteLibraryObjectRegistry:
+class RemotePackageRegistry:
     @staticmethod
     def from_dg_context(
         dg_context: "DgContext", extra_modules: Optional[Sequence[str]] = None
-    ) -> "RemoteLibraryObjectRegistry":
-        """Fetches the set of available library objects. The default set includes everything
+    ) -> "RemotePackageRegistry":
+        """Fetches the set of available package entries. The default set includes everything
         discovered under the "dagster_dg.library" entry point group in the target environment. If
         `extra_modules` is provided, these will also be searched for component types.
         """
@@ -35,37 +37,47 @@ class RemoteLibraryObjectRegistry:
         if extra_modules:
             object_data.update(_load_module_library_objects(dg_context, extra_modules))
 
-        return RemoteLibraryObjectRegistry(object_data)
+        return RemotePackageRegistry(object_data)
 
-    def __init__(self, components: dict[LibraryObjectKey, LibraryObjectSnap]):
-        self._objects: dict[LibraryObjectKey, LibraryObjectSnap] = copy.copy(components)
+    def __init__(self, components: dict[PackageObjectKey, PackageObjectSnap]):
+        self._objects: dict[PackageObjectKey, PackageObjectSnap] = copy.copy(components)
 
     @staticmethod
-    def empty() -> "RemoteLibraryObjectRegistry":
-        return RemoteLibraryObjectRegistry({})
+    def empty() -> "RemotePackageRegistry":
+        return RemotePackageRegistry({})
 
-    def get(self, key: LibraryObjectKey) -> LibraryObjectSnap:
+    @property
+    def packages(self) -> Set[str]:
+        return {key.package for key in self._objects.keys()}
+
+    def package_entries(self, package: str) -> Set[PackageObjectKey]:
+        return {key for key in self._objects.keys() if key.package == package}
+
+    def get_objects(
+        self, package: Optional[str] = None, feature: Optional[PackageObjectFeature] = None
+    ) -> Sequence[PackageObjectSnap]:
+        return [
+            entry
+            for entry in self._objects.values()
+            if (package is None or package == entry.key.package)
+            and (feature is None or feature in entry.features)
+        ]
+
+    def get(self, key: PackageObjectKey) -> PackageObjectSnap:
         """Resolves a library object within the scope of a given component directory."""
         return self._objects[key]
 
-    def get_component_type(self, key: LibraryObjectKey) -> ComponentTypeSnap:
-        """Resolves a component type within the scope of a given component directory."""
-        obj = self.get(key)
-        if not isinstance(obj, ComponentTypeSnap):
-            raise ValueError(f"Expected component type, got {obj}")
-        return obj
-
-    def has(self, key: LibraryObjectKey) -> bool:
+    def has(self, key: PackageObjectKey) -> bool:
         return key in self._objects
 
-    def keys(self) -> Iterable[LibraryObjectKey]:
+    def keys(self) -> Iterable[PackageObjectKey]:
         yield from sorted(self._objects.keys(), key=lambda k: k.to_typename())
 
-    def items(self) -> Iterable[tuple[LibraryObjectKey, LibraryObjectSnap]]:
+    def items(self) -> Iterable[tuple[PackageObjectKey, PackageObjectSnap]]:
         yield from self._objects.items()
 
     def __repr__(self) -> str:
-        return f"<RemoteLibraryObjectRegistry {list(self._objects.keys())}>"
+        return f"<RemotePackageRegistry {list(self._objects.keys())}>"
 
 
 def all_components_schema_from_dg_context(dg_context: "DgContext") -> Mapping[str, Any]:
@@ -87,7 +99,7 @@ def all_components_schema_from_dg_context(dg_context: "DgContext") -> Mapping[st
 
 def _load_entry_point_components(
     dg_context: "DgContext",
-) -> dict[LibraryObjectKey, LibraryObjectSnap]:
+) -> dict[PackageObjectKey, PackageObjectSnap]:
     if dg_context.has_cache:
         cache_key = dg_context.get_cache_key("component_registry_data")
         raw_registry_data = dg_context.cache.get(cache_key)
@@ -105,9 +117,9 @@ def _load_entry_point_components(
 
 def _load_module_library_objects(
     dg_context: "DgContext", modules: Sequence[str]
-) -> dict[LibraryObjectKey, LibraryObjectSnap]:
+) -> dict[PackageObjectKey, PackageObjectSnap]:
     modules_to_fetch = set(modules)
-    data: dict[LibraryObjectKey, LibraryObjectSnap] = {}
+    data: dict[PackageObjectKey, PackageObjectSnap] = {}
     if dg_context.has_cache:
         for module in modules:
             cache_key = dg_context.get_cache_key_for_module(module)
@@ -139,12 +151,32 @@ def _load_module_library_objects(
 
 def _parse_raw_registry_data(
     raw_registry_data: str,
-) -> dict[LibraryObjectKey, LibraryObjectSnap]:
-    deserialized = check.is_list(deserialize_value(raw_registry_data), of_type=LibraryObjectSnap)
+) -> dict[PackageObjectKey, PackageObjectSnap]:
+    deserialized = check.is_list(deserialize_value(raw_registry_data), of_type=PackageObjectSnap)
     return {obj.key: obj for obj in deserialized}
 
 
 def _dump_raw_registry_data(
-    registry_data: Mapping[LibraryObjectKey, LibraryObjectSnap],
+    registry_data: Mapping[PackageObjectKey, PackageObjectSnap],
 ) -> str:
     return serialize_value(list(registry_data.values()))
+
+
+def get_specified_env_var_deps(component_data: Mapping[str, Any]) -> set[str]:
+    if not component_data.get("requirements") or "env" not in component_data["requirements"]:
+        return set()
+    return set(component_data["requirements"]["env"])
+
+
+env_var_regex = re.compile(r"\{\{\s*env\(\s*['\"]([^'\"]+)['\"]\)\s*\}\}")
+
+
+def get_used_env_vars(data_structure: Union[Mapping[str, Any], Sequence[Any], Any]) -> set[str]:
+    if isinstance(data_structure, Mapping):
+        return set.union(set(), *(get_used_env_vars(value) for value in data_structure.values()))
+    elif isinstance(data_structure, str):
+        return set(env_var_regex.findall(data_structure))
+    elif isinstance(data_structure, Sequence):
+        return set.union(set(), *(get_used_env_vars(item) for item in data_structure))
+    else:
+        return set()

@@ -5,11 +5,12 @@ from itertools import groupby
 from typing import Any, Optional, TypedDict, Union
 
 import yaml
-from dagster_shared.serdes.objects import LibraryObjectKey
+from dagster_shared.serdes.objects import ComponentFeatureData, PackageObjectKey
+from dagster_shared.serdes.objects.package_entry import PackageObjectSnap
 from dagster_shared.yaml_utils import parse_yaml_with_source_positions
 from dagster_shared.yaml_utils.source_position import SourcePositionTree
 
-from dagster_dg.component import ComponentTypeSnap, RemoteLibraryObjectRegistry
+from dagster_dg.component import RemotePackageRegistry
 
 REF_BASE = "#/$defs/"
 JSON_SCHEMA_EXTRA_REQUIRED_SCOPE_KEY = "dagster_required_scope"
@@ -157,8 +158,8 @@ class ComponentTypeJson(TypedDict):
     """Component type JSON, used to back dg docs webapp."""
 
     name: str
-    author: str
-    tags: list[str]
+    owners: Optional[Sequence[str]]
+    tags: Optional[Sequence[str]]
     example: str
     schema: str
     description: Optional[str]
@@ -172,14 +173,19 @@ class ComponentTypeNamespaceJson(TypedDict):
 
 
 def json_for_all_components(
-    registry: RemoteLibraryObjectRegistry,
+    registry: RemotePackageRegistry,
 ) -> list[ComponentTypeNamespaceJson]:
     """Returns a list of JSON representations of all component types in the registry."""
-    component_json = [
-        (key.namespace.split(".")[0], json_for_component_type(key, library_obj))
-        for key, library_obj in registry.items()
-        if isinstance(library_obj, ComponentTypeSnap) and library_obj.schema is not None
-    ]
+    component_json = []
+    for key, entry in registry.items():
+        component_type_data = entry.get_feature_data("component")
+        if component_type_data and component_type_data.schema:
+            component_json.append(
+                (
+                    key.namespace.split(".")[0],
+                    json_for_component_type(key, entry, component_type_data),
+                )
+            )
     return [
         ComponentTypeNamespaceJson(
             name=namespace,
@@ -190,15 +196,15 @@ def json_for_all_components(
 
 
 def json_for_component_type(
-    key: LibraryObjectKey, remote_component_type: ComponentTypeSnap
+    key: PackageObjectKey, entry: PackageObjectSnap, component_type_data: ComponentFeatureData
 ) -> ComponentTypeJson:
     typename = key.to_typename()
-    sample_yaml = generate_sample_yaml(typename, remote_component_type.schema or {})
+    sample_yaml = generate_sample_yaml(typename, component_type_data.schema or {})
     return ComponentTypeJson(
         name=typename,
-        author="",
-        tags=[],
+        owners=entry.owners,
+        tags=entry.tags,
         example=sample_yaml,
-        schema=json.dumps(remote_component_type.schema),
-        description=remote_component_type.description,
+        schema=json.dumps(component_type_data.schema),
+        description=entry.description,
     )

@@ -3,6 +3,7 @@ import reject from 'lodash/reject';
 import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 import {FeatureFlag} from 'shared/app/FeatureFlags.oss';
 import {useAssetGraphSupplementaryData} from 'shared/asset-graph/useAssetGraphSupplementaryData.oss';
+import {useFavoriteAssets} from 'shared/assets/useFavoriteAssets.oss';
 import {Worker} from 'shared/workers/Worker.oss';
 
 import {ASSET_NODE_FRAGMENT} from './AssetNode';
@@ -32,6 +33,8 @@ export interface AssetGraphFetchScope {
   pipelineSelector?: PipelineSelector;
   groupSelector?: AssetGroupSelector;
   kinds?: string[];
+
+  externalAssets?: {id: string; key: {path: Array<string>}}[];
 
   // This is used to indicate we shouldn't start handling any input.
   // This is used by pages where `hideNodesMatching` is only available asynchronously.
@@ -72,10 +75,17 @@ export function useFullAssetGraphData(options: AssetGraphFetchScope) {
     };
   }, [spawnBuildGraphDataWorker]);
 
+  const externalAssetNodes = useMemo(
+    () => (options.externalAssets ?? []).map((a) => buildExternalAssetQueryItem(a).node),
+    [options.externalAssets],
+  );
   const nodes = fetchResult.data?.assetNodes;
   const queryItems = useMemo(
-    () => (nodes ? buildGraphQueryItems(nodes) : []).map(({node}) => node),
-    [nodes],
+    () => [
+      ...(nodes ? buildGraphQueryItems(nodes) : []).map(({node}) => node),
+      ...externalAssetNodes,
+    ],
+    [nodes, externalAssetNodes],
   );
 
   const [fullAssetGraphData, setFullAssetGraphData] = useState<GraphData | null>(null);
@@ -122,7 +132,7 @@ const INITIAL_STATE: GraphDataState = {
   assetGraphData: null,
 };
 
-/** Fetches data for rendering an asset graph:
+/** Fetches data for doing asset selection filtering in the asset catalog and asset graph:
  *
  * @param pipelineSelector: Optionally scope to an asset job, or pass null for the global graph
  *
@@ -152,18 +162,42 @@ export function useAssetGraphData(opsQuery: string, options: AssetGraphFetchScop
 
   const nodes = fetchResult.data?.assetNodes;
 
+  const favoriteAssets = useFavoriteAssets();
+
   const repoFilteredNodes = useMemo(() => {
-    // Apply any filters provided by the caller. This is where we do repo filtering
+    // Apply any filters provided by the caller
     let matching = nodes;
+
+    // Apply favorites filtering if enabled
+    if (favoriteAssets) {
+      matching = matching?.filter((node) => favoriteAssets.has(tokenForAssetKey(node.assetKey)));
+    }
+
+    // Apply repository filtering
     if (options.hideNodesMatching) {
       matching = reject(matching, options.hideNodesMatching);
     }
+
     return matching;
-  }, [nodes, options.hideNodesMatching]);
+  }, [nodes, options.hideNodesMatching, favoriteAssets]);
+
+  const externalAssetNodes = useMemo(
+    () =>
+      (options.externalAssets ?? [])
+        .filter((asset) => {
+          const token = tokenForAssetKey(asset.key);
+          return !favoriteAssets || favoriteAssets.has(token);
+        })
+        .map(buildExternalAssetQueryItem),
+    [options.externalAssets, favoriteAssets],
+  );
 
   const graphQueryItems = useMemo(
-    () => (repoFilteredNodes ? buildGraphQueryItems(repoFilteredNodes) : []),
-    [repoFilteredNodes],
+    () => [
+      ...(repoFilteredNodes ? buildGraphQueryItems(repoFilteredNodes) : []),
+      ...externalAssetNodes,
+    ],
+    [repoFilteredNodes, externalAssetNodes],
   );
 
   const [state, setState] = useState<GraphDataState>(INITIAL_STATE);
@@ -470,3 +504,50 @@ async function buildGraphDataWrapper(
   }
   return buildGraphDataImpl(props.nodes);
 }
+
+const buildExternalAssetQueryItem = (asset: {
+  id: string;
+  key: {path: string[]};
+}): AssetGraphQueryItem => {
+  return {
+    name: tokenForAssetKey(asset.key),
+    inputs: [],
+    outputs: [],
+    node: {
+      __typename: 'AssetNode',
+      id: asset.id,
+      assetKey: {
+        __typename: 'AssetKey',
+        ...asset.key,
+      },
+      groupName: '',
+      isExecutable: false,
+      changedReasons: [],
+      tags: [],
+      owners: [],
+      hasMaterializePermission: false,
+      repository: {
+        __typename: 'Repository',
+        id: '',
+        name: '',
+        location: {
+          __typename: 'RepositoryLocation',
+          id: '',
+          name: '',
+        },
+      },
+      dependencyKeys: [],
+      dependedByKeys: [],
+      graphName: null,
+      jobNames: [],
+      opNames: [],
+      opVersion: null,
+      description: null,
+      computeKind: null,
+      isPartitioned: false,
+      isObservable: false,
+      isMaterializable: false,
+      kinds: [],
+    },
+  };
+};

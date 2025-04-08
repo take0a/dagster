@@ -4,7 +4,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
-from dagster_components.utils import format_error_message
+from dagster.components.utils import format_error_message
 from dagster_dg.utils import ensure_dagster_dg_tests_import
 
 ensure_dagster_dg_tests_import()
@@ -74,15 +74,28 @@ def test_list_components_success():
 # ########################
 
 _EXPECTED_COMPONENT_TYPES = textwrap.dedent("""
-    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-    ┃ Component Type                                     ┃ Summary                                                         ┃
-    ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-    │ dagster_test.components.AllMetadataEmptyComponent  │                                                                 │
-    │ dagster_test.components.ComplexAssetComponent      │ An asset that has a complex schema.                             │
-    │ dagster_test.components.SimpleAssetComponent       │ A simple asset that returns a constant string value.            │
-    │ dagster_test.components.SimplePipesScriptComponent │ A simple asset that runs a Python script with the Pipes         │
-    │                                                    │ subprocess client.                                              │
-    └────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────┘
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Package      ┃ Objects                                                                                               ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ dagster_test │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│              │ ┃ Symbol                                             ┃ Summary              ┃ Features              ┃ │
+│              │ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│              │ │ dagster_test.components.AllMetadataEmptyComponent  │                      │ [component,           │ │
+│              │ │                                                    │                      │ scaffold-target]      │ │
+│              │ ├────────────────────────────────────────────────────┼──────────────────────┼───────────────────────┤ │
+│              │ │ dagster_test.components.ComplexAssetComponent      │ An asset that has a  │ [component,           │ │
+│              │ │                                                    │ complex schema.      │ scaffold-target]      │ │
+│              │ ├────────────────────────────────────────────────────┼──────────────────────┼───────────────────────┤ │
+│              │ │ dagster_test.components.SimpleAssetComponent       │ A simple asset that  │ [component,           │ │
+│              │ │                                                    │ returns a constant   │ scaffold-target]      │ │
+│              │ │                                                    │ string value.        │                       │ │
+│              │ ├────────────────────────────────────────────────────┼──────────────────────┼───────────────────────┤ │
+│              │ │ dagster_test.components.SimplePipesScriptComponent │ A simple asset that  │ [component,           │ │
+│              │ │                                                    │ runs a Python script │ scaffold-target]      │ │
+│              │ │                                                    │ with the Pipes       │                       │ │
+│              │ │                                                    │ subprocess client.   │                       │ │
+│              │ └────────────────────────────────────────────────────┴──────────────────────┴───────────────────────┘ │
+└──────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────┘
 """).strip()
 
 _EXPECTED_COMPONENT_TYPES_JSON = textwrap.dedent("""
@@ -142,7 +155,7 @@ def test_list_component_type_bad_entry_point_fails(capfd):
         isolated_example_component_library_foo_bar(runner),
     ):
         # Delete the component lib package referenced by the entry point
-        shutil.rmtree("foo_bar/lib")
+        shutil.rmtree("src/foo_bar/lib")
 
         # Disable cache to force re-discovery of deleted entry point
         result = runner.invoke("list", "component-type", "--disable-cache", "--json")
@@ -163,67 +176,60 @@ def test_list_component_type_bad_entry_point_fails(capfd):
 # ########################
 
 _EXPECTED_DEFS = textwrap.dedent("""
-    Assets
-    ┏━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━┓
-    ┃ Key        ┃ Group   ┃ Deps ┃ Kinds ┃ Description ┃
-    ┡━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━┩
-    │ my_asset_1 │ default │      │       │             │
-    │ my_asset_2 │ default │      │       │             │
-    └────────────┴─────────┴──────┴───────┴─────────────┘
-
-    Jobs
-    ┏━━━━━━━━━━━━━┓
-    ┃ Name        ┃
-    ┡━━━━━━━━━━━━━┩
-    │ my_schedule │
-    └─────────────┘
-
-    Schedules
-    ┏━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-    ┃ Name        ┃ Cron schedule ┃
-    ┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-    │ my_schedule │ @daily        │
-    └─────────────┴───────────────┘
-
-    Sensors
-    ┏━━━━━━━━━━━━━┓
-    ┃ Name        ┃
-    ┡━━━━━━━━━━━━━┩
-    │ my_schedule │
-    └─────────────┘
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Section   ┃ Definitions                                           ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Assets    │ ┏━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━┓ │
+│           │ ┃ Key        ┃ Group   ┃ Deps ┃ Kinds ┃ Description ┃ │
+│           │ ┡━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━┩ │
+│           │ │ my_asset_1 │ default │      │       │             │ │
+│           │ ├────────────┼─────────┼──────┼───────┼─────────────┤ │
+│           │ │ my_asset_2 │ default │      │       │             │ │
+│           │ └────────────┴─────────┴──────┴───────┴─────────────┘ │
+│ Jobs      │ ┏━━━━━━━━┓                                            │
+│           │ ┃ Name   ┃                                            │
+│           │ ┡━━━━━━━━┩                                            │
+│           │ │ my_job │                                            │
+│           │ └────────┘                                            │
+│ Schedules │ ┏━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓                       │
+│           │ ┃ Name        ┃ Cron schedule ┃                       │
+│           │ ┡━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩                       │
+│           │ │ my_schedule │ @daily        │                       │
+│           │ └─────────────┴───────────────┘                       │
+│ Sensors   │ ┏━━━━━━━━━━━┓                                         │
+│           │ ┃ Name      ┃                                         │
+│           │ ┡━━━━━━━━━━━┩                                         │
+│           │ │ my_sensor │                                         │
+│           │ └───────────┘                                         │
+└───────────┴───────────────────────────────────────────────────────┘
 """).strip()
 
 _EXPECTED_DEFS_JSON = textwrap.dedent("""
     [
         {
-            "type": "asset",
             "key": "my_asset_1",
-            "group": "default",
             "deps": [],
             "kinds": [],
+            "group": "default",
             "description": null,
             "automation_condition": null
         },
         {
-            "type": "asset",
             "key": "my_asset_2",
-            "group": "default",
             "deps": [],
             "kinds": [],
+            "group": "default",
             "description": null,
             "automation_condition": null
         },
         {
-            "type": "job",
             "name": "my_job"
         },
         {
-            "type": "schedule",
             "name": "my_schedule",
             "cron_schedule": "@daily"
         },
         {
-            "type": "sensor",
             "name": "my_sensor"
         }
     ]
@@ -236,12 +242,10 @@ def test_list_defs_succeeds(use_json: bool):
         ProxyRunner.test() as runner,
         isolated_example_project_foo_bar(runner, in_workspace=False),
     ):
-        result = runner.invoke(
-            "scaffold", "dagster_components.dagster.DefsFolderComponent", "mydefs"
-        )
+        result = runner.invoke("scaffold", "dagster.components.DefsFolderComponent", "mydefs")
         assert_runner_result(result)
 
-        with Path("foo_bar/defs/mydefs/definitions.py").open("w") as f:
+        with Path("src/foo_bar/defs/mydefs/definitions.py").open("w") as f:
             defs_source = textwrap.dedent(inspect.getsource(_sample_defs).split("\n", 1)[1])
             f.write(defs_source)
 
@@ -277,16 +281,30 @@ def _sample_defs():
 
 
 _EXPECTED_COMPLEX_ASSET_DEFS = textwrap.dedent("""
-    Assets
-    ┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
-    ┃ Key     ┃ Group   ┃ Deps  ┃ Kinds ┃ Description      ┃
-    ┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
-    │ alpha   │ group_1 │       │ sling │                  │
-    │ beta    │ group_2 │       │ dbt   │ This is beta.    │
-    │ delta   │ group_2 │ alpha │ dbt   │                  │
-    │         │         │ beta  │       │                  │
-    │ epsilon │ group_2 │ delta │ dbt   │ This is epsilon. │
-    └─────────┴─────────┴───────┴───────┴──────────────────┘
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Section      ┃ Definitions                                                                      ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Assets       │ ┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━┓                         │
+│              │ ┃ Key     ┃ Group   ┃ Deps  ┃ Kinds ┃ Description      ┃                         │
+│              │ ┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━┩                         │
+│              │ │ alpha   │ group_1 │       │ sling │                  │                         │
+│              │ ├─────────┼─────────┼───────┼───────┼──────────────────┤                         │
+│              │ │ beta    │ group_2 │       │ dbt   │ This is beta.    │                         │
+│              │ ├─────────┼─────────┼───────┼───────┼──────────────────┤                         │
+│              │ │ delta   │ group_2 │ alpha │ dbt   │                  │                         │
+│              │ │         │         │ beta  │       │                  │                         │
+│              │ ├─────────┼─────────┼───────┼───────┼──────────────────┤                         │
+│              │ │ epsilon │ group_2 │ delta │ dbt   │ This is epsilon. │                         │
+│              │ └─────────┴─────────┴───────┴───────┴──────────────────┘                         │
+│ Asset Checks │ ┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│              │ ┃ Key                    ┃ Additional Deps ┃ Description                       ┃ │
+│              │ ┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│              │ │ alpha:alpha_beta_check │ alpha           │ This check is for alpha and beta. │ │
+│              │ │                        │ beta            │                                   │ │
+│              │ ├────────────────────────┼─────────────────┼───────────────────────────────────┤ │
+│              │ │ alpha:alpha_check      │ alpha           │ This check is for alpha.          │ │
+│              │ └────────────────────────┴─────────────────┴───────────────────────────────────┘ │
+└──────────────┴──────────────────────────────────────────────────────────────────────────────────┘
 """).strip()
 
 
@@ -295,12 +313,10 @@ def test_list_defs_complex_assets_succeeds():
         ProxyRunner.test() as runner,
         isolated_example_project_foo_bar(runner, in_workspace=False),
     ):
-        result = runner.invoke(
-            "scaffold", "dagster_components.dagster.DefsFolderComponent", "mydefs"
-        )
+        result = runner.invoke("scaffold", "dagster.components.DefsFolderComponent", "mydefs")
         assert_runner_result(result)
 
-        with Path("foo_bar/defs/mydefs/definitions.py").open("w") as f:
+        with Path("src/foo_bar/defs/mydefs/definitions.py").open("w") as f:
             defs_source = textwrap.dedent(
                 inspect.getsource(_sample_complex_asset_defs).split("\n", 1)[1]
             )
@@ -313,13 +329,13 @@ def test_list_defs_complex_assets_succeeds():
 
 
 def _sample_complex_asset_defs():
-    from dagster import asset
+    import dagster as dg
 
-    @asset(kinds={"sling"}, group_name="group_1")
+    @dg.asset(kinds={"sling"}, group_name="group_1")
     def alpha():
         pass
 
-    @asset(
+    @dg.asset(
         kinds={"dbt"},
         group_name="group_2",
         description="This is beta.",
@@ -327,25 +343,38 @@ def _sample_complex_asset_defs():
     def beta():
         pass
 
-    @asset(
+    @dg.asset(
         kinds={"dbt"},
         group_name="group_2",
     )
     def delta(alpha, beta):
         pass
 
-    @asset(kinds={"dbt"}, group_name="group_2", description="This is epsilon.")
+    @dg.asset(kinds={"dbt"}, group_name="group_2", description="This is epsilon.")
     def epsilon(delta):
         pass
 
+    @dg.asset_check(asset=alpha)
+    def alpha_check() -> dg.AssetCheckResult:
+        """This check is for alpha."""
+        return dg.AssetCheckResult(passed=True)
+
+    @dg.asset_check(asset=alpha, additional_deps=[beta])
+    def alpha_beta_check() -> dg.AssetCheckResult:
+        """This check is for alpha and beta."""
+        return dg.AssetCheckResult(passed=True)
+
 
 _EXPECTED_ENV_VAR_ASSET_DEFS = textwrap.dedent("""
-    Assets
-    ┌───────┬───────┬──────┬───────┬─────────────┐
-    │ Key   │ Group │ Deps │ Kinds │ Description │
-    ├───────┼───────┼──────┼───────┼─────────────┤
-    │ alpha │ bar   │      │ sling │             │
-    └───────┴───────┴──────┴───────┴─────────────┘
+┏━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Section ┃ Definitions                                    ┃
+┡━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Assets  │ ┏━━━━━━━┳━━━━━━━┳━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━┓ │
+│         │ ┃ Key   ┃ Group ┃ Deps ┃ Kinds ┃ Description ┃ │
+│         │ ┡━━━━━━━╇━━━━━━━╇━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━┩ │
+│         │ │ alpha │ bar   │      │ sling │             │ │
+│         │ └───────┴───────┴──────┴───────┴─────────────┘ │
+└─────────┴────────────────────────────────────────────────┘
 """).strip()
 
 
@@ -356,19 +385,19 @@ def test_list_defs_with_env_file_succeeds():
     ):
         result = runner.invoke(
             "scaffold",
-            "dagster_components.dagster.DefsFolderComponent",
+            "dagster.components.DefsFolderComponent",
             "mydefs",
         )
         assert_runner_result(result)
 
-        with Path("foo_bar/defs/mydefs/definitions.py").open("w") as f:
+        with Path("src/foo_bar/defs/mydefs/definitions.py").open("w") as f:
             defs_source = textwrap.dedent(
                 inspect.getsource(_sample_env_var_assets).split("\n", 1)[1]
             )
             f.write(defs_source)
-            env_file_contents = """
-GROUP_NAME=bar
-"""
+            env_file_contents = textwrap.dedent("""
+                GROUP_NAME=bar
+            """)
 
         with Path(".env").open("w") as f:
             f.write(env_file_contents)

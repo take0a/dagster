@@ -1,22 +1,38 @@
 dg list component-type
 
 Using /.../my-component-library/.venv/bin/dagster-components
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
-┃ Component Type                                                      ┃ Summary          ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
-│ dagster_components.dagster.DefinitionsComponent                     │ An arbitrary set │
-│                                                                     │ of dagster       │
-│                                                                     │ definitions.     │
-│ dagster_components.dagster.DefsFolderComponent                      │ A folder         │
-│                                                                     │ containing       │
-│                                                                     │ multiple         │
-│                                                                     │ submodules.      │
-│ dagster_components.dagster.PipesSubprocessScriptCollectionComponent │ Assets that wrap │
-│                                                                     │ Python scripts   │
-│                                                                     │ executed with    │
-│                                                                     │ Dagster's        │
-│                                                                     │ PipesSubprocess… │
-│ my_component_library.lib.ShellCommand                               │ Models a shell   │
-│                                                                     │ script as a      │
-│                                                                     │ Dagster asset.   │
-└─────────────────────────────────────────────────────────────────────┴──────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Package              ┃ Objects                                                                                       ┃
+┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ dagster              │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓ │
+│                      │ ┃ Symbol                                                      ┃ Summary      ┃ Features     ┃ │
+│                      │ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩ │
+│                      │ │ dagster.components.DefinitionsComponent                     │ An arbitrary │ [component,  │ │
+│                      │ │                                                             │ set of       │ scaffold-ta… │ │
+│                      │ │                                                             │ dagster      │              │ │
+│                      │ │                                                             │ definitions. │              │ │
+│                      │ ├─────────────────────────────────────────────────────────────┼──────────────┼──────────────┤ │
+│                      │ │ dagster.components.DefsFolderComponent                      │ A folder     │ [component,  │ │
+│                      │ │                                                             │ which may    │ scaffold-ta… │ │
+│                      │ │                                                             │ contain      │              │ │
+│                      │ │                                                             │ multiple     │              │ │
+│                      │ │                                                             │ submodules,  │              │ │
+│                      │ │                                                             │ each         │              │ │
+│                      │ │                                                             │ which define │              │ │
+│                      │ │                                                             │ components.  │              │ │
+│                      │ ├─────────────────────────────────────────────────────────────┼──────────────┼──────────────┤ │
+│                      │ │ dagster.components.PipesSubprocessScriptCollectionComponent │ Assets that  │ [component,  │ │
+│                      │ │                                                             │ wrap Python  │ scaffold-ta… │ │
+│                      │ │                                                             │ scripts      │              │ │
+│                      │ │                                                             │ executed     │              │ │
+│                      │ │                                                             │ with         │              │ │
+│                      │ │                                                             │ Dagster's    │              │ │
+│                      │ │                                                             │ PipesSubpro… │              │ │
+│                      │ └─────────────────────────────────────────────────────────────┴──────────────┴──────────────┘ │
+│ my_component_library │ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│                      │ ┃ Symbol                                ┃ Summary                 ┃ Features                ┃ │
+│                      │ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│                      │ │ my_component_library.lib.ShellCommand │ Models a shell script   │ [component,             │ │
+│                      │ │                                       │ as a Dagster asset.     │ scaffold-target]        │ │
+│                      │ └───────────────────────────────────────┴─────────────────────────┴─────────────────────────┘ │
+└──────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────┘
