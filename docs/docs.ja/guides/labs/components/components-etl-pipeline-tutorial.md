@@ -227,7 +227,7 @@ Dagster UI でプロジェクトを再ロードして、キーが正しくロー
 
 スケジュールの最初のスキャフォールド:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/56-scaffold-daily-jaffle.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/25-scaffold-daily-jaffle.txt" />
 
 そして、`*` をターゲットにして `@daily` をスケジュールします:
 
