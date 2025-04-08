@@ -7,7 +7,7 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-`dagster-components` システムを使用すると、プロジェクト全体で再利用できる新しいコンポーネント タイプを簡単に作成できます。
+コンポーネントシステムを使用すると、プロジェクト全体で再利用できる新しいコンポーネント タイプを簡単に作成できます。
 
 ほとんどの場合、コンポーネント タイプは特定のテクノロジーにマップされます。たとえば、Docker コンテナーでスクリプトを実行する `DockerScriptComponent` や、Snowflake でクエリを実行する `SnowflakeQueryComponent` などがあります。
 
@@ -35,6 +35,10 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 このファイルには、新しいコンポーネント タイプの基本構造が含まれています。私たちの目標は、`build_defs` メソッドを実装して `Definitions` を返すことです。これには、コンポーネント クラスをインスタンス化するために定義する入力が必要です。
 
+:::note
+The use of `Model` is optional if you only want a Pythonic interface to the component. If you wish to implement an `__init__` method for your class (manually or using `@dataclasses.dataclass`), you can provide the `--no-model` flag to the `dg scaffold` command.
+:::
+
 ## Pythonクラスの定義
 
 最初のステップは、このコンポーネントに必要な情報を定義することです。つまり、コンポーネントのどの側面をカスタマイズ可能にするか決定するということです。
@@ -44,12 +48,20 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 - 実行するシェル スクリプトへのパス。
 - このスクリプトで生成されると予想されるアセット。
 
-クラスは、`Component` に加えて `Resolvable` からも継承します。これにより、クラスに注釈が付けられている内容に基づいて、クラスの yaml スキーマを導出します。一般的なユース ケースを簡素化するために、`dagster-components` は、yaml から `AssetSpec` を定義するためのスキーマを公開し、コンポーネントをインスタンス化する前にそれらを解決するための `ResolvedAssetSpec` などの一般的な構成の注釈を提供します。
+クラスは、`Component` に加えて `Resolvable` からも継承します。これにより、クラスに注釈が付けられている内容に基づいて、クラスの yaml スキーマを導出します。一般的なユース ケースを簡素化するために、Dagster は、yaml から `AssetSpec` を定義するためのスキーマを公開し、コンポーネントをインスタンス化する前にそれらを解決するための `ResolvedAssetSpec` などの一般的な構成の注釈を提供します。
 
 次のように、コンポーネントのスキーマを作成してクラスに追加できます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-config-schema.py"
+  language="python"
+  title="my_component_library/lib/shell_command.py"
+  />
+
+Additionally, it's possible to include metadata for your Component by overriding the `get_component_type_metadata` method. This allows you to set fields like `owners` and `tags` that will be visible in the generated documentation.
+
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/components/shell-script-component/with-config-schema-meta.py"
   language="python"
   title="my_component_library/lib/shell_command.py"
   />

@@ -61,11 +61,11 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 ### 1. Slingコンポーネントタイプを環境に追加する
 
-データを取り込むには、[Sling](https://slingdata.io/) を設定する必要があります。ただし、この時点で環境で使用可能なコンポーネント タイプを一覧表示しても、Sling コンポーネントは表示されません。これは、プロジェクトのスキャフォールディング時にインストールされた基本的な `dagster-components` パッケージに、特定の統合 (Sling など) 用のコンポーネントが含まれていないためです:
+To ingest data, you must set up [Sling](https://slingdata.io/). However, if you list the available component types in your environment at this point, the Sling component won't appear, since the `dagster` package doesn't contain components for specific integrations (like Sling):
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/7-dg-list-component-types.txt" />
 
-Sling コンポーネントを環境で使用できるようにするには、`dagster-components` の `sling` エクストラをインストールします。
+Sling コンポーネントを環境で使用できるようにするには、`dagster-slingents` の `sling` エクストラをインストールします。
 
 <CliInvocationExample contents="uv add 'dagster-components[sling]'" />
 
@@ -79,7 +79,7 @@ Sling コンポーネントを環境で使用できるようにするには、`d
 
 ### 2. Slingコンポーネントタイプの可用性を確認する
 
-`dagster_components.sling_replication` コンポーネントタイプが使用可能になったことを確認するには、`dg list component-type` コマンドを再度実行します:
+`dagster_sling.SlingReplicationCollectionComponent` コンポーネントタイプが使用可能になったことを確認するには、`dg list component-type` コマンドを再度実行します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/8-dg-list-component-types.txt" />
 
@@ -107,26 +107,36 @@ Sling コンポーネントを環境で使用できるようにするには、`d
 レプリケーションの `path` パラメータは、component.yaml を含む同じフォルダを基準とします。これはコンポーネントの規則です。
 :::
 
-### 4. DuckDBをセットアップする
+<!-- ### 4. DuckDBをセットアップする
 
 DuckDB をセットアップしてテストします:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/12-sling-setup-duckdb.txt" />
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/13-sling-test-duckdb.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/13-sling-test-duckdb.txt" /> -->
 
-### 5. Sling ソースのファイルをダウンロード
+### 4. Sling ソースのファイルをダウンロード
 
 次に、Sling はパブリック インターネットからの読み取りをサポートしていないため、Sling ソースを使用するにはいくつかのファイルをローカルにダウンロードする必要があります:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/14-curl.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/12-curl.txt" />
 
-最後に、ダウンロードしたファイルを参照する `replication.yaml` ファイルを作成します。
+### 5. Set up the Sling to DuckDB replication
+
+ダウンロードしたファイルを参照する `replication.yaml` ファイルを作成します。
 
 <CodeExample
-  path="docs_snippets/docs_snippets/guides/components/index/15-replication.yaml"
+  path="docs_snippets/docs_snippets/guides/components/index/13-replication.yaml"
   language="YAML"
   title="jaffle-platform/jaffle_platform/defs/ingest_files/replication.yaml"
+/>
+
+Finally, modify the `component.yaml` file to tell the Sling component where replicated data with the `DUCKDB` target should be written:
+
+<CodeExample
+  path="docs_snippets/docs_snippets/guides/components/index/14-component-connections.yaml"
+  language="YAML"
+  title="jaffle-platform/jaffle_platform/defs/ingest_files/component.yaml"
 />
 
 ### 6. Dagster UI でアセットを表示およびマテリアライズする
@@ -139,7 +149,7 @@ Dagster UI にプロジェクトをロードして、これまでに構築した
 
 コマンドラインで DuckDB テーブルを確認します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/16-duckdb-select.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/15-duckdb-select.txt" />
 
 ## データの変換
 
@@ -149,28 +159,28 @@ Dagster UI にプロジェクトをロードして、これまでに構築した
 
 まず、プロジェクトをクローンし、埋め込まれた git リポジトリを削除します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/17-jaffle-clone.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/16-jaffle-clone.txt" />
 
 ### 2. dbtプロジェクトコンポーネントタイプをインストールする
 
-dbt プロジェクトとインターフェースするには、Dagster dbt プロジェクト コンポーネントをインスタンス化する必要があります。dbt プロジェクト コンポーネント タイプにアクセスするには、`dagster-components[dbt]` と `dbt-duckdb` をインストールします:
+dbt プロジェクトとインターフェースするには、Dagster dbt プロジェクト コンポーネントをインスタンス化する必要があります。dbt プロジェクト コンポーネント タイプにアクセスするには、`dagster-dbt` と `dbt-duckdb` をインストールします:
 
 <CliInvocationExample contents="uv add 'dagster-components[dbt]' dbt-duckdb" />
 
-`dagster_components.dbt_project` コンポーネント タイプが使用可能になったことを確認するには、`dg list component-type` を実行します:
+`dagster_dbt.DbtProjectComponent` コンポーネント タイプが使用可能になったことを確認するには、`dg list component-type` を実行します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/18-dg-list-component-types.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/17-dg-list-component-types.txt" />
 
 ### 3. dbt プロジェクト コンポーネントの新しいインスタンスをスキャフォールディングする
 
-次に、`dagster_components.dbt_project` コンポーネントの新しいインスタンスをスキャフォールディングし、先ほどクローンした dbt プロジェクトへのパスを `project_path` スキャフォールディング パラメータとして指定します:
+次に、`dagster_dbt.DbtProjectComponent` コンポーネントの新しいインスタンスをスキャフォールディングし、先ほどクローンした dbt プロジェクトへのパスを `project_path` スキャフォールディング パラメータとして指定します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/19-dg-scaffold-jdbt.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/18-dg-scaffold-jdbt.txt" />
 
 これにより、プロジェクトの `jaffle_platform/defs/jdbt` に新しいコンポーネント インスタンスが作成されます。コンポーネント構成を確認するには、そのディレクトリの `component.yaml` を開きます:
 
 <CodeExample
-  path="docs_snippets/docs_snippets/guides/components/index/20-component-jdbt.yaml"
+  path="docs_snippets/docs_snippets/guides/components/index/19-component-jdbt.yaml"
   language="YAML"
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
@@ -185,29 +195,29 @@ Dagster UI でプロジェクトを見てみましょう:
 
 `raw_customers`、`raw_orders`、および `raw_payments` テーブルのコピーが 2 つあることがわかります。アセットをクリックすると、アセットの完全なキーが表示されます。dbt コンポーネントによって生成されるキーは `main/*` の形式ですが、Sling コンポーネントによって生成されるキーは `target/main/*` の形式です。
 
-Sling コンポーネントによって生成されたキーと一致するように、`dagster_components.dbt_project` コンポーネントの設定を更新する必要があります。以下の設定で `components/jdbt/component.yaml` を更新します:
+Sling コンポーネントによって生成されたキーと一致するように、`dagster_dbt.DbtProjectComponent` コンポーネントの設定を更新する必要があります。以下の設定で `components/jdbt/component.yaml` を更新します:
 
 <CodeExample
-  path="docs_snippets/docs_snippets/guides/components/index/21-project-jdbt-incorrect.yaml"
+  path="docs_snippets/docs_snippets/guides/components/index/20-project-jdbt-incorrect.yaml"
   language="YAML"
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
 
 上記のファイルにはタイプミスがあることに気付いたかもしれません。コンポーネント ファイルを更新した後は、変更がコンポーネントのスキーマと一致しているかどうかを検証すると便利です。これは、`dg check yaml` を実行することで実行できます:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/22-dg-component-check-error.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/21-dg-component-check-error.txt" />
 
 エラー メッセージには、ファイル名、行番号、およびエラーの正確な内容を示すコード スニペットが含まれていることがわかります。タイプミスを修正しましょう:
 
 <CodeExample
-  path="docs_snippets/docs_snippets/guides/components/index/23-project-jdbt.yaml"
+  path="docs_snippets/docs_snippets/guides/components/index/22-project-jdbt.yaml"
   language="YAML"
   title="jaffle-platform/jaffle_platform/defs/jdbt/component.yaml"
 />
 
 最後に、`dg check yaml` を再度実行して修正を検証します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/24-dg-component-check.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/23-dg-component-check.txt" />
 
 Dagster UI でプロジェクトを再ロードして、キーが正しくロードされていることを確認します:
 
@@ -217,7 +227,7 @@ Dagster UI でプロジェクトを再ロードして、キーが正しくロー
 
 修正を確認するには、コマンド ラインから DuckDB に新しくマテリアライズされたアセットのサンプルを表示します:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/25-duckdb-select-orders.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/24-duckdb-select-orders.txt" />
 
 ## パイプラインを自動化する
 
@@ -225,12 +235,12 @@ Dagster UI でプロジェクトを再ロードして、キーが正しくロー
 
 スケジュールの最初のスキャフォールド:
 
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/26-scaffold-daily-jaffle.txt" />
+<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/56-scaffold-daily-jaffle.txt" />
 
 そして、`*` をターゲットにして `@daily` をスケジュールします:
 
 <CodeExample
-  path="docs_snippets/docs_snippets/guides/components/index/27-daily-jaffle.py"
+  path="docs_snippets/docs_snippets/guides/components/index/26-daily-jaffle.py"
   language="Python"
   title="jaffle-platform/jaffle_platform/defs/daily_jaffle.py"
 />

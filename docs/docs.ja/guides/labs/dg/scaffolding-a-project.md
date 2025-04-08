@@ -1,5 +1,5 @@
 ---
-title: 'プロジェクトの足場作り'
+title: 'プロジェクトの初期化'
 sidebar_position: 100
 ---
 
@@ -7,15 +7,15 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 <Preview />
 
-`dg` は、[Dagster コードの場所](https://docs.dagster.io/guides/deploy/code-locations/managing-code-locations-with-definitions)を定義する、_プロジェクト_と呼ばれる特別なタイプの Python パッケージのスキャフォールディングをサポートします。
+`dg` は、[Dagster コードの場所](https://docs.dagster.io/guides/deploy/code-locations/managing-code-locations-with-definitions)を生成する、_プロジェクト_と呼ばれる特別なタイプの Python パッケージのスキャフォールディングをサポートします。
 
-新しいプロジェクトをスキャフォールディングするには、`dg scaffold project` コマンドを使用します:
+新しいプロジェクトを初期化するには、`dg init` コマンドを使用します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/scaffolding-project/1-scaffolding-project.txt" />
 
 ## プロジェクト構造
 
-`dg scaffold project` コマンドは、いくつかの追加機能を備えた標準の Python パッケージ構造を持つディレクトリを作成します:
+`dg init` コマンドは、いくつかの追加機能を備えた標準の Python パッケージ構造を持つディレクトリを作成します:
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/dg/scaffolding-project/2-tree.txt" />
 

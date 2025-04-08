@@ -33,7 +33,7 @@ pip install dagster-dlt
 
 :::note
 
-[sql_database](https://dlthub.com/docs/api_reference/sources/sql_database/__init__#sql_database) ソースを使用している場合は、データベースの読み取りを減らすために `defer_table_reflect=True` を設定することを検討してください。デフォルトでは、Dagster デーモンはおよそ 1 分ごとに定義を更新し、データベースに対してリソース定義を照会します。
+[sql_database](https://dlthub.com/docs/api_reference/dlt/sources/sql_database/__init__) ソースを使用している場合は、データベースの読み取りを減らすために `defer_table_reflect=True` を設定することを検討してください。デフォルトでは、Dagster デーモンはおよそ 1 分ごとに定義を更新し、データベースに対してリソース定義を照会します。
 
 :::
 

@@ -33,7 +33,7 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 このチュートリアルでは、わかりやすくするために、`dg` 実行ファイルをプロジェクトと同じ仮想環境にインストールします。ただし、通常は、[`uv`](https://docs.astral.sh/uv/getting-started/installation/) パッケージ マネージャーを使用して、`uv tool install dagster-dg` で `dg` をグローバルにインストールすることをお勧めします。これにより、`dagster-dg` が分離された環境にインストールされ、グローバルに使用可能な実行ファイルになります。これにより、`dg` を使用して複数のプロジェクトで作業しやすくなります。
 :::
 
-### `dagster-components` をインストールする
+<!-- ### `dagster-components` をインストールする
 
 次に、プロジェクトの依存関係として `dagster-components` を追加する必要があります。`setup.py` の `install_requires` に追加します:
 
@@ -41,7 +41,7 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 次に、プロジェクトをアクティブな仮想環境にインストール (または再インストール) します:
 
-<CliInvocationExample contents="pip install -e ." />
+<CliInvocationExample contents="pip install -e ." /> -->
 
 ## プロジェクト構造の更新
 
@@ -69,7 +69,7 @@ import Preview from '@site/docs.ja/partials/\_Preview.md';
 
 ## トップレベルの定義を変更する
 
-自動ロードは、`Definitions` オブジェクトを返す `dagster-components` の関数によって提供されます。プロジェクトにはすでに他の定義がいくつかあるため、それらを `my_existing_project.defs` から自動ロードされた定義と組み合わせます。
+自動ロードは、`Definitions` オブジェクトを返す関数によって提供されます。プロジェクトにはすでに他の定義がいくつかあるため、それらを `my_existing_project.defs` から自動ロードされた定義と組み合わせます。
 
 これを行うには、`definitions.py` ファイル、または最上位の `Definitions` オブジェクトを含むファイルを変更する必要があります。
 
