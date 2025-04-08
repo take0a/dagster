@@ -65,9 +65,9 @@ To ingest data, you must set up [Sling](https://slingdata.io/). However, if you 
 
 <CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/7-dg-list-component-types.txt" />
 
-Sling コンポーネントを環境で使用できるようにするには、`dagster-slingents` の `sling` エクストラをインストールします。
+Sling コンポーネントを環境で使用できるようにするには、`dagster-sling` パッケージをインストールします。
 
-<CliInvocationExample contents="uv add 'dagster-components[sling]'" />
+<CliInvocationExample contents="uv add dagster-sling" />
 
 :::note
 
@@ -107,14 +107,6 @@ Sling コンポーネントを環境で使用できるようにするには、`d
 レプリケーションの `path` パラメータは、component.yaml を含む同じフォルダを基準とします。これはコンポーネントの規則です。
 :::
 
-<!-- ### 4. DuckDBをセットアップする
-
-DuckDB をセットアップしてテストします:
-
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/12-sling-setup-duckdb.txt" />
-
-<CliInvocationExample path="docs_snippets/docs_snippets/guides/components/index/13-sling-test-duckdb.txt" /> -->
-
 ### 4. Sling ソースのファイルをダウンロード
 
 次に、Sling はパブリック インターネットからの読み取りをサポートしていないため、Sling ソースを使用するにはいくつかのファイルをローカルにダウンロードする必要があります:
@@ -141,7 +133,7 @@ Finally, modify the `component.yaml` file to tell the Sling component where repl
 
 ### 6. Dagster UI でアセットを表示およびマテリアライズする
 
-Dagster UI にプロジェクトをロードして、これまでに構築した内容を確認します。アセットをマテリアライズして DuckDB インスタンスにテーブルをロードするには、**Materialize All** をクリックします。
+Dagster UI にプロジェクトをロードして、これまでに構築した内容を確認します。アセットをマテリアライズして DuckDB インスタンスにテーブルをロードするには、**Materialize All** をクリックします:
 
 <CliInvocationExample contents="dg dev" />
 
