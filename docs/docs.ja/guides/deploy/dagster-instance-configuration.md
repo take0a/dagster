@@ -1,32 +1,36 @@
 ---
-title: 'Dagster instance'
+title: 'Dagsterインスタンス'
 description: 'Define configuration options for your Dagster instance.'
 sidebar_position: 200
 ---
 
 :::note
 
-This article applies to Dagster Open Source (OSS) deployments. For information on Dagster+, see the [Dagster+ documentation](/dagster-plus/deployment/management/settings/customizing-agent-settings).
+この記事は、Dagster Open Source (OSS) デプロイメントに適用されます。
+Dagster+ の詳細については、[Dagster+ ドキュメント](/dagster-plus/deployment/management/settings/customizing-agent-settings) を参照してください。
 
 :::
 
-The Dagster instance defines the configuration that Dagster needs for a single deployment - for example, where to store the history of past runs and their associated logs, where to stream the raw logs from op compute functions, and how to launch new runs.
+Dagster インスタンスは、Dagster が単一のデプロイメントに必要な構成を定義します。例えば、過去の実行履歴と関連ログの保存場所、op コンピューティング関数からの生のログのストリーミング場所、新しい実行の開始方法などです。
 
-All of the processes and services that make up your Dagster deployment should share a single instance config file, named `dagster.yaml`, so that they can effectively share information.
+Dagster デプロイメントを構成するすべてのプロセスとサービスは、情報を効率的に共有できるように、単一のインスタンス構成ファイル（「dagster.yaml」）を共有する必要があります。
 
 :::warning
 
-Some important configuration, like [execution parallelism](/guides/operate/run-executors), is set on a per-job basis rather than on the instance.
+[実行の並列処理](/guides/operate/run-executors)などの重要な構成は、インスタンスではなくジョブごとに設定されます。
 
 :::
 
-## Default local behavior
+## デフォルトのローカル動作
 
-When a Dagster process like the Dagster webserver or Dagster CLI commands are launched, Dagster tries to load your instance. If the environment variable `DAGSTER_HOME` is set, Dagster looks for an instance config file at `$DAGSTER_HOME/dagster.yaml`. This file contains the configuration settings that make up the instance.
+Dagster ウェブサーバーや Dagster CLI コマンドなどの Dagster プロセスが起動されると、Dagster はインスタンスのロードを試みます。
+環境変数 `DAGSTER_HOME` が設定されている場合、Dagster は `$DAGSTER_HOME/dagster.yaml` にあるインスタンス設定ファイルを検索します。
+このファイルには、インスタンスを構成する設定が含まれています。
 
-If `DAGSTER_HOME` isn't set, Dagster tools will use a temporary directory for storage that is cleaned up when the process exits. This can be useful when using Dagster for temporary local development or testing, when you don't care about the results being persisted.
+`DAGSTER_HOME` が設定されていない場合、Dagster ツールは、プロセス終了時にクリーンアップされる一時ディレクトリをストレージとして使用します。
+これは、Dagster を一時的なローカル開発やテストに使用する場合、結果の永続化を気にしない場合に便利です。
 
-If `DAGSTER_HOME` is set but `dagster.yaml` isn't present or is empty, Dagster will persist data on the local filesystem, structured like the following:
+`DAGSTER_HOME` は設定されているが、`dagster.yaml` が存在しないか空の場合、Dagster は次のような構造のデータをローカルファイルシステムに永続化します:
 
 ```
 $DAGSTER_HOME
@@ -43,54 +47,58 @@ $DAGSTER_HOME
     └── ...
 ```
 
-Here's a breakdown of the files and directories that are generated:
+生成されるファイルとディレクトリの内訳は次のとおりです:
 
 | File or directory             | Description                                                                                                                          |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| history/                      | A directory containing historical information for runs.                                                                              |
-| history/runs.db               | SQLite database file that contains information about runs.                                                                           |
-| history/[run_id].db           | SQLite database file that contains per-run event logs.                                                                               |
-| storage/                      | A directory of subdirectories, one for each run.                                                                                     |
-| storage/[run_id]/compute_logs | A directory specific to the run that contains the `stdout` and `stderr` logs from the execution of the compute functions of each op. |
+| history/                      |実行の履歴情報を含むディレクトリ。|
+| history/runs.db               | 実行に関する情報が含まれる SQLite データベース ファイル。 |
+| history/[run_id].db           | 実行ごとのイベント ログが含まれる SQLite データベース ファイル。 |
+| storage/                      | 実行ごとに 1 つずつサブディレクトリのディレクトリ。 |
+| storage/[run_id]/compute_logs | 各オペレーションの計算関数の実行からの `stdout` および `stderr` ログが含まれる実行固有のディレクトリ。 |
 
-## Configuration reference
+## 構成リファレンス
 
-In persistent Dagster deployments, you'll typically want to configure many of the components on the instance. For example, you may want to use a Postgres instance to store runs and the corresponding event logs, but stream compute logs to an Amazon S3 bucket.
+永続的な Dagster デプロイメントでは、通常、インスタンス上の多くのコンポーネントを設定する必要があります。
+例えば、Postgres インスタンスを使用して実行とそれに対応するイベントログを保存し、コンピューティングログを Amazon S3 バケットにストリーミングしたいとします。
 
-To do this, provide a `$DAGSTER_HOME/dagster.yaml` file, which the webserver and all other Dagster tools will look for on startup. In this file, you can configure different aspects of your Dagster instance, including:
+これを行うには、ウェブサーバーとその他のすべての Dagster ツールが起動時に参照する `$DAGSTER_HOME/dagster.yaml` ファイルを用意します。
+このファイルでは、Dagster インスタンスのさまざまな側面を設定できます。具体的には、次のようなものがあります。
 
 | Name                   | Key                      | Description                                                                                                                                     |
 | ---------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dagster storage        | `storage`                | Controls how job and asset history is persisted. This includes run, event log, and schedule/sensor tick metadata, as well as other useful data. |
-| Run launcher           | `run_launcher`           | Determines where runs are executed.                                                                                                             |
-| Run coordinator        | `run_coordinator`        | Determines the policy used to set prioritization rules and concurrency limits for runs.                                                         |
-| Compute log storage    | `compute_logs`           | Controls the capture and persistence of raw stdout and{" "} stderr ext logs.                                                                    |
-| Local artifact storage | `local_artifact_storage` | Configures storage for artifacts that require a local disk or when using the filesystem I/O manager ( ).                                        |
-| Telemetry              | `telemetry`              | Used to opt in/out of Dagster collecting anonymized usage statistics.                                                                           |
-| gRPC servers           | `code_servers`           | Configures how Dagster loads the code in a code location.                                                                                       |
-| Data retention         | `data_retention`         | Controls how long Dagster retains certain types of data that have diminishing value over time, such as schedule/sensor tick data.               |
-| Sensor evaluation      | `sensors`                | Controls how sensors are evaluated.                                                                                                             |
-| Schedule evaluation    | `schedules`              | Controls how schedules are evaluated.                                                                                                           |
-| Auto-materialize       | `auto_materialize`       | Controls how assets are auto-materialized.                                                                                                      |
+| Dagster storage        | `storage`                | ジョブとアセットの履歴をどのように保存するかを制御します。これには、実行、イベントログ、スケジュール/センサーティックのメタデータ、その他の有用なデータが含まれます。 |
+| Run launcher           | `run_launcher`           | 実行される場所を決定します。                      |
+| Run coordinator        | `run_coordinator`        | 実行の優先順位付けルールと同時実行制限を設定するために使用されるポリシーを決定します。         |
+| Compute log storage    | `compute_logs`           |生の stdout および {" "} stderr ext ログのキャプチャと永続化を制御します。              |
+| Local artifact storage | `local_artifact_storage` | ローカル ディスクを必要とするアーティファクトのストレージ、またはファイル システム I/O マネージャー ( ) を使用する場合のストレージを構成します。        |
+| Telemetry              | `telemetry`              | Dagster による匿名の使用統計の収集をオプトイン/オプトアウトするために使用されます。                  |
+| gRPC servers           | `code_servers`           | Dagster がコードの場所にコードをロードする方法を構成します。                                        |
+| Data retention         | `data_retention`         | スケジュール/センサー ティック データなど、時間の経過とともに価値が減少する特定の種類のデータを Dagster が保持する期間を制御します。       |
+| Sensor evaluation      | `sensors`                | センサーの評価方法を制御します。        |
+| Schedule evaluation    | `schedules`              | スケジュールの評価方法を制御します。 |
+| Auto-materialize       | `auto_materialize`       | アセットが自動的に具体化される方法を制御します。 |
 
 :::note
 
-Environment variables in YAML configuration are supported by using an `env:` key instead of a literal string value. Sample configurations in this reference include examples using environment variables.
+YAML設定における環境変数は、リテラル文字列値の代わりに`env:`キーを使用することでサポートされます。
+このリファレンスのサンプル設定には、環境変数を使用した例が含まれています。
 
 :::
 
-### Dagster storage
+### Dagster ストレージ
 
-The `storage` key allows you to configure how job and asset history is persisted. This includes metadata on runs, event logs, schedule/sensor ticks, and other useful data.
+`storage` キーを使用すると、ジョブとアセットの履歴の保存方法を設定できます。
+これには、実行に関するメタデータ、イベントログ、スケジュール/センサーのティック、その他の有用なデータが含まれます。
 
-Refer to the following tabs for available options and sample configuration.
+利用可能なオプションとサンプル構成については、次のタブを参照してください。
 
 <Tabs>
-  <TabItem value="Sqlite storage (default)" label="Sqlite storage (default)">
+  <TabItem value="Sqlite storage (default)" label="Sqlite ストレージ (デフォルト)">
 
-**SQLite storage (default)**
+**Sqlite ストレージ (デフォルト)**
 
-To use a SQLite database for storage, configure `storage.sqlite` in `dagster.yaml`:
+ストレージに SQLite データベースを使用するには、`dagster.yaml` で `storage.sqlite` を設定します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -99,17 +107,17 @@ To use a SQLite database for storage, configure `storage.sqlite` in `dagster.yam
 />
 
 </TabItem>
-<TabItem value="Postgres storage" label="Postgres storage">
+<TabItem value="Postgres storage" label="Postgres ストレージ">
 
-**Postgres storage**
+**Postgres ストレージ**
 
 :::note
 
-To use Postgres storage, you'll need to install the [dagster-postgres](/api/python-api/libraries/dagster-postgres) library.
+Postgres ストレージを使用するには、[dagster-postgres](/api/python-api/libraries/dagster-postgres) ライブラリをインストールする必要があります。
 
 :::
 
-To use a [PostgreSQL database](/api/python-api/libraries/dagster-postgres) for storage, configure `storage.postgres` in `dagster.yaml`:
+ストレージに [PostgreSQL データベース](/api/python-api/libraries/dagster-postgres) を使用するには、`dagster.yaml` で `storage.postgres` を設定します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -118,17 +126,17 @@ To use a [PostgreSQL database](/api/python-api/libraries/dagster-postgres) for s
 />
 
 </TabItem>
-<TabItem value="MySQL storage" label="MySQL storage">
+<TabItem value="MySQL storage" label="MySQLストレージ">
 
-**MySQL storage**
+**MySQLストレージ**
 
 :::note
 
-To use MySQL storage, you'll need to install the [dagster-mysql](/api/python-api/libraries/dagster-mysql) library.
+MySQL ストレージを使用するには、[dagster-mysql](/api/python-api/libraries/dagster-mysql) ライブラリをインストールする必要があります。
 
 :::
 
-To use a [MySQL database](/api/python-api/libraries/dagster-mysql) for storage, configure `storage.mysql` in `dagster.yaml`:
+ストレージに [MySQL データベース](/api/python-api/libraries/dagster-mysql) を使用するには、`dagster.yaml` で `storage.mysql` を設定します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -139,18 +147,22 @@ To use a [MySQL database](/api/python-api/libraries/dagster-mysql) for storage, 
 </TabItem>
 </Tabs>
 
-### Run launcher
+### 実行ランチャー {#run-launcher}
 
-The `run_launcher` key allows you to configure the run launcher for your instance. Run launchers determine where runs are executed. You can use one of the Dagster-provided options or write your own custom run launcher. For more information, see "[Run launchers](/guides/deploy/execution/run-launchers)".
+`run_launcher` キーを使用すると、インスタンスの実行ランチャーを設定できます。
+実行ランチャーは、実行場所を決定します。
+Dagster が提供するオプションのいずれかを使用することも、独自のカスタム実行ランチャーを作成することもできます。
+詳細については、「[実行ランチャー](/guides/deploy/execution/run-launchers)」をご覧ください。
 
-Refer to the following tabs for available options and sample configuration. Keep in mind that databases should be configured to use UTC timezone.
+使用可能なオプションとサンプル設定については、次のタブを参照してください。
+データベースは UTC タイムゾーンを使用するように設定する必要があることに注意してください。
 
 <Tabs>
-<TabItem value="DefaultRunLauncher" label="DefaultRunLauncher (default)">
+<TabItem value="DefaultRunLauncher" label="DefaultRunLauncher (デフォルト)">
 
 **DefaultRunLauncher**
 
-The <PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" /> spawns a new process in the same node as a job's code location.
+<PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" /> は、ジョブのコードの場所と同じノードに新しいプロセスを生成します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -163,7 +175,7 @@ The <PyObject section="internals" module="dagster._core.launcher" object="Defaul
 
 **DockerRunLauncher**
 
-The <PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" /> allocates a Docker container per run.
+<PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" /> は実行ごとに Docker コンテナを割り当てます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -176,7 +188,7 @@ The <PyObject section="libraries" module="dagster_docker" object="DockerRunLaunc
 
 **K8sRunLauncher**
 
-The <PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" /> allocates a Kubernetes job per run.
+<PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" /> は、実行ごとに Kubernetes ジョブを割り当てます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -187,18 +199,21 @@ The <PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" /
 </TabItem>
 </Tabs>
 
-### Run coordinator
+### 実行コーディネーター
 
-The `run_coordinator` key allows you to configure the run coordinator for your instance. Run coordinators determine the policy used to set the prioritization rules and concurrency limits for runs. For more information and troubleshooting help, see "[Run coordinators](/guides/deploy/execution/run-coordinators)".
+`run_coordinator` キーを使用すると、インスタンスの実行コーディネーターを設定できます。
+実行コーディネーターは、実行の優先順位付けルールと同時実行制限を設定するために使用されるポリシーを決定します。
+詳細とトラブルシューティングのヘルプについては、「[実行コーディネーター](/guides/deploy/execution/run-coordinators)」をご覧ください。
 
-Refer to the following tabs for available options and sample configuration.
+利用可能なオプションとサンプル設定については、次のタブを参照してください。
 
 <Tabs>
-<TabItem value="DefaultRunCoordinator (default)" label="DefaultRunCoordinator (default)">
+<TabItem value="DefaultRunCoordinator (default)" label="DefaultRunCoordinator (デフォルト)">
 
-**DefaultRunCoordinator (default)**
+**DefaultRunCoordinator (デフォルト)**
 
-The default run coordinator, the <PyObject section="internals" module="dagster._core.run_coordinator" object="DefaultRunCoordinator" /> immediately sends runs to the [run launcher](#run-launcher). There isn't a notion of `Queued` runs.
+デフォルトの実行コーディネーターである <PyObject section="internals" module="dagster._core.run_coordinator" object="DefaultRunCoordinator" /> は、実行を直ちに [実行ランチャー](#run-launcher) に送信します。
+`Queued` 実行という概念はありません。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -211,9 +226,11 @@ The default run coordinator, the <PyObject section="internals" module="dagster._
 
 **QueuedRunCoordinator**
 
-The <PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator" /> allows you to set limits on the number of runs that can be executed at once. **Note** This requires an active [dagster-daemon process](/guides/deploy/execution/dagster-daemon) to launch the runs.
+<PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator" /> を使用すると、一度に実行できる実行の数に制限を設定できます。
+**注** 実行を開始するには、アクティブな [dagster-daemon プロセス](/guides/deploy/execution/dagster-daemon) が必要です。
 
-This run coordinator supports both limiting the overall number of concurrent runs and specific limits based on run tags. For example, to avoid throttling, you can specify a concurrency limit for runs that interact with a specific cloud service.
+この実行コーディネータは、同時実行の総数を制限することと、実行タグに基づいて特定の制限を設定することの両方をサポートしています。
+たとえば、スロットルを回避するために、特定のクラウド サービスとやり取りする実行に対して同時実行数の制限を指定できます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -224,18 +241,19 @@ This run coordinator supports both limiting the overall number of concurrent run
 </TabItem>
 </Tabs>
 
-### Compute log storage
+### コンピューティングログストレージ
 
-The `compute_logs` key allows you to configure compute log storage. Compute log storage controls the capture and persistence of raw `stdout` and `stderr` text logs.
+`compute_logs` キーを使用すると、コンピューティングログのストレージを設定できます。
+コンピューティングログのストレージは、生の `stdout` および `stderr` テキストログのキャプチャと保存を制御します。
 
-Refer to the following tabs for available options and sample configuration.
+利用可能なオプションとサンプル設定については、次のタブを参照してください。
 
 <Tabs>
 <TabItem value="LocalComputeLogManager (default)" label="LocalComputeLogManager (default)">
 
 **LocalComputeLogManager**
 
-Used by default, the <PyObject section="internals" module="dagster._core.storage.local_compute_log_manager" object="LocalComputeLogManager" /> writes `stdout` and `stderr` logs to disk.
+デフォルトで使用される <PyObject section="internals" module="dagster._core.storage.local_compute_log_manager" object="LocalComputeLogManager" /> は、`stdout` および `stderr` ログをディスクに書き込みます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -248,7 +266,7 @@ Used by default, the <PyObject section="internals" module="dagster._core.storage
 
 **NoOpComputeLogManager**
 
-The <PyObject section="internals" module="dagster._core.storage.noop_compute_log_manager" object="NoOpComputeLogManager" /> does not store `stdout` and `stderr` logs for any step.
+<PyObject section="internals" module="dagster._core.storage.noop_compute_log_manager" object="NoOpComputeLogManager" /> は、どのステップでも `stdout` および `stderr` ログを保存しません。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -261,7 +279,7 @@ The <PyObject section="internals" module="dagster._core.storage.noop_compute_log
 
 **AzureBlobComputeLogManager**
 
-The <PyObject section="libraries" module="dagster_azure" object="blob.AzureBlobComputeLogManager" /> writes `stdout` and `stderr` to Azure Blob Storage.
+<PyObject section="libraries" module="dagster_azure" object="blob.AzureBlobComputeLogManager" /> は、`stdout` と `stderr` を Azure Blob Storage に書き込みます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -274,7 +292,7 @@ The <PyObject section="libraries" module="dagster_azure" object="blob.AzureBlobC
 
 **GCSComputeLogManager**
 
-The <PyObject section="libraries" module="dagster_gcp" object="gcs.GCSComputeLogManager" /> writes `stdout` and `stderr` to Google Cloud Storage.
+<PyObject section="libraries" module="dagster_gcp" object="gcs.GCSComputeLogManager" /> は、`stdout` と `stderr` を Google Cloud Storage に書き込みます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -287,7 +305,7 @@ The <PyObject section="libraries" module="dagster_gcp" object="gcs.GCSComputeLog
 
 **S3ComputeLogManager**
 
-The <PyObject section="libraries" module="dagster_aws" object="s3.S3ComputeLogManager" /> writes `stdout` and `stderr` to an Amazon Web Services S3 bucket.
+<PyObject section="libraries" module="dagster_aws" object="s3.S3ComputeLogManager" /> は、`stdout` と `stderr` を Amazon Web Services S3 バケットに書き込みます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -298,18 +316,19 @@ The <PyObject section="libraries" module="dagster_aws" object="s3.S3ComputeLogMa
 </TabItem>
 </Tabs>
 
-### Local artifact storage
+### ローカルアーティファクトストレージ
 
-The `local_artifact_storage` key allows you to configure local artifact storage. Local artifact storage is used to:
+`local_artifact_storage` キーを使用すると、ローカルアーティファクトストレージを設定できます。
+ローカルアーティファクトストレージは、次の目的で使用されます。
 
-- Configure storage for artifacts that require a local disk, or
-- Store inputs and outputs when using the filesystem I/O manager (<PyObject section="io-managers" module="dagster" object="FilesystemIOManager" />). For more information on how other I/O managers store artifacts, see the [I/O managers documentation](/guides/build/io-managers/).
+- ローカルディスクを必要とするアーティファクト用のストレージを設定する。
+- ファイルシステム I/O マネージャー (<PyObject section="io-managers" module="dagster" object="FilesystemIOManager" />) を使用する際に、入力と出力を保存する。他の I/O マネージャーがアーティファクトを保存する方法の詳細については、[I/O マネージャーのドキュメント](/guides/build/io-managers/) を参照してください。
 
 :::note
 
 <PyObject section="internals" module="dagster._core.storage.root" object="LocalArtifactStorage" />
-is currently the only option for local artifact storage. This option configures the directory used by the default
-filesystem I/O Manager, as well as any artifacts that require a local disk.
+は、現在、ローカルアーティファクトストレージの唯一のオプションです。
+このオプションは、デフォルトのファイルシステムI/Oマネージャーが使用するディレクトリと、ローカルディスクを必要とするアーティファクトを構成します。
 
 :::
 
@@ -319,9 +338,10 @@ filesystem I/O Manager, as well as any artifacts that require a local disk.
   endBefore="end_marker_local_artifact_storage"
 />
 
-### Telemetry
+### テレメトリー
 
-The `telemetry` key allows you to opt in or out of Dagster collecting anonymized usage statistics. This is set to `true` by default.
+`telemetry` キーを使用すると、Dagster による匿名の使用状況統計の収集をオプトインまたはオプトアウトできます。
+デフォルトでは `true` に設定されています。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -329,15 +349,18 @@ The `telemetry` key allows you to opt in or out of Dagster collecting anonymized
   endBefore="end_marker_telemetry"
 />
 
-For more information, see the [Telemetry documentation](/about/telemetry).
+詳細については、[テレメトリのドキュメント](/about/telemetry)を参照してください。
 
-### gRPC servers
+### gRPC サーバー
 
-The `code_servers` key allows you to configure how Dagster loads the code in a [code location](/guides/deploy/code-locations/).
+`code_servers` キーを使用すると、Dagster が [コードの場所](/guides/deploy/code-locations/) にコードをロードする方法を設定できます。
 
-When you aren't [running your own gRPC server](/guides/deploy/code-locations/workspace-yaml#grpc-server), the webserver and the Dagster daemon load your code from a gRPC server running in a subprocess. By default, if your code takes more than 180 seconds to load, Dagster assumes that it's hanging and stops waiting for it to load.
+[独自の gRPC サーバーを実行](/guides/deploy/code-locations/workspace-yaml#grpc-server) していない場合、ウェブサーバーと Dagster デーモンは、サブプロセスで実行されている gRPC サーバーからコードをロードします。
 
-If you expect that your code will take longer than 180 seconds to load, set the `code_servers.local_startup_timeout` key. The value should be an integer that indicates the maximum timeout, in seconds.
+デフォルトでは、コードのロードに 180 秒以上かかる場合、Dagster はコードがハングしていると判断し、ロードの待機を停止します。
+
+コードのロードに 180 秒以上かかると予想される場合は、`code_servers.local_startup_timeout` キーを設定してください。
+この値は、最大タイムアウトを秒単位で示す整数である必要があります。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -345,11 +368,14 @@ If you expect that your code will take longer than 180 seconds to load, set the 
   endBefore="end_marker_code_servers"
 />
 
-### Data retention
+### データ保持
 
-The `retention` key allows you to configure how long Dagster retains certain types of data. Specifically, data that has diminishing value over time, such as schedule/sensor tick data. Cleaning up old ticks can help minimize storage concerns and improve query performance.
+`retention` キーを使用すると、Dagster が特定の種類のデータを保持する期間を設定できます。
+具体的には、スケジュール/センサーティックデータなど、時間の経過とともに価値が減少するデータです。
+古いティックをクリーンアップすることで、ストレージに関する懸念を最小限に抑え、クエリのパフォーマンスを向上させることができます。
 
-By default, Dagster retains skipped sensor ticks for seven days and all other tick types indefinitely. To customize the retention policies for schedule and sensor ticks, use the `purge_after_days` key:
+デフォルトでは、Dagster はスキップされたセンサーティックを 7 日間、その他のすべてのティックタイプを無期限に保持します。
+スケジュールとセンサーティックの保持ポリシーをカスタマイズするには、`purge_after_days` キーを使用します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -357,14 +383,17 @@ By default, Dagster retains skipped sensor ticks for seven days and all other ti
   endBefore="end_marker_retention"
 />
 
-The `purge_after_days` key accepts either:
+`purge_after_days` キーには、以下のいずれかを指定できます:
 
-- A single integer that indicates how long, in days, to retain ticks of all types. **Note**: A value of `-1` retains ticks indefinitely.
-- A mapping of tick types (`skipped`, `failure`, `success`) to integers. The integers indicate how long, in days, to retain the tick type.
+- すべての種類のティックを保持する期間（日数）を示す単一の整数。
+**注**: 値 `-1` は、ティックを無期限に保持します。
+- ティックの種類（`skipped`、`failure`、`success`）と整数のマッピング。
+これらの整数は、ティックの種類を保持する期間（日数）を示します。
 
-### Sensor evaluation
+### センサー評価
 
-The `sensors` key allows you to configure how sensors are evaluated. To evaluate multiple sensors in parallel simultaneously, set the `use_threads` and `num_workers` keys:
+`sensors` キーを使用すると、センサーの評価方法を設定できます。
+複数のセンサーを同時に並列に評価するには、`use_threads` キーと `num_workers` キーを設定します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -372,13 +401,14 @@ The `sensors` key allows you to configure how sensors are evaluated. To evaluate
   endBefore="end_marker_sensors"
 />
 
-You can also set the optional `num_submit_workers` key to evaluate multiple run requests from the same sensor tick in parallel, which can help decrease latency when a single sensor tick returns many run requests.
+オプションの `num_submit_workers` キーを設定して、同じセンサー ティックからの複数の実行リクエストを並行して評価することもできます。これにより、単一のセンサー ティックが多数の実行リクエストを返す場合のレイテンシを短縮できます。
 
-### Schedule evaluation
+### スケジュール評価
 
-The `schedules` key allows you to configure how schedules are evaluated. By default, Dagster evaluates schedules one at a time.
+`schedules` キーを使用すると、スケジュールの評価方法を設定できます。
+デフォルトでは、Dagster はスケジュールを 1 つずつ評価します。
 
-To evaluate multiple schedules in parallel simultaneously, set the `use_threads` and `num_workers` keys:
+複数のスケジュールを同時に並列に評価するには、`use_threads` キーと `num_workers` キーを設定します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -386,4 +416,4 @@ To evaluate multiple schedules in parallel simultaneously, set the `use_threads`
   endBefore="end_marker_schedules"
 />
 
-You can also set the optional `num_submit_workers` key to evaluate multiple run requests from the same schedule tick in parallel, which can help decrease latency when a single schedule tick returns many run requests.
+オプションの `num_submit_workers` キーを設定して、同じスケジュール ティックからの複数の実行リクエストを並行して評価することもできます。これにより、単一のスケジュール ティックで多数の実行リクエストが返される場合のレイテンシを削減できます。

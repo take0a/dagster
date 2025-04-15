@@ -1,24 +1,28 @@
 ---
-title: 'Dagster OSS to Dagster+'
+title: 'Dagster OSSからDagster+へ'
 sidebar_position: 30
 ---
 
-## Step 1: Get started with Dagster+
+## ステップ1：Dagster+を使い始める
 
-First, you will need to create a Dagster+ organization, choose your deployment type (Hybrid or Serverless), and set up users and authentication. To get started, see the [Dagster+ documentation](/dagster-plus/getting-started).
+まず、Dagster+ 組織を作成し、デプロイメントタイプ（ハイブリッドまたはサーバーレス）を選択し、ユーザーと認証を設定する必要があります。
+開始するには、[Dagster+ ドキュメント](/dagster-plus/getting-started)をご覧ください。
 
-## Step 2: Update CI/CD pipeline
+## ステップ2: CI/CDパイプラインを更新する
 
-Next, you will need to modify the CI/CD process that deploys your OSS code to follow the Dagster+ deployment pattern. For more information, see the [Dagster+ CI/CD documentation](/dagster-plus/features/ci-cd/configuring-ci-cd).
+次に、OSS コードをデプロイする CI/CD プロセスを、Dagster+ のデプロイメントパターンに従って変更する必要があります。
+詳細については、[Dagster+ CI/CD ドキュメント](/dagster-plus/features/ci-cd/configuring-ci-cd) をご覧ください。
 
-## Step 3: Populate metadata in Dagster+
+## ステップ3：Dagster+にメタデータを入力する
 
-At this point, you should have the same data pipelines in OSS and Dagster+, but the metadata in Dagster+ will be empty. You can either cut over to Dagster+ and start populating metadata after that point, or migrate historical metadata from OSS.
+この時点で、OSSとDagster+には同じデータパイプラインが存在するはずですが、Dagster+のメタデータは空のままです。
+その後、Dagster+に切り替えてメタデータの入力を開始するか、OSSから過去のメタデータを移行することができます。
 
-### Option 1: Populate metadata after cutover
+### オプション1: カットオーバー後にメタデータを入力する
 
-If you don't need to migrate historical metadata from your OSS deployment to Dagster+, you can turn off your Dagster OSS deployment and enable the schedules, sensors, and other metadata tracking features in Dagster+. Metadata will start to appear in Dagster+ from that point forward as assets are materialized.
+OSSデプロイメントからDagster+に履歴メタデータを移行する必要がない場合は、Dagster OSSデプロイメントをオフにして、Dagster+のスケジュール、センサー、その他のメタデータ追跡機能を有効にすることができます。
+その時点から、アセットが具体化されると、メタデータがDagster+に表示されるようになります。
 
-### Option 2: Migrate historical metadata
+### オプション2: 履歴メタデータを移行する
 
-To migrate historical metadata from your OSS deployment to Dagster+, follow the steps in the [OSS metadata to plus example](https://github.com/dagster-io/dagster/tree/master/examples/oss-metadata-to-plus).
+OSS デプロイメントから Dagster+ に履歴メタデータを移行するには、[OSS メタデータから Plus の例](https://github.com/dagster-io/dagster/tree/master/examples/oss-metadata-to-plus) の手順に従います。

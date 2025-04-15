@@ -1,10 +1,10 @@
 ---
-title: 'Deploying Dagster'
+title: 'Dagster のデプロイ'
 sidebar_class_name: hidden
 ---
 
-This section is about self-hosting Dagster.
+このセクションでは、Dagster のセルフホスティングについて説明します。
 
 :::info
-To deploy to Dagster+, see the [Dagster+ getting started guide](/dagster-plus/getting-started).
+Dagster+ にデプロイするには、[Dagster+ スタートガイド](/dagster-plus/getting-started) を参照してください。
 :::

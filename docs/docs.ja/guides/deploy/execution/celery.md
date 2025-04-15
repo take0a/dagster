@@ -1,122 +1,134 @@
 ---
-title: 'Executing Dagster on Celery'
+title: 'Celery 上で Dagster を実行する'
 sidebar_position: 700
 ---
 
-[Celery](https://docs.celeryq.dev/) is an open-source Python distributed task queue system, with support for a variety of queues (brokers) and result persistence strategies (backends).
+[Celery](https://docs.celeryq.dev/) は、オープンソースの Python 分散タスクキューシステムであり、さまざまなキュー（ブローカー）と結果永続化戦略（バックエンド）をサポートしています。
 
-The `dagster-celery` executor uses Celery to satisfy three common requirements when running jobs in production:
+`dagster-celery` エグゼキューターは、Celery を使用して、本番環境でジョブを実行する際に共通する 3 つの要件を満たします。
 
-- Parallel execution capacity that scales horizontally across multiple compute nodes.
-- Separate queues to isolate execution and control external resource usage at the op level.
-- Priority-based execution at the op level.
+- 複数のコンピューティングノードに水平方向にスケールする並列実行能力。
+- 実行を分離し、オペレーションレベルで外部リソースの使用を制御するための個別のキュー。
+- オペレーションレベルでの優先度ベースの実行。
 
-The dagster-celery executor compiles a job and its associated configuration into a concrete execution plan, and then submits each execution step to the broker as a separate Celery task. The dagster-celery workers then pick up tasks from the queues to which they are subscribed, according to the priorities assigned to each task, and execute the steps to which the tasks correspond.
+dagster-celery エグゼキューターは、ジョブとそれに関連する設定を具体的な実行プランにコンパイルし、各実行ステップを個別の Celery タスクとしてブローカーに送信します。
+dagster-celery ワーカーは、各タスクに割り当てられた優先度に従って、サブスクライブされているキューからタスクを取得し、タスクに対応するステップを実行します。
 
-## Prerequisites
+## 前提条件
 
-To complete the steps in this guide, you'll need to install `dagster` and `dagster-celery`:
+このガイドの手順を完了するには、「dagster」と「dagster-celery」をインストールする必要があります:
 
 ```shell
 pip install dagster dagster-celery
 ```
 
-- You will also need **a running broker**, which is required to run the Celery executor. Refer to the [Celery documentation](https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#choosing-a-broker) for more info about choosing a broker.
+- Celery Executor を実行するには、**実行中のブローカー** も必要です。
+ブローカーの選択に関する詳細は、[Celery のドキュメント](https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#choosing-a-broker) を参照してください。
 
-## Part 1: Write and execute a job
+## パート1：ジョブの作成と実行
 
-To demonstrate, we'll start by constructing a parallel toy job that uses the Celery executor.
+まずは、Celery Executor を使用した並列トイジョブを作成します。
 
-In your Dagster project, create a new file named `celery_job.py` and paste in the following:
+Dagster プロジェクトで、「celery_job.py」という新しいファイルを作成し、以下のコードを貼り付けます:
 
 <CodeExample path="docs_snippets/docs_snippets/deploying/celery_job.py" />
 
-Now, run the Celery executor. In our case, we're running RabbitMQ as our broker. With Docker, this is something like the following:
+Celery Executor を実行します。今回のケースでは、ブローカーとして RabbitMQ を実行しています。Docker の場合は、以下のようになります:
 
 ```shell
 docker run -p 5672:5672 rabbitmq:3.8.2
 ```
 
-You'll also need to run a Celery worker to execute tasks. From the same directory where you saved the `celery_job.py` file, run:
+タスクを実行するには、Celeryワーカーを実行する必要があります。
+`celery_job.py`ファイルを保存したのと同じディレクトリから、次のコマンドを実行します:
 
 ```shell
 dagster-celery worker start -A dagster_celery.app
 ```
 
-Next, execute this job with Celery by running the following:
+次に、次のコマンドを実行して、Celery でこのジョブを実行します:
 
 ```shell
 dagster dev -f celery_job.py
 ```
 
-Now you can execute the parallel job from the [Dagster UI](/guides/operate/webserver).
+これで、[Dagster UI](/guides/operate/webserver)から並列ジョブを実行できます。
 
-## Part 2: Ensuring workers are in sync
+## パート2：ワーカーの同期の確保
 
-In Part 1, we took a few shortcuts:
+パート1では、いくつかのショートカットを使用しました。
 
-- **We ran a single Celery worker on the same node as the Dagster webserver.** This allowed us to share local ephemeral run storage and event log storage between them and use the filesystem I/O manager to exchange values between the worker's task executions.
-- **We ran the Celery worker in the same directory as `celery_job.py`**. This meant that our Dagster code was available to both the webserver and the worker, specifically that they could both find the job definition in the same file (`-f celery_job.py`)
+- **Dagsterウェブサーバーと同じノードで単一のCeleryワーカーを実行しました。**
+これにより、ローカルの一時的な実行ストレージとイベントログストレージを両者で共有し、ファイルシステムI/Oマネージャーを使用してワーカーのタスク実行間で値を交換できるようになりました。
+- **Celeryワーカーを`celery_job.py`と同じディレクトリで実行しました。**
+これにより、Dagsterコードはウェブサーバーとワーカーの両方で利用可能になり、具体的には、両方が同じファイル（`-f celery_job.py`）でジョブ定義を見つけることができるようになりました。
 
-In production, more configuration is required.
+本番環境では、さらに設定が必要です。
 
-### Step 1: Configure persistent run and event log storage
+### ステップ 1: 永続的な実行ログとイベントログのストレージを構成する
 
-First, configure appropriate persistent run and event log storage, e.g., `PostgresRunStorage` and `PostgresEventLogStorage` on your [Dagster instance](/guides/deploy/dagster-instance-configuration) (via [`dagster.yaml`](/guides/deploy/dagster-yaml)). This allows the webserver and workers to communicate information about the run and events with each other. Refer to the [Dagster storage section of the Dagster instance documentation](/guides/deploy/dagster-instance-configuration#dagster-storage) for information on how to do this.
+まず、[Dagster インスタンス](/guides/deploy/dagster-instance-configuration) で、適切な永続的な実行ログとイベントログのストレージ（例: `PostgresRunStorage` と `PostgresEventLogStorage`）を構成します（[`dagster.yaml`](/guides/deploy/dagster-yaml) を使用）。
+これにより、ウェブサーバーとワーカーが実行とイベントに関する情報を相互に通信できるようになります。
+設定方法については、[Dagster インスタンスのドキュメントの Dagster ストレージのセクション](/guides/deploy/dagster-instance-configuration#dagster-storage) を参照してください。
 
 :::note
 
-The same instance config must be present in the webserver's environment and in the workers' environments. Refer to the [Dagster instance](/guides/deploy/dagster-instance-configuration) documentation for more information.
+ウェブサーバーの環境とワーカーの環境で同じインスタンス設定が存在している必要があります。詳細については、[Dagsterインスタンス](/guides/deploy/dagster-instance-configuration)のドキュメントを参照してください。
 
 :::
 
-### Step 2: Configure a persistent I/O manager
+### ステップ 2: 永続的な I/O マネージャーを構成する
 
-When using the Celery executor for job runs, you'll need to use storage that's accessible from all nodes where Celery workers are running. This is necessary because data is exchanged between ops that might be in different worker processes, possibly on different nodes. Common options for such accessible storage include an Amazon S3 or Google Cloud Storage (GCS) bucket or an NFS mount.
+ジョブ実行に Celery Executor を使用する場合、Celery ワーカーが実行されているすべてのノードからアクセス可能なストレージを使用する必要があります。
+これは、異なるワーカープロセス（場合によっては異なるノード）にあるオペレーション間でデータが交換されるためです。
+このようなアクセス可能なストレージの一般的な選択肢としては、Amazon S3 または Google Cloud Storage (GCS) バケット、あるいは NFS マウントなどがあります。
 
-To do this, include an appropriate I/O manager in the job's resource. For example, any of the following I/O managers would be suitable:
+これを行うには、ジョブのリソースに適切な I/O マネージャーを含めます。
+例えば、以下のいずれかの I/O マネージャーが適しています。
 
 - <PyObject section="libraries" module="dagster_aws" object="s3.s3_pickle_io_manager" />
 - <PyObject section="libraries" module="dagster_azure" object="adls2.adls2_pickle_io_manager" />
 - <PyObject section="libraries" module="dagster_gcp" object="gcs_pickle_io_manager" />
 
-### Step 3: Supply executor and worker config
+### ステップ 3: エグゼキューターとワーカーの設定を指定する
 
-If using custom config for your runs - such as using a different Celery broker URL or backend - you'll need to ensure that your workers start up with the config.
+実行時にカスタム設定を使用する場合（異なる Celery ブローカー URL やバックエンドを使用する場合など）、ワーカーがその設定で起動するようにする必要があります。
 
-To do this:
+手順:
 
-1. Make sure the engine config is in a YAML file accessible to the workers
-2. Start the workers with the `-y` parameter as follows:
+1. エンジン設定が、ワーカーからアクセス可能な YAML ファイルにあることを確認します。
+2. 以下のように、`-y` パラメータを指定してワーカーを起動します。
 
    ```shell
    dagster-celery worker start -y /path/to/celery_config.yaml
    ```
 
-### Step 4: Ensure Dagster code is accessible
+### ステップ 4: Dagster コードへのアクセスを確認する
 
-Lastly, you'll need to make sure that the Dagster code you want the workers to execute is:
+最後に、ワーカーに実行させる Dagster コードが以下の条件を満たしていることを確認する必要があります。
 
-1. Present in the workers' environment, and
-2. The code is in sync with the code present on the node running the webserver
+1. ワーカーの環境に存在すること。
+2. コードが、ウェブサーバーを実行しているノード上のコードと同期していること。
 
-The easiest way to do this is typically to package the code into a Python module and to configure your project's [`workspace.yaml`](/guides/deploy/code-locations/workspace-yaml) to have the webserver load from that module.
+通常、これを最も簡単に行う方法は、コードを Python モジュールにパッケージ化し、プロジェクトの [`workspace.yaml`](/guides/deploy/code-locations/workspace-yaml) を設定して、ウェブサーバーがそのモジュールから読み込むようにすることです。
 
-In Part 1, we accomplished this by starting the webserver with the `-f` parameter:
+パート 1 では、`-f` パラメータを指定してウェブサーバーを起動することで、この設定を実現しました。
 
 ```shell
 dagster dev -f celery_job.py
 ```
 
-This told the webserver the file containing the job (`celery_job.py`) and to start the Celery worker from the same point in the file system, so the job was available in the same location.
+これにより、Web サーバーにジョブを含むファイル (`celery_job.py`) が通知され、ファイル システム内の同じポイントから Celery ワーカーが開始され、ジョブが同じ場所で利用できるようになります。
 
-## Additional information
+## 追加情報
 
-### Using the dagster-celery CLI
+###dagster-celery CLI の使用
 
-In the walkthrough, we started our workers using the `dagster-celery` CLI instead of invoking Celery directly. This CLI is intended as a convenient wrapper that shields you from the complexity of full Celery configuration. **Note**: It's still possible to directly start Celery workers - let us know if your use case requires this.
+このチュートリアルでは、Celery を直接起動するのではなく、`dagster-celery` CLI を使用してワーカーを起動しました。
+この CLI は、Celery の完全な設定の複雑さを軽減する便利なラッパーとして設計されています。
+**注**: Celery ワーカーを直接起動することも可能です。ユースケースで必要な場合はお知らせください。
 
-For all of these commands, it's essential that your broker is running.
+これらのコマンドはすべて、ブローカーが実行中であることが必須です。
 
 ```shell
 ## Start new workers
@@ -131,20 +143,22 @@ dagster-celery worker terminate
 
 :::note
 
-If running Celery with custom config, include the config file path in these commands to ensure workers start with the correct config. Refer to [Step 3](#step-3-supply-executor-and-worker-config) of the walkthrough for more information.
+Celery をカスタム構成で実行する場合は、ワーカーが正しい構成で起動するように、これらのコマンドに構成ファイルのパスを含めてください。
+詳細については、ウォークスルーの [ステップ 3](#step-3-supply-executor-and-worker-config) を参照してください。
 
 :::
 
-While `dagster-celery` is designed to make the full range of Celery configuration available on an as-needed basis, keep in mind that some combinations of config may not be compatible with each other. However, if you're may be comfortable tuning Celery, changing some of the settings may work better for your use case.
+`dagster-celery` は、必要に応じて Celery の全設定を利用できるように設計されていますが、設定の組み合わせによっては互換性がない場合があることに注意してください。
+ただし、Celery の調整に慣れている場合は、設定の一部を変更すると、ユースケースに合わせてより適切に機能する可能性があります。
 
-### Monitoring and debugging
+### モニタリングとデバッグ
 
-There are several available tools for monitoring and debugging your queues and workers. First is the Dagster UI, which will display event logs and the `stdout`/`stderr` from runs. You can also view the logs generated by the broker and by the worker processes.
+キューとワーカーのモニタリングとデバッグには、いくつかのツールが利用可能です。まずDagster UIは、実行時のイベントログと`stdout`/`stderr`を表示します。また、ブローカーとワーカープロセスによって生成されたログも表示できます。
 
-To debug broker/queue level issues, use the monitoring tools provided by the broker you're running. RabbitMQ includes a [monitoring API](https://www.rabbitmq.com/monitoring.html) and has first class support for Prometheus and Grafana integration in production.
+ブローカー/キューレベルの問題をデバッグするには、実行しているブローカーが提供するモニタリングツールを使用してください。RabbitMQには[モニタリングAPI](https://www.rabbitmq.com/monitoring.html)が含まれており、本番環境でのPrometheusとGrafanaの統合を第一級のサポートで提供しています。
 
-To monitor celery workers and queues, you can use Celery's [Flower](https://flower.readthedocs.io/en/latest/) tool. This can be useful in understanding how workers interact with the queue.
+Celeryのワーカーとキューをモニタリングするには、Celeryの[Flower](https://flower.readthedocs.io/en/latest/)ツールを使用できます。これは、ワーカーがキューとどのようにやり取りするかを理解するのに役立ちます。
 
-### Broker and backend
+### ブローカーとバックエンド
 
-`dagster-celery` has been tested using the RabbitMQ broker and default RPC backend.
+`dagster-celery` は、RabbitMQ ブローカーとデフォルトの RPC バックエンドを使用してテストされています。

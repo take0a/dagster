@@ -1,23 +1,24 @@
 ---
-title: 'Run coordinators'
+title: '実行コーディネーター'
 sidebar_position: 300
 ---
 
-In production Dagster deployments, there are often many runs being launched at once. The _run coordinator_ lets you control the policy that Dagster uses to manage the set of runs in your deployment.
+本番環境の Dagster デプロイメントでは、多くの場合、一度に複数の実行が開始されます。
+_実行コーディネーター_ を使用すると、デプロイメント内の実行セットを管理するために Dagster が使用するポリシーを制御できます。
 
-When you submit a run from the Dagster UI or the Dagster command line, it’s first sent to the run coordinator, which applies any limits or prioritization policies before eventually sending it to the [run launcher](/guides/deploy/execution/run-launchers) to be launched.
+Dagster UI または Dagster コマンドラインから実行を送信すると、まず実行コーディネーターに送信され、そこで制限や優先順位付けポリシーが適用された後、最終的に [実行ランチャー](/guides/deploy/execution/run-launchers) に送信されて起動されます。
 
-## Run coordinator types
+## 実行コーディネーターの種類
 
-The following run coordinators can be configured on your [Dagster instance](/guides/deploy/dagster-instance-configuration):
+[Dagster インスタンス](/guides/deploy/dagster-instance-configuration)では、以下の実行コーディネーターを設定できます。
 
 | Term                                                                                                  | Definition                                                                                                                                                                                                                                                                                                                                                                                    |
 | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <PyObject section="internals" module="dagster._core.run_coordinator" object="DefaultRunCoordinator"/> | The `DefaultRunCoordinator` calls launch_run on the instance’s run launcher immediately in the same process, without applying any limits or prioritization rules.<br />When this coordinator is set, clicking **Launch Run** in the Dagster UI will immediately launch the run from the Dagster daemon process. Similarly, scheduled runs will immediately launch from the scheduler process. |
-| <PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator"/>  | The `QueuedRunCoordinator` sends runs to the Dagster daemon via a run queue. The daemon pulls runs from the queue and calls launch_run on submitted runs.<br/>Using this run coordinator enables instance-level limits on run concurrency, as well as custom run prioritization rules.                                                                                                        |
+| <PyObject section="internals" module="dagster._core.run_coordinator" object="DefaultRunCoordinator"/> | `DefaultRunCoordinator` は、インスタンスの実行ランチャーの launch_run を、制限や優先順位ルールを適用することなく、同じプロセス内で直ちに呼び出します。<br />このコーディネータが設定されている場合、Dagster UI で **Launch Run** をクリックすると、Dagster デーモンプロセスから直ちに実行が開始されます。同様に、スケジュールされた実行もスケジューラプロセスから直ちに開始されます。 |
+| <PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator"/>  | `QueuedRunCoordinator` は、実行キューを介して Dagster デーモンに実行を送信します。デーモンはキューから実行を取得し、送信された実行に対して launch_run を呼び出します。<br/>この実行コーディネータを使用すると、インスタンスレベルでの実行同時実行の制限と、カスタム実行優先順位ルールを設定できます。 |
 
-## Configuring run coordinators
+## 実行コーディネーターの構成
 
-If you use the `DefaultRunCoordinator`, no configuration is required on your part.
+`DefaultRunCoordinator` を使用する場合、お客様側での構成は不要です。
 
-However, if using the `QueuedRunCoordinator` or building a custom implementation, you can define [custom run prioritization rules](/guides/deploy/execution/customizing-run-queue-priority) and [instance-level concurrency limits](/guides/operate/managing-concurrency).
+ただし、`QueuedRunCoordinator` を使用する場合、またはカスタム実装を構築する場合は、[カスタム実行優先順位ルール](/guides/deploy/execution/customizing-run-queue-priority) と [インスタンスレベルの同時実行制限](/guides/operate/managing-concurrency) を定義できます。

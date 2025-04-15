@@ -1,22 +1,27 @@
 ---
-title: 'Using environment variables and secrets in Dagster code'
+title: 'Dagster コードで環境変数とシークレットを使用する'
 sidebar_position: 400
 ---
 
-Environment variables, which are key-value pairs configured outside your source code, allow you to dynamically modify application behavior depending on environment.
+環境変数は、ソースコード外で設定されるキーと値のペアであり、環境に応じてアプリケーションの動作を動的に変更できます。
 
-Using environment variables, you can define various configuration options for your Dagster application and securely set up secrets. For example, instead of hard-coding database credentials - which is bad practice and cumbersome for development - you can use environment variables to supply user details. This allows you to parameterize your pipeline without modifying code or insecurely storing sensitive data.
+環境変数を使用すると、Dagsterアプリケーションのさまざまな構成オプションを定義し、シークレットを安全に設定できます。
+例えば、データベースの認証情報をハードコーディングする（これは開発にとって好ましくない方法で煩雑です）代わりに、環境変数を使用してユーザーの詳細を提供できます。
+これにより、コードを変更したり、機密データを安全でない状態で保存したりすることなく、パイプラインをパラメータ化できます。
 
-## Declaring environment variables
+## 環境変数の宣言
 
-How environment variables are declared depends on whether you're developing locally or have already deployed your Dagster project.
+環境変数の宣言方法は、ローカルで開発しているか、すでに Dagster プロジェクトをデプロイしているかによって異なります。
 
 <Tabs>
-<TabItem value="Local development">
+<TabItem value="ローカル開発">
 
-**Local development**
+**ローカル開発**
 
-As of Dagster 1.1.0, using `.env` files is supported for loading environment variables into local environments. A `.env` file is a text file containing key-value pairs that is used locally, but not checked into source control. Using a `.env` file allows you to develop and test locally without putting sensitive info at risk. For example:
+Dagster 1.1.0 以降、環境変数をローカル環境に読み込むために `.env` ファイルの使用がサポートされています。
+`.env` ファイルは、ローカルで使用されるキーと値のペアを含むテキストファイルで、ソース管理にはチェックインされません。
+`.env` ファイルを使用すると、機密情報を危険にさらすことなく、ローカルで開発とテストを行うことができます。
+例:
 
 ```shell
 # .env
@@ -27,34 +32,34 @@ DATABASE_USERNAME=salesteam
 DATABASE_PASSWORD=supersecretstagingpassword
 ```
 
-If Dagster detects a `.env` file in the same folder where `dagster-webserver` or `dagster-daemon` is launched, it will automatically load the environment variables in the file. This also applies to variables [exported from Dagster+](/dagster-plus/deployment/management/environment-variables/dagster-ui#export)
+Dagsterは、`dagster-webserver`または`dagster-daemon`が起動されているフォルダと同じフォルダに`.env`ファイルが存在することを検出すると、そのファイル内の環境変数を自動的に読み込みます。これは、Dagster+からエクスポートされた変数にも適用されます(/dagster-plus/deployment/management/environment-variables/dagster-ui#export)。
 
-When using a `.env` file, keep the following in mind:
+`.env`ファイルを使用する際は、以下の点にご注意ください。
 
-- The `.env` file must be in the same folder where `dagster-webserver` or `dagster-daemon` is launched
-- Any time the `.env` file is modified, the workspace must be re-loaded to make the Dagster webserver/UI aware of the changes
+- `.env`ファイルは、`dagster-webserver`または`dagster-daemon`が起動されているフォルダと同じフォルダに配置する必要があります。
+- `.env`ファイルが変更されるたびに、ワークスペースを再読み込みして、Dagsterウェブサーバー/UIに変更を反映させる必要があります。
 
+</TabItem>
 <TabItem value="Dagster+">
 
 **Dagster+**
 
-Environment variables can be set a variety of ways in Dagster+:
+Dagster+では、環境変数を様々な方法で設定できます。
 
-- Directly in the UI
-- Via agent configuration (Hybrid deployments only)
+- UIから直接設定
+- エージェント設定から設定（ハイブリッドデプロイメントのみ）
 
-If using the UI, you can also [export locally-scoped variables to a `.env` file](/dagster-plus/deployment/management/environment-variables/dagster-ui#export), which you can then use to develop locally.
+UIを使用する場合は、[ローカルスコープの変数を`.env`ファイルにエクスポート](/dagster-plus/deployment/management/environment-variables/dagster-ui#export)して、ローカル開発で使用することもできます。
 
-Refer to the [Dagster+ environment variables guide](/dagster-plus/deployment/management/environment-variables/) for more info.
-
-</TabItem>
+詳細については、[Dagster+環境変数ガイド](/dagster-plus/deployment/management/environment-variables/)を参照してください。
 
 </TabItem>
-<TabItem value="Dagster open source">
+<TabItem value="Dagster オープンソース">
 
-**Dagster open source**
+**Dagster オープンソース**
 
-How environment variables are set for Dagster projects deployed on your infrastructure depends on **where** Dagster is deployed. Refer to the deployment guide for your platform for more info:
+インフラにデプロイされた Dagster プロジェクトの環境変数の設定方法は、**Dagster がデプロイされている場所** によって異なります。
+詳細については、ご利用のプラットフォームのデプロイメントガイドを参照してください:
 
 - [Amazon Web Services EC2 / ECS](/guides/deploy/deployment-options/aws)
 - [GCP](/guides/deploy/deployment-options/gcp)
@@ -64,16 +69,17 @@ How environment variables are set for Dagster projects deployed on your infrastr
 </TabItem>
 </Tabs>
 
-## Accessing environment variables
+## 環境変数へのアクセス
 
-In this section, we'll demonstrate how to access environment variables once they've been declared. There are two ways to do this:
+このセクションでは、宣言済みの環境変数にアクセスする方法を説明します。
+これには2つの方法があります:
 
-- [In Python code](#in-python-code), which isn't specific to Dagster
-- [From Dagster configuration](#from-dagster-configuration), which incorporates environment variables into the Dagster config system
+- [Pythonコード内](#in-python-code)。これはDagsterに固有のものではありません。
+- [Dagster設定から](#from-dagster-configuration)。これは環境変数をDagster設定システムに組み込みます。
 
-### In Python code
+### Pythonコード内 {#in-python-code}
 
-To access environment variables in your Dagster code, you can use [`os.getenv`](https://docs.python.org/3/library/os.html#os.getenv):
+Dagster コード内の環境変数にアクセスするには、[`os.getenv`](https://docs.python.org/3/library/os.html#os.getenv) を使用できます。
 
 ```python
 import os
@@ -81,7 +87,7 @@ import os
 database_name = os.getenv("DATABASE_NAME")
 ```
 
-This approach also works for accessing [built-in environment variables for Dagster+](/dagster-plus/deployment/management/environment-variables/built-in):
+この方法は、[Dagster+ の組み込み環境変数](/dagster-plus/deployment/management/environment-variables/built-in) にアクセスする場合にも機能します:
 
 ```python
 import os
@@ -89,9 +95,9 @@ import os
 deployment_name = os.getenv("DAGSTER_CLOUD_DEPLOYMENT_NAME")
 ```
 
-For a real-world example, see the [Dagster+ branch deployments example](#dagster-branch-deployments).
+実際の例については、[Dagster+ ブランチのデプロイメント例](#dagster-branch-deployments) をご覧ください。
 
-You can also call the `get_value()` method on the `EnvVar`:
+`EnvVar` に対して `get_value()` メソッドを呼び出すこともできます:
 
 ```python
 from dagster import EnvVar
@@ -99,75 +105,83 @@ from dagster import EnvVar
 database_name = EnvVar('DATABASE_NAME').get_value()
 ```
 
-### From Dagster configuration
+### Dagster設定から {#from-dagster-configuration}
 
-[Configurable Dagster objects](/guides/operate/configuration/run-configuration) - such as ops, assets, resources, I/O managers, and so on - can accept configuration from environment variables. Dagster provides a native way to specify environment variables in your configuration. These environment variables are retrieved at launch time, rather than on initialization as with `os.getenv`. Refer to the [next section](#using-envvar-vs-osgetenv) for more info.
+[設定可能な Dagster オブジェクト](/guides/operate/configuration/run-configuration) (オペレーション、アセット、リソース、I/O マネージャーなど) は、環境変数から設定を受け入れることができます。
+Dagster は、設定で環境変数を指定するためのネイティブな方法を提供します。
+これらの環境変数は、`os.getenv` のように初期化時ではなく、起動時に取得されます。
+詳細については、[次のセクション](#using-envvar-vs-osgetenv) を参照してください。
 
 <Tabs>
-<TabItem value="In Python code">
+<TabItem value="Pythonコード内">
 
-**In Python code**
+**Pythonコード内**
 
-To access an environment variable as part of a Dagster configuration in Python code, you may use the following special syntax:
+Python コードで Dagster 構成の一部として環境変数にアクセスするには、次の特殊な構文を使用できます:
 
 ```python
 "PARAMETER_NAME": EnvVar("ENVIRONMENT_VARIABLE_NAME")
 ```
 
-For example:
+例:
 
 ```python
 "access_token": EnvVar("GITHUB_ACCESS_TOKEN")
 ```
 
-And when specifying an integer number:
+整数を指定する場合:
 
 ```python
 "database_port": EnvVar.int("DATABASE_PORT")
 ```
 
 </TabItem>
-<TabItem value="In YAML or config dictionaries">
+<TabItem value="YAMLまたは設定辞書内">
 
-**In YAML or config dictionaries**
+**YAMLまたは設定辞書内**
 
-To access an environment variable as part of a Dagster configuration in YAML or in a config dictionary, use the following syntax:
+YAML または config ディクショナリ内の Dagster 構成の一部として環境変数にアクセスするには、次の構文を使用します:
 
 ```python
 "PARAMETER_NAME": {"env": "ENVIRONMENT_VARIABLE_NAME"}
 ```
 
-For example:
+例:
 
 ```python
 "access_token": {"env": "GITHUB_ACCESS_TOKEN"}
 ```
 
-Refer to the [Handling secrets section](#handling-secrets) and [Per-environment configuration example](#per-environment-configuration-example) for examples.
+例については、[シークレットの処理セクション](#handling-secrets)と[環境ごとの構成例](#per-environment-configuration-example)を参照してください。
 
 </TabItem>
 </Tabs>
 
-### Using EnvVar vs os.getenv
+### EnvVar と os.getenv の使用 {#using-envvar-vs-osgeten}
 
-We just covered two different ways to access environment variables in Dagster. So, which one should you use? When choosing an approach, keep the following in mind:
+Dagster で環境変数にアクセスする 2 つの異なる方法について説明しました。
+では、どちらを使用すべきでしょうか？
+方法を選択する際には、以下の点に留意してください。
 
-- **When `os.getenv` is used**, the variable's value is retrieved when Dagster loads the [code location](/guides/deploy/code-locations/) and **will** be visible in the UI.
-- **When `EnvVar` is used**, the variable's value is retrieved at runtime and **won't** be visible in the UI.
+- **`os.getenv` を使用する場合**、変数の値は Dagster が [コードの場所](/guides/deploy/code-locations/) をロードしたときに取得され、UI に表示されます。
+- **`EnvVar` を使用する場合**、変数の値は実行時に取得され、UI には表示**されません。**
 
-Using the `EnvVar` approach has a few unique benefits:
+`EnvVar` アプローチを使用すると、いくつかの独自のメリットがあります:
 
-- **Improved observability.** The UI will display information about configuration values sourced from environment variables.
-- **Secret values are hidden in the UI.** Secret values are hidden in the Launchpad, Resources page, and other places where configuration is displayed.
-- **Simplified testing.** Because you can provide string values directly to configuration rather than environment variables, testing may be easier.
+- **可観測性の向上。** UI に、環境変数から取得した設定値に関する情報が表示されます。
+- **シークレット値は UI に表示されません。** シークレット値は、Launchpad、リソースページ、その他の設定が表示される場所では表示されません。
+- **テストの簡素化。** 環境変数ではなく設定に直接文字列値を指定できるため、テストが容易になります。
 
-## Handling secrets
+## 秘密の取り扱い
 
-Using environment variables to provide secrets ensures sensitive info won't be visible in your code or the launchpad in the UI. In Dagster, best practice for handling secrets uses [configuration](/guides/operate/configuration/run-configuration) and [resources](/guides/build/external-resources/).
+環境変数を使用してシークレットを提供することで、機密情報がコードや UI の Launchpad に表示されることを防ぎます。
+Dagster では、シークレットの取り扱いに関するベストプラクティスとして、[configuration](/guides/operate/configuration/run-configuration) と [resources](/guides/build/external-resources/) が使用されています。
 
-A resource is typically used to connect to an external service or system, such as a database. Resources can be configured separately from the rest of your app, allowing you to define it once and reuse it as needed.
+リソースは通常、データベースなどの外部サービスまたはシステムに接続するために使用されます。
+リソースはアプリの他の部分とは個別に設定できるため、一度定義しておけば必要に応じて再利用できます。
 
-Let's take a look at an example from the [Dagster Crash Course](https://dagster.io/blog/dagster-crash-course-oct-2022), which creates a GitHub resource and supplies it to assets. Let's start by looking at the resource:
+[Dagster Crash Course](https://dagster.io/blog/dagster-crash-course-oct-2022) の例を見てみましょう。この例では、GitHub リソースを作成してアセットに提供しています。
+まずはリソースを見てみましょう:
 
 ```python
 ## resources.py
@@ -182,15 +196,16 @@ class GithubClientResource(ConfigurableResource):
     return Github(self.access_token)
 ```
 
-Let's review what's happening here:
+ここで何が起こっているのか確認してみましょう。
 
-- This code creates a GitHub resource named `GithubClientResource`
-- By subclassing <PyObject section="resources" module="dagster" object="ConfigurableResource" /> and specifying the `access_token` field, we're telling Dagster that we want to be able to configure the resource with an `access_token` parameter
-- Since `access_token` is a string value, this config parameter can either be:
-  - An environment variable, or
-  - Provided directly in the configuration
+- このコードは、`GithubClientResource` という GitHub リソースを作成します。
+- <PyObject section="resources" module="dagster" object="ConfigurableResource" /> をサブクラス化し、`access_token` フィールドを指定することで、Dagster に `access_token` パラメータを使ってリソースを設定できるように指示しています。
+- `access_token` は文字列値なので、この設定パラメータは次のいずれかになります。
+  - 環境変数、または
+  - 設定で直接指定
 
-As storing secrets in configuration is bad practice, we'll opt for using an environment variable. In this code, we're configuring the resource supplying it to our assets:
+設定にシークレットを保存するのは好ましくないため、環境変数を使用することにします。
+このコードでは、アセットにリソースを提供することでリソースを設定しています。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/using_environment_variables_and_secrets/repository.py"
@@ -198,22 +213,23 @@ As storing secrets in configuration is bad practice, we'll opt for using an envi
   endBefore="end"
 />
 
-Let's review what's happening here:
+ここで何が起こっているか確認してみましょう:
 
-- We pass configuration info to the resource when we construct it. In this example, we're telling Dagster to load the `access_token` from the `GITHUB_ACCESS_TOKEN` environment variable by wrapping it in `EnvVar`.
-- We're adding that resource to our <PyObject section="definitions" module="dagster" object="Definitions" /> object so it's available for our assets.
+- リソースを構築するときに、設定情報を渡します。
+この例では、`GITHUB_ACCESS_TOKEN` 環境変数を `EnvVar` でラップすることで、Dagster に `access_token` を読み込むように指示しています。
+- このリソースを <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに追加して、アセットで使用できるようにします。
 
-## Parameterizing pipeline behavior
+## パイプラインの動作のパラメータ化
 
-Using environment variables, you define how your code should execute at runtime.
+環境変数を使用することで、実行時にコードがどのように実行されるかを定義します。
 
-- [Per-environment configuration example](#per-environment-configuration-example)
+- [環境ごとの設定例](#per-environment-configuration-example)
 
-### Per-environment configuration example
+### 環境ごとの構成例 {#per-environment-configuration-example}
 
-In this example, we'll demonstrate how to use different I/O manager configurations for `local` and `production` environments using [configuration](/guides/operate/configuration/run-configuration) (specifically the configured API) and [resources](/guides/build/external-resources/).
+この例では、[configuration](/guides/operate/configuration/run-configuration)（具体的には構成済みAPI）と[resources](/guides/build/external-resources/)を使用して、`local`環境と`production`環境で異なるI/Oマネージャー構成を使用する方法を説明します。
 
-This example is adapted from the [Transitioning data pipelines from development to production guide](/guides/deploy/dev-to-prod):
+この例は、[データパイプラインを開発環境から本番環境に移行するガイド](/guides/deploy/dev-to-prod)から抜粋したものです。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/using_environment_variables_and_secrets/repository_v2.py"
@@ -221,23 +237,26 @@ This example is adapted from the [Transitioning data pipelines from development 
   endBefore="end_new"
 />
 
-Let's review what's happening here:
+ここで何が起こっているか確認してみましょう。
 
-- We've created a dictionary of resource definitions, `resources`, named after our `local` and `production` environments. In this example, we're using a [Pandas Snowflake I/O manager](/api/python-api/libraries/dagster-snowflake-pandas).
-- For both `local` and `production`, we constructed the I/O manager using environment-specific run configuration. Note the differences in configuration between `local` and `production`, specifically where environment variables were used.
-- Following the `resources` dictionary, we define the `deployment_name` variable, which determines the current executing environment. This variable defaults to `local`, ensuring that `DAGSTER_DEPLOYMENT=PRODUCTION` must be set to use the `production` configuration.
+- リソース定義の辞書「`resources`」を作成し、`local` 環境と `production` 環境にちなんで名前を付けました。
+この例では、[Pandas Snowflake I/O マネージャー](/api/python-api/libraries/dagster-snowflake-pandas) を使用しています。
+- `local` と `production` の両方で、環境固有の実行構成を使用して I/O マネージャーを構築しました。
+`local` と `production` の構成の違い、特に環境変数が使用されている箇所に注意してください。
+- `resources` 辞書に続いて、現在の実行環境を決定する `deployment_name` 変数を定義します。
+この変数のデフォルトは `local` であるため、`production` 構成を使用するには `DAGSTER_DEPLOYMENT=PRODUCTION` を設定する必要があります。
 
-### Dagster+ branch deployments
+### Dagster+ ブランチデプロイメント
 
 :::note
 
-This section is only applicable to Dagster+.
+このセクションは Dagster+ にのみ適用されます。
 
 :::
 
-This example demonstrates how to determine the current deployment type at runtime - [branch deployment](/dagster-plus/features/ci-cd/branch-deployments/) or [full deployment](/dagster-plus/deployment/management/deployments/) - without using resources or configuration.
+この例では、リソースや設定を使用せずに、実行時に現在のデプロイメントタイプ（[ブランチデプロイメント](/dagster-plus/features/ci-cd/branch-deployments/)または[フルデプロイメント](/dagster-plus/deployment/management/deployments/)）を判別する方法を示します。
 
-Let's look at a function that determines the current deployment using the `DAGSTER_CLOUD_IS_BRANCH_DEPLOYMENT` environment variable:
+`DAGSTER_CLOUD_IS_BRANCH_DEPLOYMENT` 環境変数を使用して現在のデプロイメントを判別する関数を見てみましょう:
 
 ```python
 
@@ -248,13 +267,15 @@ def get_current_env():
 
 ```
 
-This function checks the value of `DAGSTER_CLOUD_IS_BRANCH_DEPLOYMENT` and, if equal to `1`, returns a variable with the value of `branch`. This indicates that the current deployment is a branch deployment. Otherwise, the deployment is a full deployment and is_branch_depl will be returned with a value of prod.
+この関数は `DAGSTER_CLOUD_IS_BRANCH_DEPLOYMENT` の値をチェックし、`1` と等しい場合は `branch` の値を持つ変数を返します。
+これは、現在のデプロイメントがブランチデプロイメントであることを示します。
+それ以外の場合、デプロイメントは完全デプロイメントであり、is_branch_depl には prod という値が返されます。
 
-Using this info, we can write code that executes differently when in a branch deployment or a full deployment.
+この情報を使用して、ブランチデプロイメントと完全デプロイメントで異なる実行方法を実行するコードを作成できます。
 
-## Troubleshooting
+## トラブルシューティング
 
 | Error                                                                                                                                                              | Description                                                                                                                                                                                                               | Solution                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **You have attempted to fetch the environment variable "[variable]" which is not set. In order for this execution to succeed it must be set in this environment.** | Surfacing when a run is launched in the UI, this error means that an environment variable set using <PyObject section="config" module="dagster" object="StringSource" /> could not be found in the executing environment. | Verify that the environment variable is named correctly and accessible in the environment.<ul><li>**If developing locally and using a `.env` file**, try reloading the workspace in the UI. The workspace must be reloaded any time this file is modified for the UI to be aware of the changes.</li><li>**If using Dagster+**:</li><ul><li>Verify that the environment variable is [scoped to the environment and code location](/dagster-plus/deployment/management/environment-variables/dagster-ui#scope) if using the built-in secrets manager</li><li>Verify that the environment variable was correctly configured and added to your [agent's configuration](/dagster-plus/deployment/management/environment-variables/agent-config)</li></ul></ul> |
-| **No environment variables in `.env` file.**                                                                                                                       | Dagster located and attempted to load a local `.env` file while launching `dagster-webserver`, but couldn't find any environment variables in the file.                                                                   | If this is unexpected, verify that your `.env` is correctly formatted and located in the same folder where you're running `dagster-webserver`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **You have attempted to fetch the environment variable "[variable]" which is not set. In order for this execution to succeed it must be set in this environment.** | UI で実行が開始されたときに表示されるこのエラーは、<PyObject section="config" module="dagster" object="StringSource" /> を使用して設定された環境変数が実行環境で見つからなかったことを意味します。 | 環境変数の名前が正しく、環境内でアクセス可能であることを確認してください。<ul><li>**ローカルで開発していて `.env` ファイルを使用している場合**、UI でワークスペースを再読み込みしてみてください。UI が変更を認識するには、このファイルが変更されるたびにワークスペースを再読み込みする必要があります。</li><li>**Dagster+ を使用している場合**:</li><ul><li>組み込みのシークレット マネージャーを使用している場合は、環境変数が [環境とコードの場所にスコープされている](/dagster-plus/deployment/management/environment-variables/dagster-ui#scope) ことを確認してください。</li><li>環境変数が正しく構成され、[エージェントの構成](/dagster-plus/deployment/management/environment-variables/agent-config) に追加されていることを確認してください。</li></ul></ul> |
+| **No environment variables in `.env` file.**     | Dagster は `dagster-webserver` を起動中にローカルの `.env` ファイルを見つけてロードしようとしましたが、ファイル内に環境変数が見つかりませんでした。  | これが予期しないものである場合は、`.env` が正しくフォーマットされており、`dagster-webserver` を実行しているフォルダーと同じフォルダーに配置されていることを確認してください。 |

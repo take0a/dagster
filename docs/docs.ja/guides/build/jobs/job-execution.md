@@ -1,64 +1,66 @@
 ---
-title: Job execution
+title: ジョブ実行
 description: Dagster provides several methods to execute jobs.
 sidebar_position: 300
 ---
 
 :::note
 
-This guide is applicable to both [ops](/guides/build/ops/) and [jobs](/guides/build/jobs/)
+このガイドは、[ops](/guides/build/ops/)と[jobs](/guides/build/jobs/)の両方に適用されます。
 
 :::
 
-Dagster provides several methods to execute [op](/guides/build/jobs/op-jobs) and [asset jobs](/guides/build/jobs/asset-jobs). This guide explains different ways to do one-off execution of jobs using the Dagster UI, command line, or Python APIs.
+Dagster は、[op](/guides/build/jobs/op-jobs) と [asset jobs](/guides/build/jobs/asset-jobs) を実行するための複数の方法を提供しています。
+このガイドでは、Dagster UI、コマンドライン、または Python API を使用してジョブを 1 回限り実行するさまざまな方法について説明します。
 
-You can also launch jobs in other ways:
+ジョブは他の方法でも起動できます。
 
-- [Schedules](/guides/automate/schedules/) can be used to launch runs on a fixed interval.
-- [Sensors](/guides/automate/sensors/) allow you to launch runs based on external state changes.
+- [スケジュール](/guides/automate/schedules/)を使用すると、一定の間隔で実行を開始できます。
+- [センサー](/guides/automate/sensors/)を使用すると、外部の状態変化に基づいて実行を開始できます。
 
-## Relevant APIs
+## 関連API
 
 | Name                                                            | Description                                                                        |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| <PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> | A method to execute a job synchronously, typically for running scripts or testing. |
+| <PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> | 通常はスクリプトの実行やテストのために、ジョブを同期的に実行するメソッド。|
 
-## Executing a job
+## ジョブの実行
 
-Dagster supports the following methods to execute one-off jobs. Click the tabs for more info.
+Dagsterは、以下の方法で単発ジョブを実行できます。詳細については、タブをクリックしてください。
 
 <Tabs>
 <TabItem value="Dagster UI">
 
-Using the Dagster UI, you can view, interact, and execute jobs.
+Dagster UI を使用すると、ジョブを表示、操作、実行できます。
 
-To view your job in the UI, use the [`dagster dev`](/api/python-api/cli#dagster-dev) command:
+UI でジョブを表示するには、[`dagster dev`](/api/python-api/cli#dagster-dev) コマンドを使用します:
 
 ```bash
 dagster dev -f my_job.py
 ```
 
-Then navigate to `http://localhost:3000`:
+次に `http://localhost:3000` に移動します:
 
 ![Pipeline def](/images/guides/build/ops/pipeline-def.png)
 
-Click on the **Launchpad** tab, then press the **Launch Run** button to execute the job:
+**Launchpad** タブをクリックし、**Launch Run** ボタンを押してジョブを実行します:
 
 ![Job run](/images/guides/build/ops/pipeline-run.png)
 
-By default, Dagster will run the job using the <PyObject section="execution" module="dagster" object="multiprocess_executor" /> - that means each step in the job runs in its own process, and steps that don't depend on each other can run in parallel.
+デフォルトでは、Dagster は <PyObject section="execution" module="dagster" object="multiprocess_executor" /> を使用してジョブを実行します。つまり、ジョブ内の各ステップはそれぞれ独自のプロセスで実行され、相互に依存しないステップは並列実行できます。
 
-The Launchpad also offers a configuration editor to let you interactively build up the configuration. Refer to the [run configuration documentation](/guides/operate/configuration/run-configuration#specifying-runtime-configuration) for more info.
+Launchpad には、対話形式で設定を作成できる設定エディタも用意されています。
+詳細については、[実行構成のドキュメント](/guides/operate/configuration/run-configuration#specifying-runtime-configuration) を参照してください。
 
 </TabItem>
-<TabItem value="Command line">
+<TabItem value="コマンドライン">
 
-The dagster CLI includes the following commands for job execution:
+dagster CLI には、ジョブ実行用の以下のコマンドが含まれています:
 
-- [`dagster job execute`](/api/python-api/cli#dagster-job) for direct execution
-- [`dagster job launch`](/api/python-api/cli#dagster-job) for launching runs asynchronously using the [run launcher](/guides/deploy/execution/run-launchers) on your instance
+- [`dagster job execute`](/api/python-api/cli#dagster-job) は直接実行します。
+- [`dagster job launch`](/api/python-api/cli#dagster-job) はインスタンス上の [run launcher](/guides/deploy/execution/run-launchers) を使用して非同期的に実行を開始します。
 
-To execute your job directly, run:
+ジョブを直接実行するには、次のコマンドを実行します:
 
 ```bash
 dagster job execute -f my_job.py
@@ -69,21 +71,20 @@ dagster job execute -f my_job.py
 
 ### Python APIs
 
-Dagster includes Python APIs for execution that are useful when writing tests or scripts.
+Dagster には、テストやスクリプトの作成に役立つ実行用の Python API が含まれています。
 
-<PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> executes a job and
-returns an <PyObject section="execution" module="dagster" object="ExecuteInProcessResult" />.
+<PyObject section="jobs" module="dagster" object="JobDefinition.execute_in_process" /> はジョブを実行し、<PyObject section="execution" module="dagster" object="ExecuteInProcessResult" /> を返します。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/ops_jobs_graphs/job_execution.py" startAfter="start_execute_marker" endBefore="end_execute_marker" />
 
-You can find the full API documentation in [Execution API](/api/python-api/execution) and learn more about the testing use cases in the [testing documentation](/guides/test/).
+完全な API ドキュメントは [実行 API](/api/python-api/execution) で参照でき、テストのユースケースの詳細については [テスト ドキュメント](/guides/test/) を参照してください。
 
 </TabItem>
 </Tabs>
 
-## Executing job subsets
+## ジョブのサブセットの実行
 
-Dagster supports ways to run a subset of a job, called **op selection**.
+Dagster は、**op 選択** と呼ばれるジョブのサブセットを実行する方法をサポートしています。
 
 ### Op selection syntax
 
@@ -119,42 +120,48 @@ Similarly, you can specify the same op selection in the Dagster UI Launchpad:
 
 ![Op selection](/images/guides/build/ops/solid-selection.png)
 
-## Controlling job execution
+## ジョブ実行の制御
 
-Each <PyObject section="jobs" module="dagster" object="JobDefinition" /> contains an <PyObject section="internals" module="dagster" object="ExecutorDefinition" /> that determines how it will be executed.
+各 <PyObject section="jobs" module="dagster" object="JobDefinition" /> には、実行方法を決定する <PyObject section="internals" module="dagster" object="ExecutorDefinition" /> が含まれています。
 
-This `executor_def` property can be set to allow for different types of isolation and parallelism, ranging from executing all the ops in the same process to executing each op in its own Kubernetes pod. See [Executors](/guides/operate/run-executors) for more details.
+この `executor_def` プロパティを設定することで、すべてのオペレーションを同じプロセスで実行することから、各オペレーションを独自の Kubernetes ポッドで実行することまで、さまざまなタイプの分離と並列処理が可能になります。詳細については、[エグゼキューター](/guides/operate/run-executors) を参照してください。
 
-### Default job executor
+### デフォルトのジョブ実行プログラム
 
-The default job executor definition defaults to multiprocess execution. It also allows you to toggle between in-process and multiprocess execution via config.
+デフォルトのジョブ実行プログラム定義は、マルチプロセス実行に設定されています。
+また、設定によってインプロセス実行とマルチプロセス実行を切り替えることもできます。
 
-Below is an example of run config as YAML you could provide in the Dagster UI playground to launch an in-process execution.
+以下は、Dagster UI プレイグラウンドでインプロセス実行を開始するために指定できる、YAML 形式の実行設定の例です。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/ops_jobs_graphs/job_execution.py" startAfter="start_ip_yaml" endBefore="end_ip_yaml" />
 
-Additional config options are available for multiprocess execution that can help with performance. This includes limiting the max concurrent subprocesses and controlling how those subprocesses are spawned.
+マルチプロセス実行には、パフォーマンス向上に役立つ追加の設定オプションが用意されています。
+これには、同時実行可能なサブプロセスの最大数を制限したり、サブプロセスの生成方法を制御したりする機能が含まれます。
 
-The example below sets the run config directly on the job to explicitly set the max concurrent subprocesses to `4`, and change the subprocess start method to use a forkserver.
+以下の例では、ジョブの実行設定を直接設定し、同時実行可能なサブプロセスの最大数を明示的に「4」に設定し、サブプロセスの開始方法をフォークサーバーを使用するように変更しています。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/ops_jobs_graphs/job_execution.py" startAfter="start_mp_cfg" endBefore="end_mp_cfg" />
 
-Using a forkserver is a great way to reduce per-process overhead during multiprocess execution, but can cause issues with certain libraries. Refer to the [Python documentation](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods) for more info.
+フォークサーバーの使用は、マルチプロセス実行時のプロセスごとのオーバーヘッドを削減する優れた方法ですが、特定のライブラリでは問題が発生する可能性があります。
+詳細については、[Pythonドキュメント](https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods)を参照してください。
 
-#### Op concurrency limits
+#### オペレーションの同時実行数制限
 
-In addition to the `max_concurrent` limit, you can use `tag_concurrency_limits` to specify limits on the number of ops with certain tags that can execute at once within a single run.
+`max_concurrent` 制限に加えて、`tag_concurrency_limits` を使用して、特定のタグを持つオペレーションを 1 回の実行で同時に実行できる数に制限を指定できます。
 
-Limits can be specified for all ops with a certain tag key or key-value pair. If any limit would be exceeded by launching an op, then the op will stay queued. Asset jobs will look at the `op_tags` field on each asset in the job when checking them for tag concurrency limits.
+特定のタグキーまたはキーと値のペアを持つすべてのオペレーションに対して制限を指定できます。
 
-For example, the following job will execute at most two ops at once with the `database` tag equal to `redshift`, while also ensuring that at most four ops execute at once:
+オペレーションの実行によって制限を超える場合、そのオペレーションはキューに保持されます。
+アセットジョブは、ジョブ内の各アセットの `op_tags` フィールドを参照して、タグの同時実行数制限を確認します。
+
+例えば、次のジョブは、`database` タグが `redshift` であるオペレーションを最大 2 つ同時に実行しますが、同時に最大 4 つのオペレーションが実行されるようにします。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/ops_jobs_graphs/job_execution.py" startAfter="start_tag_concurrency" endBefore="end_tag_concurrency" />
 
 :::note
 
-These limits are only applied on a per-run basis. You can apply op concurrency limits across multiple runs using the <PyObject section="libraries" module="dagster_celery" object="celery_executor" /> or <PyObject section="libraries" module="dagster_celery_k8s" object="celery_k8s_job_executor" />.
+これらの制限は実行ごとにのみ適用されます。<PyObject section="libraries" module="dagster_celery" object="celery_executor" /> または <PyObject section="libraries" module="dagster_celery_k8s" object="celery_k8s_job_executor" /> を使用することで、複数の実行にわたってオペレーションの同時実行制限を適用できます。
 
-Refer to the [Managing concurrency in data pipelines guide](/guides/operate/managing-concurrency) for more info about op concurrency, and how to limit run concurrency.
+オペレーションの同時実行と実行の同時実行を制限する方法の詳細については、[データパイプラインにおける同時実行の管理ガイド](/guides/operate/managing-concurrency) を参照してください。
 
 :::

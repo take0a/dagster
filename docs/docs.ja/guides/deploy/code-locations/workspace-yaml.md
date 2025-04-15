@@ -1,15 +1,19 @@
 ---
-title: 'Workspace file (workspace.yaml) reference'
+title: 'ワークスペースファイル (workspace.yaml) リファレンス'
 sidebar_position: 200
 ---
 
 :::info
 
-This reference is only applicable to Dagster OSS. For Dagster+, see [the Dagster+ code locations documentation](/dagster-plus/deployment/code-locations).
+このリファレンスはDagster OSSにのみ適用されます。
+Dagster+については、[Dagster+のコードロケーションに関するドキュメント](/dagster-plus/deployment/code-locations)をご覧ください。
 
 :::
 
-A workspace file is used to configure code locations in Dagster. It tells Dagster where to find your code and how to load it. By default, this is a YAML document named workspace.yaml. For example:
+ワークスペースファイルは、Dagster 内のコードの場所を設定するために使用されます。
+ワークスペースファイルは、Dagster にコードの場所とロード方法を指示します。
+デフォルトでは、workspace.yaml という名前の YAML ドキュメントです。
+例:
 
 ```yaml
 # workspace.yaml
@@ -18,61 +22,65 @@ load_from:
   - python_file: my_file.py
 ```
 
-Each entry in a workspace file is considered a code location. A code location should contain a single <PyObject section="definitions" module="dagster" object="Definitions" /> object.
+ワークスペース ファイル内の各エントリは、コードの場所とみなされます。
+コードの場所には、1 つの <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトが含まれている必要があります。
 
-Each code location is loaded in its own process that Dagster tools use an RPC protocol to communicate with. This process separation allows multiple code locations in different environments to be loaded independently, and ensures that errors in user code can't impact Dagster system code.
+各コードロケーションは、DagsterツールがRPCプロトコルを使用して通信する独自​​のプロセスにロードされます。
+このプロセス分離により、異なる環境にある複数のコードロケーションを個別にロードできるようになり、ユーザーコードのエラーがDagsterシステムコードに影響を与えないようにすることができます。
 
-:::info Migrating from `@repository` to `Definitions`
+:::info `@repository` から `Definitions` への移行
 
-To accommodate incrementally migrating from `@repository` to `Definitions`, code locations in a single workspace file can mix and match between definition approaches. For example, `code-location-1` could load a single `Definitions` object from a file or module, and `code-location-2` could load multiple repositories.
+`@repository` から `Definitions` への段階的な移行に対応するため、単一のワークスペース ファイル内のコードの場所は、複数の定義アプローチを混在させることができます。
+たとえば、`code-location-1` はファイルまたはモジュールから単一の `Definitions` オブジェクトをロードし、`code-location-2` は複数のリポジトリをロードできます。
 
 :::
 
-## Location of workspace.yaml
+## workspace.yaml の場所
 
-Dagster command-line tools (like `dagster dev`, `dagster-webserver`, or `dagster-daemon run`) look for workspace files in the current directory when invoked. This allows you to launch from that directory without the need for command line arguments
+Dagster コマンドラインツール（`dagster dev`、`dagster-webserver`、`dagster-daemon run` など）は、起動時に現在のディレクトリにあるワークスペースファイルを検索します。
+これにより、コマンドライン引数を必要とせずに、そのディレクトリから起動できます。
 
-To load the workspace.yaml file from a different folder, use the -w argument:
+別のフォルダからworkspace.yaml ファイルを読み込むには、-w 引数を使用します。
 
 ```bash
 dagster dev -w path/to/workspace.yaml
 ```
 
-## File structure
+## ファイル構造
 
-The `workspace.yaml` file uses the following structure:
+`workspace.yaml` ファイルは以下の構造を使用します:
 
 ```yaml
 load_from:
   - <loading_method>: <configuration_options>
 ```
 
-Where `<loading_method>` can be one of:
+ここで、`<loading_method>` は次のいずれかになります:
 
 - `python_file`
 - `python_module`
 - `grpc_server`
 
-## Loading code locations
+## コードの場所の読み込み
 
-We recommend loading from a Python module for most cases.
+ほとんどの場合、Python モジュールから読み込むことをお勧めします。
 
 :::note
 
-Each code location is loaded in its own process.
+各コードの場所は、独自のプロセスで読み込まれます。
 
 :::
 
-### Python module
+### Python モジュール
 
-To load a code location from a local or installed Python module, use the `python_module` key in workspace.yaml.
+ローカルまたはインストール済みの Python モジュールからコードの場所をロードするには、workspace.yaml の `python_module` キーを使用します。
 
-**Options:**
+**オプション:**
 
-- `module_name`: Name of the Python module to load.
-- Other options are the same as `python_file`.
+- `module_name`: ロードする Python モジュールの名前。
+- その他のオプションは `python_file` と同じです。
 
-**Example:**
+**例:**
 
 ```yaml
 load_from:
@@ -80,19 +88,20 @@ load_from:
       module_name: hello_world_module.definitions
 ```
 
-### Python file
+### Python ファイル
 
-To load a code location from a Python file, use the `python_file` key in workspace.yaml. The value of `python_file` should specify a path relative to `workspace.yaml` leading to a file that contains a code location definition.
+Python ファイルからコードの場所を読み込むには、workspace.yaml の `python_file` キーを使用します。
+`python_file` の値は、コードの場所の定義を含むファイルへの `workspace.yaml` からの相対パスを指定する必要があります。
 
-**Options:**
+**オプション:**
 
-- `relative_path`: Path to the Python file, relative to the `workspace.yaml` location.
-- `attribute` (optional): Name of a specific repository or function returning a `RepositoryDefinition`.
-- `working_directory` (optional): Custom working directory for relative imports.
-- `executable_path` (optional): Path to a specific Python executable.
-- `location_name` (optional): Custom name for the code location.
+- `relative_path`: Python ファイルへのパス（`workspace.yaml` の場所からの相対パス）。
+- `attribute` (オプション): 特定のリポジトリまたは `RepositoryDe​​finition` を返す関数の名前。
+- `working_directory` (オプション): 相対インポート用のカスタム作業ディレクトリ。
+- `executable_path` (オプション): 特定の Python 実行ファイルへのパス。
+- `location_name` (オプション): コードの場所のカスタム名。
 
-**Example:**
+**例:**
 
 ```yaml
 load_from:
@@ -104,9 +113,11 @@ load_from:
       location_name: my_location
 ```
 
-:::info Using @repository
+:::info @repository の使用
 
-If using `@repository` to define code locations, you can identify a single repository within the module using the `attribute` key. The value of this key must be the name of a repository or the name of a function that returns a <PyObject section="repositories" module="dagster" object="RepositoryDefinition" />. For example:
+`@repository` を使用してコードの場所を定義する場合、`attribute` キーを使用してモジュール内の単一のリポジトリを識別できます。
+このキーの値は、リポジトリの名前、または <PyObject section="repositories" module="dagster" object="RepositoryDe​​finition" /> を返す関数の名前である必要があります。
+例:
 
 ```yaml
 # workspace.yaml
@@ -119,17 +130,17 @@ load_from:
 
 :::
 
-### gRPC server
+### gRPC サーバー
 
-Configures a gRPC server as a code location.
+gRPC サーバーをコードの場所として設定します。
 
-**Options:**
+**オプション:**
 
-- `host`: The host address of the gRPC server.
-- `port`: The port number of the gRPC server.
-- `location_name`: Custom name for the code location.
+- `host`: gRPC サーバーのホストアドレス。
+- `port`: gRPC サーバーのポート番号。
+- `location_name`: コードの場所のカスタム名。
 
-**Example:**
+**例:**
 
 ```yaml
 load_from:
@@ -139,9 +150,9 @@ load_from:
       location_name: 'my_grpc_server'
 ```
 
-## Multiple code locations
+## 複数のコードロケーション
 
-You can define multiple code locations in a single `workspace.yaml` file:
+1 つの `workspace.yaml` ファイルで複数のコードロケーションを定義できます:
 
 ```yaml
 load_from:
@@ -155,66 +166,72 @@ load_from:
       executable_path: venvs/path/to/ml_tensorflow/bin/python
 ```
 
-## Loading workspace files
+## ワークスペースファイルの読み込み
 
-By default, Dagster command-line tools (like `dagster dev`, `dagster-webserver`, or `dagster-daemon run`) look for workspace files (by default, `workspace.yaml`) in the current directory when invoked. This allows you to launch from that directory without the need for command line arguments:
+デフォルトでは、Dagster コマンドラインツール（`dagster dev`、`dagster-webserver`、`dagster-daemon run` など）は、起動時に現在のディレクトリにあるワークスペースファイル（デフォルトでは `workspace.yaml`）を検索します。
+これにより、コマンドライン引数を必要とせずに、そのディレクトリから起動できます。
 
 ```shell
 dagster dev
 ```
 
-To load the `workspace.yaml` file from a different folder, use the `-w` argument:
+別のフォルダーから `workspace.yaml` ファイルを読み込むには、 `-w` 引数を使用します:
 
 ```shell
 dagster dev -w path/to/workspace.yaml
 ```
 
-When `dagster dev` is run, Dagster will load all the code locations defined by the workspace file. For more information and examples, see the [CLI reference](/api/python-api/cli#dagster-dev).
+`dagster dev` を実行すると、Dagster はワークスペースファイルで定義されたすべてのコードの場所をロードします。
+詳細と例については、[CLI リファレンス](/api/python-api/cli#dagster-dev) を参照してください。
 
-If a code location can't be loaded - for example, due to a syntax error or other unrecoverable error - a warning message will display in the Dagster UI. You'll be directed to a status page with a descriptive error and stack trace for any locations Dagster was unable to load.
+構文エラーやその他の回復不可能なエラーなどによりコードの場所をロードできない場合は、Dagster UI に警告メッセージが表示されます。
+Dagster がロードできなかった場所については、エラーの詳細とスタックトレースを含むステータスページが表示されます。
 
 :::info
 
-If a code location is renamed or its configuration in a workspace file is modified, you must stop and restart any running schedules or sensors in that code location. You can do this in the UI by navigating to the [**Deployment overview** page](/guides/operate/webserver#deployment), clicking a code location, and using the **Schedules** and **Sensors** tabs.
+コードの場所の名前が変更された場合、またはワークスペース ファイル内の構成が変更された場合は、そのコードの場所にある実行中のスケジュールまたはセンサーを停止して再起動する必要があります。
+UI でこれを行うには、[**Deployment overview** ページ](/guides/operate/webserver#deployment) に移動し、コードの場所をクリックして、**Schedules** タブと **Sensors** タブを使用します。
 
 :::
 
-## Running your own gRPC server
+## 独自の gRPC サーバーを実行する
 
-By default, Dagster tools automatically create a process on your local machine for each of your code locations. However, it's also possible to run your own gRPC server that's responsible for serving information about your code locations. This can be useful in more complex system architectures that deploy user code separately from the Dagster webserver.
+デフォルトでは、Dagster ツールはローカルマシン上にコードの場所ごとにプロセスを自動的に作成します。
+ただし、コードの場所に関する情報を提供する独自の gRPC サーバーを実行することもできます。
+これは、ユーザーコードを Dagster ウェブサーバーとは別にデプロイする、より複雑なシステムアーキテクチャで役立ちます。
 
-- [Initializing the server](#initializing-the-server)
-- [Specifying a Docker image](#specifying-a-docker-image)
+- [サーバーの初期化](#initializing-the-server)
+- [Dockerイメージの指定](#specifying-a-docker-image)
 
-### Initializing the server
+### サーバーの初期化 {#initializing-the-server}
 
-To initialize the Dagster gRPC server, run the `dagster api grpc` command and include:
+Dagster gRPC サーバーを初期化するには、`dagster api grpc` コマンドを実行し、以下のオプションを指定します。
 
-- A target file or module. Similar to a workspace file, the target can either be a Python file or module.
-- Host address
-- Port or socket
+- ターゲットファイルまたはモジュール。ワークスペースファイルと同様に、ターゲットは Python ファイルまたはモジュールのいずれかです。
+- ホストアドレス
+- ポートまたはソケット
 
-The following tabs demonstrate some common ways to initialize a gRPC server:
+以下のタブは、gRPC サーバーを初期化する一般的な方法を示しています。
 
 <Tabs>
-<TabItem value="Using a Python file">
+<TabItem value="Pythonファイルの使用">
 
-Running on a port, using a Python file:
+Python ファイルを使用してポート上で実行します:
 
 ```shell
 dagster api grpc --python-file /path/to/file.py --host 0.0.0.0 --port 4266
 ```
 
-Running on a socket, using a Python file:
+Python ファイルを使用してソケット上で実行します:
 
 ```shell
 dagster api grpc --python-file /path/to/file.py --host 0.0.0.0 --socket /path/to/socket
 ```
 
 </TabItem>
-<TabItem value="Using a Python module">
+<TabItem value="Pythonモジュールの使用">
 
-Using a Python module:
+Pythonモジュールの使用:
 
 ```shell
 dagster api grpc --module-name my_module_name.definitions --host 0.0.0.0 --port 4266
@@ -225,11 +242,12 @@ dagster api grpc --module-name my_module_name.definitions --host 0.0.0.0 --port 
 
 :::note
 
-This only applies to code locations defined with <PyObject section="repositories" module="dagster" object="repository" decorator />.
+これは、<PyObject section="repositories" module="dagster" object="repository" decorator /> で定義されたコードの場所にのみ適用されます。
 
 :::
 
-Specifying an attribute within the target to load a specific repository. When run, the server will automatically find and load the specified repositories:
+ターゲット内で属性を指定して、特定のリポジトリをロードします。
+実行すると、サーバーは指定されたリポジトリを自動的に検出してロードします。
 
 ```shell
 dagster api grpc --python-file /path/to/file.py --attribute my_repository --host 0.0.0.0 --port 4266
@@ -238,7 +256,7 @@ dagster api grpc --python-file /path/to/file.py --attribute my_repository --host
 </TabItem>
 <TabItem value="Local imports">
 
-Specify a working directory to use as the base folder for local imports:
+ローカルインポートのベースフォルダとして使用する作業ディレクトリを指定します:
 
 ```shell
 dagster api grpc --python-file /path/to/file.py --working-directory /var/my_working_dir --host 0.0.0.0 --port 4266
@@ -247,9 +265,9 @@ dagster api grpc --python-file /path/to/file.py --working-directory /var/my_work
 </TabItem>
 </Tabs>
 
-Refer to the [API docs](/api/python-api/cli#dagster-api-grpc) for the full list of options that can be set when running a new gRPC server.
+新しい gRPC サーバーを実行する際に設定できるオプションの完全なリストについては、[API ドキュメント](/api/python-api/cli#dagster-api-grpc) を参照してください。
 
-Then, in your workspace file, configure a new gRPC server code location to load:
+次に、ワークスペースファイルで、新しい gRPC サーバーのコードがロードされる場所を設定します:
 
 ```yaml file=/concepts/repositories_workspaces/workspace_grpc.yaml
 # workspace.yaml
@@ -261,41 +279,49 @@ load_from:
       location_name: 'my_grpc_server'
 ```
 
-### Specifying a Docker image
+### Dockerイメージの指定 {#specifying-a-docker-image}
 
-When running your own gRPC server within a container, you can tell the webserver that any runs launched from a code location should be launched in a container with that same image.
+コンテナ内で独自の gRPC サーバーを実行する場合、ウェブサーバーに対して、コードの場所から起動されるすべての実行を、同じイメージを持つコンテナ内で起動するように指示できます。
 
-To do this, set the `DAGSTER_CURRENT_IMAGE` environment variable to the name of the image before starting the server. After setting this environment variable for your server, the image should be listed alongside the code location on the **Status** page in the UI.
+これを行うには、サーバーを起動する前に、`DAGSTER_CURRENT_IMAGE` 環境変数にイメージ名を設定します。
+サーバーでこの環境変数を設定すると、UI の **Status** ページに、コードの場所と並んでイメージが表示されます。
 
-This image will only be used by [run launchers](/guides/deploy/execution/run-launchers) and [executors](/guides/operate/run-executors) that expect to use Docker images (like the <PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" />, <PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" />, <PyObject section="libraries" module="dagster_docker" object="docker_executor" />, or <PyObject section="libraries" module="dagster_k8s" object="k8s_job_executor" />).
+このイメージは、Docker イメージ (<PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" />、<PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" />、<PyObject section="libraries" module="dagster_docker" object="docker_executor" />、<PyObject section="libraries" module="dagster_k8s" object="k8s_job_executor" /> など) の使用を想定している [ランチャーの実行](/guides/deploy/execution/run-launchers) および [エグゼキューター](/guides/operate/run-executors) によってのみ使用されます。
 
-If you're using the built-in [Helm chart](/guides/deploy/deployment-options/kubernetes/deploying-to-kubernetes), this environment variable is automatically set on each of your gRPC servers.
+組み込みの [Helm チャート](/guides/deploy/deployment-options/kubernetes/deploying-to-kubernetes) を使用している場合、この環境変数は各 gRPC サーバーで自動的に設定されます。
 
-## Examples
+## 例
 
 <Tabs>
-<TabItem value="Loading relative imports">
+<TabItem value="相対インポートの読み込み">
 
-### Loading relative imports
+### 相対インポートの読み込み
 
-By default, code is loaded with `dagster-webserver`'s working directory as the base path to resolve any local imports in your code. Using the `working_directory` key, you can specify a custom working directory for relative imports. For example:
+デフォルトでは、コードは `dagster-webserver` の作業ディレクトリをベースパスとして読み込まれ、コード内のローカルインポートを解決します。
+`working_directory` キーを使用すると、相対インポート用のカスタム作業ディレクトリを指定できます。
+例:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/repositories_workspaces/workspace_working_directory.yaml" />
 
 </TabItem>
-<TabItem value="Loading multiple Python environments">
+<TabItem value="複数のPython環境を読み込む">
 
-### Loading multiple Python environments
+### 複数のPython環境を読み込む
 
-By default, the webserver and other Dagster tools assume that code locations should be loaded using the same Python environment used to load Dagster. However, it's often useful for code locations to use independent environments. For example, a data engineering team running Spark can have dramatically different dependencies than an ML team running Tensorflow.
+デフォルトでは、ウェブサーバーやその他の Dagster ツールは、Dagster のロードに使用されたものと同じ Python 環境を使用してコードの場所をロードすることを想定しています。
+ただし、コードの場所ごとに独立した環境を使用することが有用な場合がよくあります。たとえば、Spark を実行するデータエンジニアリングチームと、Tensorflow を実行する ML チームでは、依存関係が大きく異なる場合があります。
 
-To enable this use case, Dagster supports customizing the Python environment for each code location by adding the `executable_path` key to the YAML for a location. These environments can involve distinct sets of installed dependencies, or even completely different Python versions. For example:
+このようなユースケースに対応するため、Dagster は、場所の YAML に `executable_path` キーを追加することで、コードの場所ごとに Python 環境をカスタマイズできます。
+これらの環境には、インストール済みの依存関係の異なるセットが含まれる場合もあれば、Python のバージョンが全く異なる場合もあります。
+例:
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/repositories_workspaces/python_environment_example.yaml" />
 
-The example above also illustrates the `location_name` key. Each code location in a workspace file has a unique name that is displayed in the UI, and is also used to disambiguate definitions with the same name across multiple code locations. Dagster will supply a default name for each location based on its workspace entry if a custom one is not supplied.
+上記の例は、`location_name` キーについても示しています。
+ワークスペースファイル内の各コードロケーションには、UI に表示される一意の名前が付けられます。また、複数のコードロケーションで同じ名前の定義を区別するためにも使用されます。
+カスタム名が指定されていない場合、Dagster はワークスペースエントリに基づいて各ロケーションにデフォルトの名前を提供します。
 
 </TabItem>
 </Tabs>
 
-You can see a working example of a Dagster project that has multiple code locations in our [cloud-examples/multi-location-project repo](https://github.com/dagster-io/cloud-examples/tree/main/multi-location-project).
+複数のコードの場所を持つ Dagster プロジェクトの動作例は、[cloud-examples/multi-location-project リポジトリ](https://github.com/dagster-io/cloud-examples/tree/main/multi-location-project) で確認できます。

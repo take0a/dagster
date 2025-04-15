@@ -1,27 +1,32 @@
 ---
-title: 'Executing Dagster on Dask'
+title: 'Dask 上で Dagster を実行する'
 sidebar_position: 800
 ---
 
-The [dagster-dask](https://github.com/dagster-io/dagster/tree/master/python_modules/libraries/dagster-dask) module makes a **`dask_executor`** available, which can target either a local Dask cluster or a distributed cluster. Computation is distributed across the cluster at the execution step level -- that is, we use Dask to orchestrate execution of the steps in a job, not to parallelize computation within those steps.
+[dagster-dask](https://github.com/dagster-io/dagster/tree/master/python_modules/libraries/dagster-dask) モジュールは、ローカル Dask クラスターまたは分散クラスターのいずれかをターゲットにできる **`dask_executor`** を提供します。
+計算は実行ステップレベルでクラスター全体に分散されます。つまり、Dask はジョブ内のステップの実行を調整するために使用するものであり、ステップ内の計算を並列化するために使用するものではありません。
 
-This executor takes the compiled execution plan, and converts each execution step into a [Dask Future](https://docs.dask.org/en/latest/futures.html) configured with the appropriate task dependencies to ensure tasks are properly sequenced. When the job is executed, these futures are generated and then awaited by the parent Dagster process.
+このエグゼキューターは、コンパイルされた実行計画を受け取り、各実行ステップを、適切なタスク依存関係が構成された [Dask Future](https://docs.dask.org/en/latest/futures.html) に変換します。これにより、タスクが適切に順序付けられます。
+ジョブが実行されると、これらの Future が生成され、親 Dagster プロセスによって待機されます。
 
-Data is passed between step executions via [IO Managers](/guides/build/io-managers/). As a consequence, a persistent shared storage (such as a network filesystem shared by all of the Dask nodes, S3, or GCS) must be used.
+データは [IO マネージャー](/guides/build/io-managers/) を介してステップ実行間で渡されます。
+そのため、永続的な共有ストレージ（すべての Dask ノードで共有されるネットワークファイルシステム、S3、GCS など）を使用する必要があります。
 
-Note that, when using this executor, the compute function of a single op is still executed in a single process on a single machine. If your goal is to distribute execution of workloads _within_ the logic of a single op, you may find that invoking Dask or PySpark directly from within the body of an op's compute function is a better fit than the engine layer covered in this documentation.
+このエグゼキューターを使用する場合、単一のオペレーションの計算関数は、単一のマシン上の単一のプロセスで実行されることに注意してください。
+単一のオペレーションのロジック内でワークロードの実行を分散することが目的の場合は、このドキュメントで説明されているエンジン レイヤーよりも、オペレーションのコンピューティング関数の本体内から直接 Dask または PySpark を呼び出す方が適している場合があります。
 
-## Requirements
+## 要件
 
-Install [dask.distributed](https://distributed.readthedocs.io/en/latest/install.html).
+[dask.distributed](https://distributed.readthedocs.io/en/latest/install.html) をインストールしてください。
 
-## Local execution
+## ローカル実行
 
-It is relatively straightforward to set up and run a Dagster job on local Dask. This can be useful for testing.
+ローカルのDASK上でDagsterジョブをセットアップして実行するのは比較的簡単です。
+これはテストに役立ちます。
 
-First, run `pip install dagster-dask`.
+まず、`pip install dagster-dask` を実行します。
 
-Then, create a job with the dask executor:
+次に、DASKエグゼキュータでジョブを作成します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dask_hello_world.py"
@@ -29,17 +34,19 @@ Then, create a job with the dask executor:
   endBefore="end_local_job_marker"
 />
 
-Now you can run this job with a config block such as the following:
+これで、次のような構成ブロックを使用してこのジョブを実行できます:
 
 <CodeExample path="docs_snippets/docs_snippets/deploying/dask_hello_world.yaml" />
 
-Executing this job will spin up local Dask execution, run the job, and exit.
+このジョブを実行すると、ローカルの Dask 実行が開始され、ジョブが実行されて終了します。
 
-## Distributed execution
+## 分散実行
 
-If you want to use a Dask cluster for distributed execution, you will first need to [set up a Dask cluster](https://distributed.readthedocs.io/en/latest/quickstart.html#setup-dask-distributed-the-hard-way). Note that the machine running the Dagster parent process must be able to connect to the host/port on which the Dask scheduler is running.
+分散実行に Dask クラスターを使用する場合は、まず [Dask クラスターをセットアップ](https://distributed.readthedocs.io/en/latest/quickstart.html#setup-dask-distributed-the-hard-way) する必要があります。
+Dagster 親プロセスを実行しているマシンは、Dask スケジューラが実行されているホスト/ポートに接続できる必要があります。
 
-You'll also need an IO manager that uses persistent shared storage, which should be attached to the job along with any resources on which it depends. Here, we use the <PyObject section="libraries" module="dagster_aws" object="s3.s3_pickle_io_manager"/>:
+また、永続的な共有ストレージを使用する IO マネージャーも必要です。これは、ジョブが依存するリソースとともにジョブにアタッチする必要があります。
+ここでは、<PyObject section="libraries" module="dagster_aws" object="s3.s3_pickle_io_manager"/> を使用します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dask_hello_world_distributed.py"
@@ -47,29 +54,32 @@ You'll also need an IO manager that uses persistent shared storage, which should
   endBefore="end_distributed_job_marker"
 />
 
-For distributing task execution on a Dask cluster, you must provide a config block that includes the address/port of the Dask scheduler:
+Dask クラスターでタスク実行を分散するには、Dask スケジューラのアドレス/ポートを含む構成ブロックを提供する必要があります:
 
 <CodeExample path="docs_snippets/docs_snippets/deploying/dask_remote.yaml" />
 
-Since Dask will invoke your job code on the cluster workers, you must ensure that the latest version of your Python code is available to all of the Dask workers. Ideally, you'll package this as a Python module, and target your `workspace.yaml` at this module.
+Dask はクラスターワーカー上でジョブコードを呼び出すため、すべての Dask ワーカーで最新バージョンの Python コードが利用できるようにする必要があります。
+理想的には、これを Python モジュールとしてパッケージ化し、`workspace.yaml` でこのモジュールをターゲットにします。
 
-## Managing compute resources with Dask
+## Dask によるコンピューティングリソースの管理
 
-Dask has [basic support](https://distributed.dask.org/en/latest/resources.html) for compute resource management. In Dask you can specify that a particular worker node has, say, 3 GPUs, and then tasks which are specified with GPU requirements will be scheduled to respect that constraint on available resources.
+Dask は、コンピューティングリソース管理のための [基本的なサポート](https://distributed.dask.org/en/latest/resources.html) を備えています。
+Dask では、特定のワーカーノードに GPU を 3 基搭載するなどと指定すると、GPU 要件が指定されたタスクは、利用可能なリソースの制約を考慮してスケジュールされます。
 
-In Dask, you'd set this up by launching your workers with resource specifications:
+Dask では、リソース仕様を指定してワーカーを起動することで、これを設定できます:
 
 ```shell
 dask-worker scheduler:8786 --resources "GPU=2"
 ```
 
-and then when submitting tasks to the Dask cluster, specifying resource requirements in the Python API:
+そして、Dask クラスターにタスクを送信するときに、Python API でリソース要件を指定します:
 
 ```python
 client.submit(task, resources={'GPU': 1})
 ```
 
-Dagster has simple support for Dask resource specification at the op level for ops that will be executed on Dask clusters. In your op definition, just add _tags_ as follows:
+Dagster は、Dask クラスターで実行されるオペレーションのオペレーションレベルでの Dask リソース指定をシンプルにサポートしています。
+オペレーション定義に、次のように _tags_ を追加するだけです:
 
 ```python
 @op(
@@ -80,10 +90,11 @@ def my_op(...):
     pass
 ```
 
-The dict passed to `dagster-dask/resource_requirements` will be passed through as the `resources` argument to the Dask client's **`~dask:distributed.Client.submit`** method for execution on a Dask cluster. Note that in non-Dask execution, this key will be ignored.
+`dagster-dask/resource_requirements` に渡された辞書は、Dask クラスターで実行するために、Dask クライアントの **`~dask:distributed.Client.submit`** メソッドに `resources` 引数として渡されます。
+Dask 以外の実行では、このキーは無視されることに注意してください。
 
-## Caveats
+## 注意事項
 
-Dagster logs are not yet retrieved from Dask workers; this will be addressed in follow-up work.
+Dagster ログはまだ Dask ワーカーから取得されていません。これは後続の作業で対処される予定です。
 
-While this library is still nascent, we're working to improve it, and we are happy to accept contributions.
+このライブラリはまだ初期段階ですが、改善に取り組んでおり、皆様からの貢献を歓迎します。

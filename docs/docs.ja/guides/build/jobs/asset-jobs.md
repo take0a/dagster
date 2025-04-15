@@ -1,48 +1,52 @@
 ---
-title: Asset jobs
+title: アセットジョブ
 sidebar_position: 100
 ---
 
-Jobs are the main unit of execution and monitoring for [asset definitions](/guides/build/assets/defining-assets) in Dagster. An asset job is a type of job that targets a [selection of assets](/guides/build/assets/asset-selection-syntax) and can be launched:
+ジョブは、Dagsterにおける[アセット定義](/guides/build/assets/defining-assets)の実行と監視の主要単位です。
+アセットジョブは、[選択したアセット](/guides/build/assets/asset-selection-syntax)を対象とするジョブの一種で、以下の方法で起動できます。
 
-- Manually from the Dagster UI
-- At fixed intervals, by [schedules](/guides/automate/schedules)
-- When external changes occur, using [sensors](/guides/automate/sensors)
+- Dagster UIから手動で起動
+- [スケジュール](/guides/automate/schedules)に基づいて一定間隔で起動
+- [センサー](/guides/automate/sensors)を使用して外部の変化が発生したときに起動
 
-## Creating asset jobs
+## アセットジョブの作成
 
-In this section, we'll demonstrate how to create a few asset jobs that target the following assets:
+このセクションでは、次のアセットを対象とするいくつかのアセット ジョブを作成する方法を説明します:
 
 <CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-jobs/asset-jobs.py" language="python" startAfter="start_marker_assets" endBefore="end_marker_assets" />
 
-To create an asset job, use the [`define_asset_job`](/api/python-api/assets#dagster.define_asset_job) method. An asset-based job is based on the assets the job targets and their dependencies.
+アセットジョブを作成するには、[`define_asset_job`](/api/python-api/assets#dagster.define_asset_job) メソッドを使用します。アセットベースのジョブは、ジョブの対象となるアセットとその依存関係に基づいて作成されます。
 
-You can target one or multiple assets, or create multiple jobs that target overlapping sets of assets. In the following example, we have two jobs:
+1つまたは複数のアセットをターゲットにすることも、重複するアセットセットをターゲットとする複数のジョブを作成することもできます。
+次の例では、2つのジョブがあります。
 
-- `all_assets_job` targets all assets
-- `sugary_cereals_job` targets only the `sugary_cereals` asset
+- `all_assets_job` はすべてのアセットをターゲットにします。
+- `sugary_cereals_job` は `sugary_cereals` アセットのみをターゲットにします。
 
 <CodeExample path="docs_snippets/docs_snippets/guides/data-modeling/asset-jobs/asset-jobs.py" language="python" startAfter="start_marker_jobs" endBefore="end_marker_jobs" />
 
-## Making asset jobs available to Dagster tools
+## アセットジョブを Dagster ツールで利用できるようにする
 
-Including the jobs in a [`Definitions`](/api/python-api/definitions) object located at the top level of a Python module or file makes asset jobs available to the UI, GraphQL, and the command line. The Dagster tool loads that module as a code location. If you include schedules or sensors, the [code location](/guides/deploy/code-locations) will automatically include jobs that those schedules or sensors target.
+Python モジュールまたはファイルの最上位レベルにある [`Definitions`](/api/python-api/definitions) オブジェクトにジョブを含めると、UI、GraphQL、コマンドラインでアセットジョブを利用できるようになります。
+Dagster ツールは、そのモジュールをコードの場所として読み込みます。スケジュールまたはセンサーを含めると、[コードの場所](/guides/deploy/code-locations) には、それらのスケジュールまたはセンサーが対象とするジョブが自動的に含まれます。
 
 <CodeExample path="docs_snippets/docs_snippets/concepts/assets/jobs_to_definitions.py" />
 
-## Testing asset jobs
+## アセットジョブのテスト
 
-Dagster has built-in support for testing, including separating business logic from environments and setting explicit expectations on uncontrollable inputs. For more information, see the [testing documentation](/guides/test).
+Dagster には、ビジネスロジックを環境から分離したり、制御不能な入力に対する明確な期待値の設定など、テストのためのサポートが組み込まれています。
+詳細については、[テストに関するドキュメント](/guides/test) をご覧ください。
 
-## Executing asset jobs
+## アセットジョブの実行
 
-You can run an asset job in a variety of ways:
+アセットジョブは、以下の様々な方法で実行できます。
 
-- In the Python process where it's defined
-- Via the command line
-- Via the GraphQL API
-- In the UI
+- 定義された Python プロセス内
+- コマンドライン経由
+- GraphQL API 経由
+- UI 経由
 
-## Examples
+## 例
 
-The [Hacker News example](https://github.com/dagster-io/dagster/tree/master/examples/project_fully_featured) [builds an asset job that targets an asset group](https://github.com/dagster-io/dagster/blob/master/examples/project_fully_featured/project_fully_featured/jobs.py).
+[Hacker News のサンプル](https://github.com/dagster-io/dagster/tree/master/examples/project_fully_featured)は、[アセットグループをターゲットとするアセットジョブを構築します](https://github.com/dagster-io/dagster/blob/master/examples/project_fully_featured/project_fully_featured/jobs.py)。

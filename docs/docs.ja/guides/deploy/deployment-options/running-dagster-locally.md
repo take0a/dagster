@@ -1,63 +1,63 @@
 ---
-title: 'Running Dagster locally'
+title: 'Dagsterをローカルで実行する'
 sidebar_label: Local deployment
 description: How to run Dagster on your local machine.
 sidebar_position: 1
 ---
 
-In this guide, we'll walk you through how to run Dagster on your local machine using the `dagster dev` command. The `dagster dev` command launches the Dagster UI and the Dagster daemon, allowing you to start a full deployment of Dagster from the command line.
+このガイドでは、「dagster dev」コマンドを使ってローカルマシンでDagsterを実行する方法を解説します。「dagster dev」コマンドはDagster UIとDagsterデーモンを起動し、コマンドラインからDagsterの完全なデプロイメントを開始できます。
 
 :::warning
-`dagster dev` is intended for local development _only_. If you want to run Dagster for production use cases, see our other [deployment guides](/guides/deploy/deployment-options/index.md).
+`dagster dev` はローカル開発のみを対象としています。本番環境で Dagster を実行したい場合は、他の [デプロイメントガイド](/guides/deploy/deployment-options/index.md) をご覧ください。
 :::
 
-## Locating your code
+## コードを見つける
 
-Before starting local development, you need to tell Dagster how to find the Python code containing your assets and jobs.
+ローカル開発を開始する前に、アセットとジョブを含む Python コードを見つける方法を Dagster に伝える必要があります。
 
-For a refresher on how to set up a Dagster project, follow our [Recommended Dagster Project Structure](/guides/build/projects/structuring-your-dagster-project) guide.
+Dagster プロジェクトの設定方法を再確認するには、[推奨される Dagster プロジェクト構造](/guides/build/projects/structuring-your-dagster-project) ガイドに従ってください。
 
 <Tabs>
-  <TabItem value="module" label="From a module">
-    Dagster can load Python modules as code locations.
+  <TabItem value="module" label="モジュールから">
+    Dagster は、コードの場所として Python モジュールを読み込むことができます。
     <CodeExample path="docs_snippets/docs_snippets/guides/tbd/definitions.py" language="python" title="my_module/__init__.py" />
-    We can use the `-m` argument to supply the name of the module to start a Dagster instance loaded with our definitions:
+    `-m` 引数を使用してモジュール名を指定し、定義がロードされた Dagster インスタンスを起動できます:
     ```shell
     dagster dev -m my_module
     ```
 
   </TabItem>
-  <TabItem value="without-args" label="Without command line arguments">
-    To load definitions from a module without supplying the `-m` command line argument, you can use a `pyproject.toml` file. This file, included in all Dagster example projects, contains a `tool.dagster` section where you can supply the `module_name`:
+  <TabItem value="without-args" label="コマンドライン引数なし">
+    `-m` コマンドライン引数を指定せずにモジュールから定義をロードするには、`pyproject.toml` ファイルを使用します。このファイルはすべての Dagster サンプルプロジェクトに含まれており、`tool.dagster` セクションに `module_name` を指定できます:
     <CodeExample path="docs_snippets/docs_snippets/guides/tbd/pyproject.toml" language="toml" title="pyproject.toml" />
 
   </TabItem>
-  <TabItem value="file" label="From a file">
-    Dagster can load a file directly as a code location.
+  <TabItem value="file" label="ファイルから">
+    Dagster は、ファイルをコードの場所として直接読み込むことができます。
     <CodeExample path="docs_snippets/docs_snippets/guides/tbd/definitions.py" language="python" title="definitions.py" />
-    Given the preceding file, we can use the `-f` argument to supply the name of the file to start a Dagster instance loaded with our definitions:
+    上記のファイルでは、`-f` 引数を使用してファイル名を指定し、定義がロードされた Dagster インスタンスを起動できます:
     ```shell
     dagster dev -f defs.py
     ```
 
     :::note
-    We don't recommend using the `-f` argument for production deployments, to avoid a whole class of Python import errors.
+    Python インポート エラーのクラス全体を回避するために、実稼働環境でのデプロイメントでは `-f` 引数の使用はお勧めしません。
     :::
 
   </TabItem>
 </Tabs>
 
-## Creating a persistent instance
+## 永続インスタンスの作成
 
-Running `dagster dev` without any additional configuration starts an ephemeral instance in a temporary directory. You may see log output indicating as such:
+追加設定なしで「dagster dev」を実行すると、一時ディレクトリに一時的なインスタンスが起動します。ログ出力には次のような内容が表示される場合があります:
 
 ```shell
 Using temporary directory /Users/rhendricks/.tmp_dagster_home_qs_fk8_5 for storage.
 ```
 
-This indicates that any runs or materialized assets created during your session won't be persisted once the session ends.
+これは、セッション中に作成された実行やマテリアライズドアセットが、セッション終了後は保存されないことを意味します。
 
-To designate a more permanent home for your runs and assets, you can set the `DAGSTER_HOME` environment variable to a folder on your filesystem. Dagster will then use the specified folder for storage on all subsequent runs of `dagster dev`.
+実行やアセットのより永続的な保存場所を指定するには、`DAGSTER_HOME` 環境変数をファイルシステム上のフォルダに設定してください。これにより、Dagster は以降の `dagster dev` 実行時に、指定されたフォルダをストレージとして使用します。
 
 ```shell
 mkdir -p ~/.dagster_home
@@ -65,11 +65,11 @@ export DAGSTER_HOME=~/.dagster_home
 dagster dev
 ```
 
-## Configuring your instance
+## インスタンスの設定
 
-To configure your Dagster instance, you can create a `dagster.yaml` file in your `$DAGSTER_HOME` folder.
+Dagster インスタンスを設定するには、`$DAGSTER_HOME` フォルダに `dagster.yaml` ファイルを作成します。
 
-For example, to have your local instance limit the number of concurrent runs, you could configure the following `dagster.yaml`:
+たとえば、ローカルインスタンスで同時実行数を制限するには、次の `dagster.yaml` を設定します:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/tbd/dagster.yaml"
@@ -77,16 +77,18 @@ For example, to have your local instance limit the number of concurrent runs, yo
   title="~/.dagster_home/dagster.yaml"
 />
 
-For the full list of options that can be set in the `dagster.yaml` file, refer to the [Dagster instance documentation](/guides/deploy/dagster-instance-configuration).
+`dagster.yaml` ファイルで設定できるオプションの完全なリストについては、[Dagster インスタンスのドキュメント](/guides/deploy/dagster-instance-configuration)を参照してください。
 
-## Detecting when you're running in `dagster dev`
+## `dagster dev` で実行中かどうかを検出する
 
-You may want to detect whether you're running locally. For example, you might want schedules or sensors to start in the `RUNNING` state in production but not in your local test deployment.
+ローカルで実行されているかどうかを検出したい場合があります。例えば、スケジュールやセンサーを本番環境では `RUNNING` 状態で起動したいが、ローカルのテスト環境では起動させたくない、といった場合です。
 
-`dagster dev` sets the environment variable `DAGSTER_IS_DEV_CLI` to `1`. You can detect whether you're in a local dev environment by checking for the presence of that environment variable.
+`dagster dev` は、環境変数 `DAGSTER_IS_DEV_CLI` を `1` に設定します。この環境変数の存在を確認することで、ローカル開発環境にいるかどうかを検出できます。
 
-## Moving to production
+## プロダクションへの移行
 
-`dagster dev` is primarily useful for running Dagster for local development and testing. It isn't suitable for the demands of most production deployments. Most importantly, `dagster dev` does not include authentication or web security. Additionally, in a production deployment, you might want to run multiple webserver replicas, have zero downtime continuous deployment of your code, or set up your Dagster daemon to automatically restart if it crashes.
+`dagster dev` は、主にローカル開発およびテスト環境で Dagster を実行する際に役立ちます。
+ほとんどの本番環境へのデプロイには適していません。
+最も重要な点として、`dagster dev` には認証やウェブセキュリティ機能が含まれていないことが挙げられます。さらに、本番環境では、複数のウェブサーバーのレプリカを実行したり、ダウンタイムなしでコードを継続的にデプロイしたり、Dagster デーモンがクラッシュした場合に自動的に再起動するように設定したりする必要があるかもしれません。
 
-For information about deploying Dagster in production, see the [Dagster Open Source deployment options documentation](/guides/deploy/deployment-options/).
+本番環境での Dagster のデプロイ方法については、[Dagster オープンソース デプロイオプションのドキュメント](/guides/deploy/deployment-options/) をご覧ください。

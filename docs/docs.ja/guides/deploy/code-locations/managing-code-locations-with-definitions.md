@@ -1,36 +1,36 @@
 ---
-title: 'Managing code locations with Definitions'
+title: '定義によるコードの場所の管理'
 description: "A code location is a collection of Dagster definitions loadable and accessible by Dagster's tools. Learn to create, load, and deploy code locations."
 sidebar_position: 100
 ---
 
-A code location is a collection of Dagster definitions loadable and accessible by Dagster's tools, such as the CLI, UI, and Dagster+. A code location comprises:
+コードロケーションとは、CLI、UI、Dagster+などのDagsterツールから読み込み、アクセスできるDagster定義の集合です。コードロケーションは以下の要素で構成されます:
 
-- A reference to a Python module that has an instance of <PyObject section="definitions" module="dagster" object="Definitions" /> in a top-level variable
-- A Python environment that can successfully load that module
+- トップレベル変数に <PyObject section="definitions" module="dagster" object="Definitions" /> のインスタンスを持つ Python モジュールへの参照
+- そのモジュールを正常にロードできる Python 環境
 
-Definitions within a code location have a common namespace and must have unique names. This allows them to be grouped and organized by code location in tools.
+コード内の定義は共通の名前空間を持ち、一意の名前を持つ必要があります。これにより、ツール内でコード内の定義をグループ化して整理できます。
 
 ![Code locations](/images/guides/deploy/code-locations/code-locations-diagram.png)
 
-A single deployment can have one or multiple code locations.
+単一のデプロイメントには、1つまたは複数のコードロケーションを含めることができます。
 
-Code locations are loaded in a different process and communicate with Dagster system processes over an RPC mechanism. This architecture provides several advantages:
+コードロケーションは別のプロセスにロードされ、RPCメカニズムを介してDagsterシステムプロセスと通信します。このアーキテクチャには、いくつかの利点があります。
 
-- When there is an update to user code, the Dagster webserver/UI can pick up the change without a restart.
-- You can use multiple code locations to organize jobs, but still work on all of your code locations using a single instance of the webserver/UI.
-- The Dagster webserver process can run in a separate Python environment from user code so job dependencies don't need to be installed into the webserver environment.
-- Each code location can be sourced from a separate Python environment, so teams can manage their dependencies (or even their Python versions) separately.
+- ユーザーコードが更新された場合、Dagsterウェブサーバー/UIは再起動せずに変更を取得できます。
+- 複数のコードロケーションを使用してジョブを整理しながら、ウェブサーバー/UIの単一のインスタンスを使用してすべてのコードロケーションを操作できます。
+- Dagsterウェブサーバープロセスは、ユーザーコードとは別のPython環境で実行できるため、ジョブの依存関係をウェブサーバー環境にインストールする必要はありません。
+- 各コードロケーションは別々のPython環境から取得できるため、チームは依存関係（さらにはPythonのバージョン）を個別に管理できます。
 
-## Relevant APIs
+## 関連 API
 
 | Name                                                                     | Description                                                                                                                                       |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <PyObject section="definitions" module="dagster" object="Definitions" /> | The object that contains all the definitions defined within a code location. Definitions include assets, jobs, resources, schedules, and sensors. |
+| <PyObject section="definitions" module="dagster" object="Definitions" /> | コードロケーション内で定義されたすべての定義を含むオブジェクト。定義には、アセット、ジョブ、リソース、スケジュール、センサーが含まれます。 |
 
-## Defining code locations
+## コードの場所の定義
 
-To define a code location, create a top-level variable that contains a <PyObject section="definitions" module="dagster" object="Definitions" /> object in a Python module. For example:
+コードの場所を定義するには、Pythonモジュール内に <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトを含むトップレベル変数を作成します。例:
 
 ```python
 # definitions.py
@@ -43,60 +43,63 @@ defs = Definitions(
 )
 ```
 
-It is recommended to include definitions in a Python module named `definitions.py`.
+定義は、`definitions.py` という名前の Python モジュールに含めることをお勧めします。
 
-## Deploying and loading code locations
+## コードの場所のデプロイと読み込み
 
 - [Local development](#local-development)
 - [Dagster+ deployment](#dagster-deployment)
 - [Open source deployment](#open-source-deployment)
 
-### Local development
+### ローカル開発 {#local-development}
 
 <Tabs>
-<TabItem value="From a file" label="From a file">
+<TabItem value="From a file" label="ファイルから">
 
-Dagster can load a file directly as a code location. In the following example, we used the `-f` argument to supply the name of the file:
+Dagsterは、コードの場所としてファイルを直接読み込むことができます。
+次の例では、`-f`引数を使用してファイル名を指定しています:
 
 ```shell
 dagster dev -f my_file.py
 ```
 
-This command loads the definitions in `my_file.py` as a code location in the current Python environment.
+このコマンドは、`my_file.py` 内の定義を現在の Python 環境のコード位置として読み込みます。
 
-You can also include multiple files at a time, where each file will be loaded as a code location:
+複数のファイルを一度に含めることもできます。その場合、各ファイルがコード位置として読み込まれます:
 
 ```shell
 dagster dev -f my_file.py -f my_second_file.py
 ```
 
 </TabItem>
-<TabItem value="From a module" label="From a module">
+<TabItem value="From a module" label="モジュールから">
 
-Dagster can also load Python modules as [code locations](/guides/deploy/code-locations/). When this approach is used, Dagster loads the definitions defined in the module passed to the command line.
+DagsterはPythonモジュールを[コードの場所](/guides/deploy/code-locations/)としてロードすることもできます。この方法を使用すると、Dagsterはコマンドラインに渡されたモジュール内で定義された定義をロードします。
 
-We recommend defining a variable containing the <PyObject section="definitions" module="dagster" object="Definitions" /> object in a submodule named `definitions` inside the Python module. In practice, the submodule can be created by adding a file named `definitions.py` at the root level of the Python module.
+Python モジュール内の `definitions` というサブモジュール内に、<PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトを含む変数を定義することをお勧めします。
+実際には、Python モジュールのルートレベルに `definitions.py` というファイルを追加することでサブモジュールを作成できます。
 
-As this style of development eliminates an entire class of Python import errors, we strongly recommend it for Dagster projects deployed to production.
+この開発スタイルは Python のインポートエラーを一挙に排除するため、本番環境にデプロイされる Dagster プロジェクトには強くお勧めします。
 
-In the following example, we used the `-m` argument to supply the name of the module and where to find the definitions:
+次の例では、`-m` 引数を使用してモジュール名と定義の場所を指定しています:
 
 ```shell
 dagster dev -m your_module_name.definitions
 ```
 
-This command loads the definitions in the variable containing the <PyObject section="definitions" module="dagster" object="Definitions" /> object in the `definitions` submodule in the current Python environment.
+このコマンドは、現在の Python 環境の `definitions` サブモジュール内の <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトを含む変数内の定義を読み込みます。
 
-You can also include multiple modules at a time, where each module will be loaded as a code location:
+複数のモジュールを一度に含めることもできます。その場合、各モジュールはコードの場所として読み込まれます:
 
 ```shell
 dagster dev -m your_module_name.definitions -m your_second_module.definitions
 ```
 
 </TabItem>
-<TabItem value="Without command line arguments" label="Without command line arguments">
+<TabItem value="Without command line arguments" label="コマンドライン引数なし">
 
-To load definitions without supplying command line arguments, you can use the `pyproject.toml` file. This file, included in all Dagster example projects, contains a `tool.dagster` section with a `module_name` variable:
+コマンドライン引数を指定せずに定義をロードするには、`pyproject.toml` ファイルを使用できます。
+すべての Dagster サンプルプロジェクトに含まれるこのファイルには、`module_name` 変数を含む `tool.dagster` セクションが含まれています。
 
 ```toml
 [tool.dagster]
@@ -104,19 +107,19 @@ module_name = "your_module_name.definitions"  ## name of project's Python module
 code_location_name = "your_code_location_name"  ## optional, name of code location to display in the Dagster UI
 ```
 
-When defined, you can run this in the same directory as the `pyproject.toml` file:
+定義されると、`p​​yproject.toml` ファイルと同じディレクトリでこれを実行できます:
 
 ```shell
 dagster dev
 ```
 
-Instead of this:
+代わりに次のようになります:
 
 ```shell
 dagster dev -m your_module_name.definitions
 ```
 
-You can also include multiple modules at a time using the `pyproject.toml` file, where each module will be loaded as a code location:
+`pyproject.toml` ファイルを使用して、一度に複数のモジュールを含めることもできます。各モジュールはコードの場所としてロードされます:
 
 ```toml
 [tool.dagster]
@@ -126,18 +129,20 @@ modules = [{ type = "module", name = "foo" }, { type = "module", name = "bar" }]
 </TabItem>
 </Tabs>
 
-Fore more information about local development, including how to configure your local instance, see "[Running Dagster locally](/guides/deploy/deployment-options/running-dagster-locally)".
+ローカルインスタンスの構成方法など、ローカル開発の詳細については、「[Dagster をローカルで実行する](/guides/deploy/deployment-options/running-dagster-locally)」を参照してください。
 
-### Dagster+ deployment
+### Dagster+ のデプロイメント
 
-See the [Dagster+ code locations documentation](/dagster-plus/deployment/code-locations/).
+[Dagster+ のコードロケーションに関するドキュメント](/dagster-plus/deployment/code-locations/)をご覧ください。
 
-### Open source deployment
+### オープンソースのデプロイメント
 
-The `workspace.yaml` file is used to load code locations for open source (OSS) deployments. This file specifies how to load a collection of code locations and is typically used in advanced use cases. For more information, see "[workspace.yaml reference](/guides/deploy/code-locations/workspace-yaml)".
+`workspace.yaml` ファイルは、オープンソース (OSS) のデプロイメントでコードの場所を読み込むために使用されます。
+このファイルは、コードの場所のコレクションを読み込む方法を指定し、通常は高度なユースケースで使用されます。
+詳細については、「[workspace.yaml リファレンス](/guides/deploy/code-locations/workspace-yaml)」をご覧ください。
 
-## Troubleshooting
+## トラブルシューティング
 
 | Error                                                                | Description and resolution                                                                                                                                                                                                                                    |
 | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cannot have more than one Definitions object defined at module scope | Dagster found multiple <PyObject section="definitions" module="dagster" object="Definitions" /> objects in a single Python module. Only one <PyObject section="definitions" module="dagster" object="Definitions" /> object may be in a single code location. |
+| Cannot have more than one Definitions object defined at module scope | Dagsterは、単一のPythonモジュール内に複数の<PyObject section="definitions" module="dagster" object="Definitions" />オブジェクトを検出しました。単一のコード位置に存在できる<PyObject section="definitions" module="dagster" object="Definitions" />オブジェクトは1つだけです。 |

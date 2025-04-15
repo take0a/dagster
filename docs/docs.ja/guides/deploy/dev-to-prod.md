@@ -1,33 +1,41 @@
 ---
-title: 'Transitioning from development to production'
+title: '開発から本番への移行'
 sidebar_position: 500
 ---
 
-In this article, we'll walk through how to transition your data pipelines from local development to staging and production deployments.
+この記事では、データパイプラインをローカル開発環境からステージング環境、そして本番環境に移行する方法について解説します。
 
-Let's say we’ve been tasked with fetching the N most recent entries from Hacker News and splitting the data into two datasets: one containing all of the data about stories and one containing all of the data about comments. In order to make the pipeline maintainable and testable, we have two additional requirements:
+例えば、Hacker News から最新の N 件のエントリを取得し、そのデータを 2 つのデータセットに分割するタスクがあるとします。1 つは記事に関するすべてのデータ、もう 1 つはコメントに関するすべてのデータです。
+パイプラインを保守性とテスト性に優れたものにするために、さらに 2 つの要件があります。
 
-- We must be able to run our data pipeline in local, staging, and production environments.
-- We need to be confident that data won't be accidentally overwritten (for example, because a user forgot to change a configuration value).
+- データパイプラインをローカル環境、ステージング環境、本番環境で実行できること。
+- データが誤って上書きされないことを保証できること（例：ユーザーが設定値の変更を忘れた場合など）。
 
-Using a few Dagster concepts, we can easily tackle this task! Here’s an overview of the main concepts we’ll be using in this guide:
+Using a few Dagster concepts, we can easily tackle this task! 
+Here’s an overview of the main concepts we’ll be using in this guide:
 
-- [Assets](/guides/build/assets/) - An asset is a software object that models a data asset. The prototypical example is a table in a database or a file in cloud storage.
-- [Resources](/guides/build/external-resources) - A resource is an object that models a connection to a (typically) external service. Resources can be shared between assets, and different implementations of resources can be used depending on the environment. For example, a resource may provide methods to send messages in Slack.
-- [I/O managers](/guides/build/io-managers/) - An I/O manager is a special kind of resource that handles storing and loading assets. For example, if we wanted to store assets in S3, we could use Dagster’s built-in S3 I/O manager.
-- [Run config](/guides/operate/configuration/run-configuration) - Assets and resources sometimes require configuration to set certain values, like the password to a database. Run config allows you to set these values at run time. In this guide, we will also use an API to set some default run configuration.
+- [アセット](/guides/build/assets/) - アセットとは、データアセットをモデル化するソフトウェアオブジェクトです。
+代表的な例としては、データベース内のテーブルやクラウドストレージ内のファイルなどが挙げられます。
+- [リソース](/guides/build/external-resources) - リソースとは、（通常は）外部サービスへの接続をモデル化するオブジェクトです。
+リソースはアセット間で共有でき、環境に応じて異なる実装のリソースを使用できます。
+例えば、リソースはSlackでメッセージを送信するメソッドを提供する場合があります。
+- [I/Oマネージャー](/guides/build/io-managers/) - I/Oマネージャーは、アセットの保存と読み込みを処理する特別な種類のリソースです。
+例えば、アセットをS3に保存したい場合は、Dagsterに組み込まれているS3 I/Oマネージャーを使用できます。
+- [実行構成](/guides/operate/configuration/run-configuration) - アセットやリソースでは、データベースのパスワードなど、特定の値を設定するために構成が必要になる場合があります。
+実行構成を使用すると、実行時にこれらの値を設定できます。
+このガイドでは、APIを使用してデフォルトの実行構成を設定する方法も説明します。
 
-Using these Dagster concepts we will:
+これらのDagsterのコンセプトを用いて、以下のことを行います:
 
-- Write three assets: the full Hacker News dataset, data about comments, and data about stories.
-- Use Dagster's Snowflake I/O manager to store the datasets in [Snowflake](https://www.snowflake.com/).
-- Set up our Dagster code so that the configuration for the Snowflake I/O manager is automatically supplied based on the environment where the code is running.
+- 3つのアセットを作成します。Hacker Newsデータセット全体、コメントに関するデータ、ストーリーに関するデータです。
+- DagsterのSnowflake I/Oマネージャーを使用して、データセットを[Snowflake](https://www.snowflake.com/)に保存します。
+- コードが実行される環境に基づいて、Snowflake I/Oマネージャーの設定が自動的に提供されるように、Dagsterコードを設定します。
 
-## Setup
+## 設定
 
 <CodeReferenceLink filePath="examples/development_to_production" />
 
-To follow along with this guide, you can copy the full code example and install a few additional pip libraries:
+このガイドに従うには、完全なコード例をコピーし、いくつかの追加の pip ライブラリをインストールします。
 
 ```bash
 dagster project from-example --name my-dagster-project --example development_to_production
@@ -35,15 +43,15 @@ cd my-dagster-project
 pip install -e .
 ```
 
-## Part one: Local development
+## パート1：ローカル開発
 
-In this section we will:
+このセクションでは、以下の作業を行います:
 
-- Write our assets
-- Add run configuration for the Snowflake I/O manager
-- Materialize assets in the Dagster UI
+- アセットの作成
+- Snowflake I/O マネージャーの実行構成の追加
+- Dagster UI でアセットのマテリアライズ
 
-Let’s start by writing our three assets. We'll use Pandas DataFrames to interact with the data.
+まずは、3つのアセットの作成から始めましょう。データの操作には Pandas DataFrame を使用します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/assets.py"
@@ -51,7 +59,8 @@ Let’s start by writing our three assets. We'll use Pandas DataFrames to intera
   endBefore="end_assets"
 />
 
-Now we can add these assets to our <PyObject section="definitions" module="dagster" object="Definitions" /> object and materialize them via the UI as part of our local development workflow. We can pass in credentials to our `SnowflakePandasIOManager`.
+これで、これらのアセットを <PyObject section="definitions" module="dagster" object="Definitions" /> オブジェクトに追加し、ローカル開発ワークフローの一環として UI 経由でマテリアライズできるようになりました。
+`SnowflakePandasIOManager` に認証情報を渡すことができます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/repository/repository_v1.py"
@@ -59,32 +68,38 @@ Now we can add these assets to our <PyObject section="definitions" module="dagst
   endBefore="end"
 />
 
-Note that we have passwords in our configuration in this code snippet. This is bad practice, and we will resolve it shortly.
+このコードスニペットでは、設定にパスワードが含まれていることに注意してください。
+これは不適切な方法であり、すぐに修正する予定です。
 
-This results in an asset graph that looks like this:
+結果として、アセットグラフは次のようになります。
 
 ![Hacker News asset graph](/images/guides/deploy/hacker_news_asset_graph.png)
 
-We can materialize the assets in the UI and ensure that the data appears in Snowflake as we expect:
+UI でアセットを具体化し、データが期待どおりに Snowflake に表示されることを確認できます:
 
 ![Snowflake data](/images/guides/deploy/snowflake_data.png)
 
-While we define our assets as Pandas DataFrames, the Snowflake I/O manager automatically translates the data to and from Snowflake tables. The Python asset name determines the Snowflake table name. In this case three tables will be created: `ITEMS`, `COMMENTS` and `STORIES`.
+アセットをPandas DataFramesとして定義すると、Snowflake I/Oマネージャーが自動的にSnowflakeテーブルとの間でデータを変換します。
+Pythonアセット名によってSnowflakeテーブル名が決まります。
+この場合、`ITEMS`、`COMMENTS`、`STORIES`の3つのテーブルが作成されます。
 
-## Part two: Deployment
+## パート2: デプロイ
 
-In this section we will:
+このセクションでは、以下の内容について説明します。
 
-- Modify the configuration for the Snowflake I/O manager to handle staging and production environments
-- Discuss different options for managing a staging environment
+- ステージング環境と本番環境の両方に対応できるよう、Snowflake I/Oマネージャーの構成を変更する
+- ステージング環境を管理するためのさまざまなオプションを検討する
 
-Now that our assets work locally, we can start the deployment process! We'll first set up our assets for production, and then discuss the options for our staging deployment.
+アセットがローカルで動作するようになったので、デプロイプロセスを開始できます。
+まず、本番環境向けにアセットを設定し、次にステージング環境へのデプロイのオプションを検討する。
 
-### Production
+### 本番
 
-We want to store the assets in a production Snowflake database, so we need to update the configuration for the `SnowflakePandasIOManager`. But if we were to simply update the values we set for local development, we would run into an issue: the next time a developer wants to work on these assets, they will need to remember to change the configuration back to the local values. This leaves room for a developer to accidentally overwrite the production asset during local development.
+アセットを本番環境のSnowflakeデータベースに保存したいので、`SnowflakePandasIOManager`の設定を更新する必要があります。
+しかし、ローカル開発用に設定した値を単純に更新すると、問題が発生します。開発者が次にこれらのアセットで作業する際に、設定をローカルの値に戻すことを忘れないようにする必要があるのです。
+これでは、開発者がローカル開発中に誤って本番環境のアセットを上書きしてしまう可能性があります。
 
-Instead, we can determine the configuration for resources based on the environment:
+代わりに、環境に基づいてリソースの設定を決定することができます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/repository/repository_v2.py"
@@ -92,16 +107,18 @@ Instead, we can determine the configuration for resources based on the environme
   endBefore="end"
 />
 
-Note that we still have passwords in our configuration in this code snippet. This is bad practice, and we will resolve it next.
+このコードスニペットでは、設定にパスワードがまだ残っていることに注意してください。
+これは不適切な方法なので、次に解決します。
 
-Now, we can set the environment variable `DAGSTER_DEPLOYMENT=production` in our deployment and the correct resources will be applied to the assets.
+これで、デプロイメントで環境変数 `DAGSTER_DEPLOYMENT=production` を設定することができ、アセットに適切なリソースが適用されます。
 
-We still have some problems with this setup:
+この設定にはまだいくつか問題があります。
 
-1. Developers need to remember to change `user` and `password` to their credentials and `schema` to their name when developing locally.
-2. Passwords are being stored in code.
+1. 開発者は、ローカルで開発する際に、`user` と `password` を自分の認証情報に、`schema` を自分の名前に変更することを忘れないようにする必要があります。
+2. パスワードがコード内に保存されています。
 
-We can easily solve these problems using <PyObject section="resources" module="dagster" object="EnvVar"/>, which lets us source configuration for resources from environment variables. This allows us to store Snowflake configuration values as environment variables and point the I/O manager to those environment variables:
+これらの問題は、<PyObject section="resources" module="dagster" object="EnvVar"/> を使用することで簡単に解決できます。これにより、環境変数からリソースの設定を取得できます。
+これにより、Snowflake の設定値を環境変数として保存し、I/O マネージャーにそれらの環境変数を参照させることができます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/repository/repository_v3.py"
@@ -109,13 +126,15 @@ We can easily solve these problems using <PyObject section="resources" module="d
   endBefore="end"
 />
 
-### Staging
+### ステージング
 
-Depending on your organization’s Dagster setup, there are a couple of options for a staging environment.
+組織の Dagster 設定に応じて、ステージング環境にはいくつかのオプションがあります。
 
-- **For Dagster+ users**, we recommend using [branch deployments](/dagster-plus/features/ci-cd/branch-deployments/) as your staging step. A branch deployment is a new Dagster deployment that is automatically generated for each git branch, and can be used to verify data pipelines before deploying them to production.
+- **Dagster+ ユーザーの場合** は、ステージング手順として [ブランチデプロイメント](/dagster-plus/features/ci-cd/branch-deployments/) を使用することをお勧めします。
+ブランチデプロイメントは、Git ブランチごとに自動的に生成される新しい Dagster デプロイメントであり、本番環境にデプロイする前にデータパイプラインを検証するために使用できます。
 
-- **For a self-hosted staging deployment**, we’ve already done most of the necessary work to run our assets in staging! All we need to do is add another entry to the `resources` dictionary and set `DAGSTER_DEPLOYMENT=staging` in our staging deployment.
+- **セルフホスト型のステージングデプロイメントの場合** は、ステージング環境でアセットを実行するために必要な作業のほとんどは既に完了しています。
+必要なのは、`resources` ディクショナリに別のエントリを追加し、ステージングデプロイメントで `DAGSTER_DEPLOYMENT=staging` を設定することだけです。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/repository/repository_v3.py"
@@ -123,26 +142,32 @@ Depending on your organization’s Dagster setup, there are a couple of options 
   endBefore="end_staging"
 />
 
-## Advanced: Unit tests with stubs and mocks
+## 上級：スタブとモックを使ったユニットテスト
 
-You may have noticed a missing step in the development workflow presented in this guide — unit tests! While the main purpose of the guide is to help you transition your code from local development to a production deployment, unit testing is still an important part of the development cycle. In this section, we'll explore a pattern you may find useful when writing your own unit tests.
+このガイドで紹介されている開発ワークフローには、ユニットテストというステップが抜けていることに気づいたかもしれません。このガイドの主な目的は、ローカル開発から本番環境へのコード移行を支援することですが、ユニットテストは開発サイクルにおいて依然として重要な部分です。
+このセクションでは、独自のユニットテストを作成する際に役立つパターンを紹介します。
 
-When we write unit tests for the `items` asset, we could make more precise assertions if we knew exactly what data we'd receive from Hacker News. If we refactor our interactions with the Hacker News API as a resource, we can leverage Dagster's resource system to provide a stub resource in our unit tests.
+`items` アセットのユニットテストを作成する際に、Hacker News から受け取るデータが正確にわかっていれば、より正確なアサーションを行うことができます。
+Hacker News API とのやり取りをリソースとしてリファクタリングすれば、Dagster のリソースシステムを活用してユニットテストでスタブリソースを提供できます。
 
-Before we get into implementation, let's go over some best practices:
+実装に入る前に、いくつかのベストプラクティスを確認しましょう。
 
-### When to use resources
+### リソースを使用するタイミング
 
-In many cases, interacting with an external service directly in assets or ops is more convenient than refactoring the interactions with the service as a resource. We recommend refactoring code to use resources in the following cases:
+多くの場合、外部サービスとのやり取りをリソースとしてリファクタリングするよりも、アセットやオペレーション内で直接行う方が便利です。
+以下の場合には、リソースを使用するようにコードをリファクタリングすることをお勧めします。
 
-- Multiple assets or ops need to interact with the service in a consistent way
-- Different implementations of a service need to be used in certain scenarios (ie. a staging environment, or unit tests)
+- 複数のアセットまたはオペレーションが一貫した方法でサービスとやり取りする必要がある場合
+- 特定のシナリオ（ステージング環境やユニットテストなど）で、サービスの異なる実装を使用する必要がある場合
 
-### When to use stub resources
+### スタブリソースを使用する場合
 
-Determining when it makes sense to stub a resource for a unit test can be a topic of much debate. There are certainly some resources where it would be too complicated to write and maintain a stub. For example, it would be difficult to mock a database like Snowflake with a lightweight database since the SQL syntax and runtime behavior may vary. In general, if a resource is relatively simple, writing a stub can be helpful for unit testing the assets and ops that use the resource.
+ユニットテストのためにリソースをスタブ化することが適切なタイミングを判断することは、多くの議論の的となることがあります。
+確かに、スタブの作成と保守が複雑すぎるリソースも存在します。
+例えば、Snowflakeのようなデータベースを軽量データベースでモック化することは、SQL構文や実行時の動作が異なる可能性があるため困難です。
+一般的に、リソースが比較的単純な場合、スタブを作成することは、そのリソースを使用するアセットやオペレーションのユニットテストに役立ちます。
 
-We'll start by writing the "real" Hacker News API Client:
+まずは、「本物の」Hacker News APIクライアントを作成しましょう:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/resources/resources_v1.py"
@@ -150,7 +175,7 @@ We'll start by writing the "real" Hacker News API Client:
   endBefore="end_resource"
 />
 
-We'll also need to update the `items` asset to use this client as a resource:
+このクライアントをリソースとして使用するには、`items` アセットも更新する必要があります:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/assets_v2.py"
@@ -160,11 +185,12 @@ We'll also need to update the `items` asset to use this client as a resource:
 
 :::note
 
-For the sake of brevity, we've omitted the implementation of the property `item_field_names` in `HNAPIClient`. You can find the full implementation of this resource in the [full code example](https://github.com/dagster-io/dagster/tree/master/examples/development_to_production) on GitHub.
+簡潔にするために、`HNAPIClient` のプロパティ `item_field_names` の実装は省略しました。
+このリソースの完全な実装は、GitHub の [完全なコード例](https://github.com/dagster-io/dagster/tree/master/examples/development_to_production) で確認できます。
 
 :::
 
-We'll also need to add an instance of `HNAPIClient` to `resources` in our `Definitions` object.
+また、`Definitions` オブジェクトの `resources` に `HNAPIClient` のインスタンスを追加する必要があります。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/repository/repository_v3.py"
@@ -172,7 +198,8 @@ We'll also need to add an instance of `HNAPIClient` to `resources` in our `Defin
   endBefore="end_hn_resource"
 />
 
-Now we can write a stubbed version of the Hacker News resource. We want to make sure the stub has implementations for each method `HNAPIClient` implements.
+これで、Hacker Newsリソースのスタブ版を作成できます。
+スタブには、`HNAPIClient`が実装する各メソッドの実装が含まれていることを確認します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/resources/resources_v2.py"
@@ -182,11 +209,12 @@ Now we can write a stubbed version of the Hacker News resource. We want to make 
 
 :::note
 
-Since the stub Hacker News resource and the real Hacker News resource need to implement the same methods, this would be a great time to write an interface. We’ll skip the implementation in this guide, but you can find it in the [full code example](https://github.com/dagster-io/dagster/tree/master/examples/development_to_production).
+スタブ Hacker News リソースと実際の Hacker News リソースは同じメソッドを実装する必要があるため、インターフェースを作成するのに最適なタイミングです。
+このガイドでは実装は省略しますが、[完全なコード例](https://github.com/dagster-io/dagster/tree/master/examples/development_to_production) で確認できます。
 
 :::
 
-Now we can use the stub Hacker News resource to test that the `items` asset transforms the data in the way we expect:
+ここで、スタブ Hacker News リソースを使用して、`items` アセットが期待どおりにデータを変換することをテストできます:
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/dagster/development_to_production/test_assets.py"
@@ -196,6 +224,6 @@ Now we can use the stub Hacker News resource to test that the `items` asset tran
 
 :::note
 
-While we focused on assets in this article, the same concepts and APIs can be used to swap out run configuration for jobs.
+この記事ではアセットに焦点を当てましたが、同じ概念と API を使用してジョブの実行構成を交換することもできます。
 
 :::

@@ -1,22 +1,23 @@
 ---
-title: 'Managing concurrency of Dagster assets, jobs, and Dagster instances'
+title: 'Dagster アセット、ジョブ、および Dagster インスタンスの同時実行の管理'
 sidebar_label: Managing concurrency
 description: How to limit the number of runs a job, or assets for an instance of Dagster.
 sidebar_position: 50
 ---
 
-You often want to control the number of concurrent runs for a Dagster job, a specific asset, or for a type of asset or job. Limiting concurrency in your data pipelines can help prevent performance problems and downtime.
+Dagster ジョブ、特定のアセット、または特定のタイプのアセットやジョブの同時実行数を制御する必要があることがよくあります。
+データパイプラインの同時実行数を制限すると、パフォーマンスの問題やダウンタイムを防ぐのに役立ちます。
 
 :::note
 
-This article assumes familiarity with [assets](/guides/build/assets/) and [jobs](/guides/build/jobs/).
+この記事では、[assets](/guides/build/assets/) と [jobs](/guides/build/jobs/) に関する知識があることを前提としています。
 
 :::
 
-## Limit the number of total runs that can be in progress at the same time
+## 同時に実行できる実行の総数を制限します
 
-- Dagster Core, add the following to your [dagster.yaml](/guides/deploy/dagster-yaml)
-- In Dagster+, add the following to your [deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference)
+- Dagster Core の場合は、[dagster.yaml](/guides/deploy/dagster-yaml) に以下のコードを追加してください。
+- Dagster+ の場合は、[deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference) に以下のコードを追加してください。
 
 ```yaml
 concurrency:
@@ -24,9 +25,9 @@ concurrency:
     max_concurrent_runs: 15
 ```
 
-## Limit the number of assets or ops actively executing across all runs
+## すべての実行でアクティブに実行されるアセットまたはオペレーションの数を制限する {#limit-the-number-of-assets-or-ops-actively-executing-across-all-runs}
 
-You can assign assets and ops to concurrency pools which allow you to limit the number of in progress op executions across all runs. You first assign your asset or op to a concurrency pool using the `pool` keyword argument.
+アセットとオペレーションを同時実行プールに割り当てることで、すべての実行における進行中のオペレーションの実行数を制限できます。まず、`pool` キーワード引数を使用して、アセットまたはオペレーションを同時実行プールに割り当てます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/operate/concurrency-pool-api.py"
@@ -34,30 +35,32 @@ You can assign assets and ops to concurrency pools which allow you to limit the 
   title="Specifying pools on assets and ops"
 />
 
-You should be able to verify that you have set the pool correctly by viewing the details pane for the asset or op in the Dagster UI.
+Dagster UI でアセットまたはオペレーションの詳細ペインを表示すると、プールが正しく設定されていることを確認できます。
 
 ![Viewing the pool tag](/images/guides/operate/managing-concurrency/asset-pool-tag.png)
 
-Once you have assigned your assets and ops to a concurrency pool, you can configure a pool limit for that pool in your deployment by using the Dagster UI or the Dagster CLI.
+アセットとオペレーションを同時実行プールに割り当てたら、Dagster UI または Dagster CLI を使用して、デプロイメント内のそのプールのプール制限を設定できます。
 
-To specify a limit for the pool "database" using the UI, navigate to the `Deployments` &rarr; `Concurrency` settings page and click the `Add pool limit` button:
+UI を使用してプール「データベース」の制限を指定するには、「デプロイメント」→「同時実行」設定ページに移動し、「プール制限を追加」ボタンをクリックします:
 
 ![Setting the pool limit](/images/guides/operate/managing-concurrency/add-pool-ui.png)
 
-To specify a limit for the pool "database" using the CLI, use:
+CLI を使用してプール「データベース」の制限を指定するには、次のコマンドを使用します:
 
 ```
 dagster instance concurrency set database 1
 ```
 
-## Limit the number of runs that can be in progress for a set of ops
+## 一連のオペレーションで進行中の実行数を制限します。
 
-You can also use concurrency pools to limit the number of in progress runs containing those assets or ops. You can follow the steps in the [Limit the number of assets or ops actively in execution across all runs](#limit-the-number-of-assets-or-ops-actively-executing-across-all-runs) section to assign your assets and ops to pools and to configure the desired limit.
+同時実行プールを使用して、これらのアセットまたはオペレーションを含む進行中の実行数を制限することもできます。
+[すべての実行でアクティブに実行されているアセットまたはオペレーションの数を制限する](#limit-the-number-of-assets-or-ops-actively-executing-across-all-runs)セクションの手順に従って、アセットとオペレーションをプールに割り当て、必要な制限を設定できます。
 
-Once you have assigned your assets and ops to your pool, you can change your deployment settings to set the pool enforcement granularity. To limit the total number of runs containing a specific op at any given time (instead of the total number of ops actively executing), we need to set the pool granularity to `run`.
+アセットとオペレーションをプールに割り当てたら、デプロイメント設定を変更してプール適用の粒度を設定できます。
+特定のオペレーションを含む実行の総数（アクティブに実行されているオペレーションの総数ではなく）を特定の時点で制限するには、プールの粒度を「run」に設定する必要があります。
 
-- Dagster Core, add the following to your [dagster.yaml](/guides/deploy/dagster-yaml)
-- In Dagster+, add the following to your [deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference)
+- Dagster Core の場合は、[dagster.yaml](/guides/deploy/dagster-yaml) に以下のコードを追加してください。
+- Dagster+ の場合は、[deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference) に以下のコードを追加してください。
 
 ```yaml
 concurrency:
@@ -65,12 +68,13 @@ concurrency:
     granularity: 'run'
 ```
 
-Without this granularity set, the default granularity is set to the `op`. This means that for a pool `foo` with a limit `1`, we enforce that only one op is executing at a given time across all runs, but the number of runs in progress is unaffected by the pool limit.
+この粒度が設定されていない場合、デフォルトの粒度は `op` に設定されます。
+つまり、制限が `1` のプール `foo` の場合、すべての実行において、特定の時点で実行される op は 1 つだけになりますが、進行中の実行の数はプールの制限の影響を受けません。
 
-### Setting a default limit for concurrency pools
+### 同時実行プールのデフォルト制限の設定
 
-- Dagster+: Edit the `concurrency` config in deployment settings via the [Dagster+ UI](/guides/operate/webserver) or the [`dagster-cloud` CLI](/dagster-plus/deployment/management/dagster-cloud-cli/).
-- Dagster Open Source: Use your instance's [dagster.yaml](/guides/deploy/dagster-yaml)
+- Dagster+: [Dagster+ UI](/guides/operate/webserver) または [`dagster-cloud` CLI](/dagster-plus/deployment/management/dagster-cloud-cli/) から、デプロイメント設定の `concurrency` 構成を編集します。
+- Dagster Open Source: インスタンスの [dagster.yaml](/guides/deploy/dagster-yaml) を使用します。
 
 ```yaml
 concurrency:
@@ -78,9 +82,11 @@ concurrency:
     default_limit: 1
 ```
 
-## Limit the number of runs that can be in progress by run tag
+## 実行タグごとに進行中の実行数を制限
 
-You can also limit the number of in progress runs by run tag. This is useful for limiting sets of runs independent of which assets or ops it is executing. For example, you might want to limit the number of in-progress runs for a particular schedule. Or, you might want to limit the number of in-progress runs for all backfills.
+実行タグごとに進行中の実行数を制限することもできます。
+これは、実行中のアセットやオペレーションに関係なく、実行セットを制限する場合に便利です。
+たとえば、特定のスケジュールで進行中の実行数を制限したい場合や、すべてのバックフィルで進行中の実行数を制限したい場合などです。
 
 ```yaml
 concurrency:
@@ -93,9 +99,10 @@ concurrency:
         limit: 10
 ```
 
-### Limit the number of runs that can be in progress by unique tag value
+### 実行タグの一意の値ごとに、進行中の実行回数を制限する
 
-To apply separate limits to each unique value of a run tag, set a limit for each unique value using `applyLimitPerUniqueValue`. For example, instead of limiting the number of backfill runs across all backfills, you may want to limit the number of runs for each backfill in progress:
+実行タグの一意の値ごとに個別の制限を適用するには、`applyLimitPerUniqueValue` を使用して一意の値ごとに制限を設定します。
+例えば、すべてのバックフィルの実行回数を制限するのではなく、進行中のバックフィルごとに実行回数を制限することができます。
 
 ```yaml
 concurrency:
@@ -107,10 +114,10 @@ concurrency:
         limit: 10
 ```
 
-## Limit the number of ops concurrently executing for a single run
+## 1回の実行で同時に実行されるオペレーションの数を制限する
 
-While pool limits allow you to [limit the number of ops executing across all runs](#limit-the-number-of-assets-or-ops-actively-executing-across-all-runs), to limit the number of ops executing _within a single run_, you need to configure your [run executor](/guides/operate/run-executors). You can
-limit concurrency for ops and assets in runs, by using `max_concurrent` in the run config, either in Python or using the Launchpad in the Dagster UI.
+プール制限を使用すると、[すべての実行で実行されるオペレーションの数を制限する](#すべての実行でアクティブに実行されるアセットまたはオペレーションの数を制限する)ことができますが、_1回の実行で_実行されるオペレーションの数を制限するには、[実行エグゼキューター](/guides/operate/run-executors)を設定する必要があります。
+実行中のオペレーションとアセットの同時実行数を制限するには、PythonまたはDagster UIのLaunchpadを使用して、実行構成で `max_concurrent` を使用します。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/operate/concurrency-run-scoped-op-concurrency.py"
@@ -118,11 +125,12 @@ limit concurrency for ops and assets in runs, by using `max_concurrent` in the r
   title="Limit concurrent op execution for a single run"
 />
 
-The default limit for op execution within a run depends on which executor you are using. For example, the <PyObject section="execution" module="dagster" object="multiprocess_executor" /> by default limits the number of ops executing to the value of `multiprocessing.cpu_count()` in the launched run.
+実行中のオペレーション実行数のデフォルトの制限は、使用しているエグゼキュータによって異なります。
+たとえば、<PyObject section="execution" module="dagster" object="multiprocess_executor" /> は、デフォルトで、起動された実行で実行されるオペレーションの数を `multiprocessing.cpu_count()` の値に制限します。
 
-## Prevent runs from starting if another run is already occurring (advanced)
+## 別の実行が既に実行されている場合は実行を開始しないようにする（高度な設定）
 
-You can use Dagster's rich metadata to use a schedule or a sensor to only start a run when there are no currently running jobs.
+Dagster の豊富なメタデータを使用することで、スケジュールやセンサーを使用して、現在実行中のジョブがない場合にのみ実行を開始できます。
 
 <CodeExample
   path="docs_snippets/docs_snippets/guides/operate/concurrency-no-more-than-1-job.py"
@@ -130,43 +138,45 @@ You can use Dagster's rich metadata to use a schedule or a sensor to only start 
   title="No more than 1 running job from a schedule"
 />
 
-## Troubleshooting
+## トラブルシューティング
 
-When limiting concurrency, you might run into some issues until you get the configuration right.
+同時実行数を制限する場合、設定が適切になるまでは問題が発生する可能性があります。
 
-### Runs going to STARTED status and skipping QUEUED
+### 実行は開始状態になり、QUEUED をスキップします
 
 :::info
-This only applies to Dagster Open Source.
+これは Dagster Open Source にのみ適用されます。
 :::
 
-If you are running a version older than `1.10.0`, you may need to manually configure your deployment to enable run queueing by setting the `run_queue` key in your instance's settings. In the Dagster UI, navigate to **Deployment > Configuration** and verify that the `run_queue` key is set.
+`1.10.0` より前のバージョンを実行している場合は、インスタンスの設定で `run_queue` キーを設定して、実行キューを有効にするようにデプロイメントを手動で構成する必要がある場合があります。
+Dagster UI で、**Deployment > Configuration** に移動し、`run_queue` キーが設定されていることを確認してください。
 
-### Runs remaining in QUEUED status
+### QUEUED ステータスのまま実行が残っている
 
-The possible causes for runs remaining in `QUEUED` status depend on whether you're using Dagster+ or Dagster Open Source.
+実行が QUEUED ステータスのままになっている原因は、Dagster+ を使用しているか、Dagster Open Source を使用しているかによって異なります。
 
 <Tabs>
   <TabItem value="Dagster+" label="Dagster+">
-    If runs aren't being dequeued in Dagster+, the root causes could be:
-    * **If using a [hybrid deployment](/dagster-plus/deployment/deployment-types/hybrid)**, the agent serving the deployment may be down. In this situation, runs will be paused.
-    * **Dagster+ is experiencing downtime**. Check the [status page](https://dagstercloud.statuspage.io/) for the latest on potential outages.
+    Dagster+ で実行がデキューされない場合、根本原因として以下のことが考えられます:
+    * **[ハイブリッドデプロイメント](/dagster-plus/deployment/deployment-types/hybrid)** を使用している場合、デプロイメントを処理するエージェントがダウンしている可能性があります。この場合、実行は一時停止されます。
+    * **Dagster+ でダウンタイムが発生しています**。[ステータスページ](https://dagstercloud.statuspage.io/) で、潜在的な停止に関する最新情報をご確認ください。
 
   </TabItem>
-  <TabItem value="Dagster Open Source" label="Dagster Open Source">
-  If runs aren't being dequeued in Dagster Open Source, the root cause is likely an issue with the Dagster daemon or the run queue configuration.
+  <TabItem value="Dagster Open Source" label="Dagster オープンソース">
+  Dagster Open Source で実行がキューから削除されない場合は、根本原因は Dagster デーモンまたは実行キューの構成に問題がある可能性があります。
 
-**Troubleshoot the Dagster daemon**
+**Dagsterデーモンのトラブルシューティング**
 
-    * **Verify the Dagster daemon is set up and running.** In the Dagster UI, navigate to **Deployment > Daemons** and verify that the daemon is running. The **Run queue** should also be running. If you used [dagster dev](/guides/operate/webserver) to start the Dagster UI, the daemon should have been started for you. If the daemon isn't running, proceed to step 2.
-    * **Verify the Dagster daemon can access the same storage as the Dagster webserver process.** Both the webserver process and the Dagster daemon should access the same storage, meaning they should use the same `dagster.yaml`. Locally, this means both processes should have the same set `DAGSTER_HOME` environment variable. If you used dagster dev to start the Dagster UI, both processes should be using the same storage. Refer to the [Dagster Instance docs](/guides/deploy/dagster-instance-configuration) for more information.
+    * **Dagster デーモンがセットアップされ、実行されていることを確認します。** Dagster UI で、**[デプロイメント] > [デーモン]** に移動し、デーモンが実行中であることを確認します。**[実行キュー]** も実行されている必要があります。[dagster dev](/guides/operate/webserver) を使用して Dagster UI を起動した場合、デーモンは自動的に起動されているはずです。デーモンが実行されていない場合は、手順 2 に進みます。
+    * **Dagster デーモンが Dagster Web サーバー プロセスと同じストレージにアクセスできることを確認します。** Web サーバー プロセスと Dagster デーモンはどちらも同じストレージにアクセスする必要があります。つまり、同じ `dagster.yaml` を使用する必要があります。ローカルでは、両方のプロセスで同じ `DAGSTER_HOME` 環境変数が設定されている必要があります。dagster dev を使用して Dagster UI を起動した場合、両方のプロセスが同じストレージを使用している必要があります。詳細については、[Dagster インスタンスのドキュメント](/guides/deploy/dagster-instance-configuration)を参照してください。
 
-**Troubleshoot the run queue configuration**
-If the daemon is running, runs may intentionally be left in the queue due to concurrency rules. To investigate:
-_ **Check the output logged from the daemon process**, as this will include skipped runs.
-_ **Check the max_concurrent_runs setting in your instance's dagster.yaml**. If set to 0, this may block the queue. You can check this setting in the Dagster UI by navigating to Deployment > Configuration and locating the concurrency.runs.max_concurrent_runs setting. Refer to the [Limit the number of total runs that can be in progress at the same time](#limit-the-number-of-total-runs-that-can-be-in-progress-at-the-same-time) section for more info. \* **Check the state of your run queue**. In some cases, the queue may be blocked by some number of in-progress runs. To view the status of your run queue, click **Runs** in the top navigation of the Dagster UI and then open the **Queued** and **In Progress** tabs.
+**実行キューの設定に関するトラブルシューティング**
 
-    If there are queued or in-progress runs blocking the queue, you can terminate them to allow other runs to proceed.
+デーモンが実行中の場合、同時実行ルールにより、実行が意図的にキューに残されることがあります。調査するには、以下の手順を実行してください:
+    * **デーモンプロセスから記録された出力を確認してください**。スキップされた実行も含まれます。
+    * **インスタンスの dagster.yaml で max_concurrent_runs 設定を確認してください**。0 に設定されていると、キューがブロックされる可能性があります。この設定は、Dagster UI で「デプロイメント」>「構成」に移動し、concurrency.runs.max_concurrent_runs 設定を見つけることで確認できます。詳細については、[同時に進行中の実行の合計数を制限する](#limit-the-number-of-total-runs-that-c​​an-be-in-progress-at-the-same-time)セクションを参照してください。
+    * **実行キューの状態を確認してください**。場合によっては、進行中の実行によってキューがブロックされることがあります。実行キューのステータスを表示するには、Dagster UI の上部ナビゲーションで  **Runs** をクリックし、**Queued** タブと  **In Progress**  タブを開きます。
 
+キューに入っている実行や進行中の実行によってキューがブロックされている場合は、それらを終了して他の実行を続行できるようにすることができます。
   </TabItem>
 </Tabs>

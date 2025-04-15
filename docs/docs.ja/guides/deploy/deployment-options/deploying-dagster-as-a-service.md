@@ -1,37 +1,40 @@
 ---
-title: 'Deploying Dagster as a service'
+title: 'Dagster をサービスとしてデプロイする'
 sidebar_label: Dagster as a service
 description: 'Learn how to deploy Dagster as a service on a single machine'
 sidebar_position: 20
 ---
 
 <details>
-  <summary>Prerequisites</summary>
+  <summary>前提条件</summary>
 
-To follow the steps in this guide, you'll need:
+このガイドの手順を実行するには、以下のものが必要です。
 
-- A Dagster project created
-- Working knowledge of containerization and managing services
+- Dagster プロジェクトを作成済み
+- コンテナ化とサービス管理に関する実用的な知識
 
 </details>
 
-This guide will walk you through deploying Dagster as a service on a single machine. It includes instructions for setting up the Dagster webserver and daemon. This approach is suitable for small-scale deployments or for testing purposes. For production environments, consider using containerized deployments or cloud-based solutions
+このガイドでは、Dagster を単一のマシンにサービスとして導入する手順を説明します。
+Dagster ウェブサーバーとデーモンの設定手順も含まれています。
+このアプローチは、小規模な導入やテスト目的に適しています。
+本番環境では、コンテナ化された導入またはクラウドベースのソリューションの使用を検討してください。
 
-## Running the Dagster Webserver
+## Dagster Webサーバーの実行
 
-The Dagster webserver is the core component of any Dagster deployment. It serves the Dagster UI and responds to GraphQL queries.
+Dagsterウェブサーバーは、あらゆるDagsterデプロイメントの中核コンポーネントです。Dagster UIを提供し、GraphQLクエリに応答します。
 
-### Installation
+### インストール
 
-First, install the Dagster webserver:
+まず、Dagster ウェブサーバーをインストールします:
 
 ```bash
 pip install dagster-webserver
 ```
 
-### Starting the Dagster Webserver
+### Dagster Webサーバーの起動
 
-Before starting the webserver, set the `DAGSTER_HOME` environment variable, which tells Dagster where to store its persistent data and logs.
+Web サーバーを起動する前に、`DAGSTER_HOME` 環境変数を設定します。この変数は、Dagster に永続データとログを保存する場所を指示します。
 
 <Tabs>
   <TabItem value="linux-mac" label="Linux/macOS (Bash)" default>
@@ -51,67 +54,67 @@ $env:DAGSTER_HOME = "C:\Users\YourUsername\dagster_home"
 
 </Tabs>
 
-Then, to run the webserver, use the following command:
+次に、Web サーバーを実行するには、次のコマンドを使用します:
 
 ```bash
 dagster-webserver -h 0.0.0.0 -p 3000
 ```
 
-This configuration will:
+この設定により、以下の処理が実行されます:
 
-- Set the `DAGSTER_HOME` environment variable, which tells Dagster where to store its persistent data and logs
-- Write execution logs to `$DAGSTER_HOME/logs`
-- Listen on `0.0.0.0:3000`
+- `DAGSTER_HOME` 環境変数を設定します。これにより、Dagster は永続データとログを保存する場所を知ります。
+- 実行ログを `$DAGSTER_HOME/logs` に書き込みます。
+- `0.0.0.0:3000` を listen します。
 
-## Running the Dagster Daemon
+## Dagster デーモンの実行
 
-The Dagster daemon is necessary if you're using schedules, sensors, backfills, or want to set limits on the number of runs that can be executed simultaneously.
+スケジュール、センサー、バックフィルを使用している場合、または同時に実行できる実行数に制限を設定する場合は、Dagster デーモンが必要です。
 
-### Installation
+### インストール
 
-Install the Dagster daemon:
+Dagsterデーモンをインストールします:
 
 ```bash
 pip install dagster
 ```
 
-### Starting the Daemon
+### デーモンの起動
 
-Make sure you've set the `DAGSTER_HOME` environment variable, see [Running the Dagster Webserver](#running-the-dagster-webserver) for instructions.
-Then, run the Dagster daemon with this command:
+`DAGSTER_HOME` 環境変数が設定されていることを確認してください。手順については、[Dagster Web サーバーの実行](#running-the-dagster-webserver) を参照してください。
+次に、次のコマンドで Dagster デーモンを実行します:
 
 ```bash
 dagster-daemon run
 ```
 
-The `dagster-daemon` process will periodically check your instance for:
+`dagster-daemon` プロセスは、インスタンスを定期的にチェックし、以下の情報を確認します:
 
-- New runs to be launched from your run queue
-- Runs triggered by your running schedules or sensors
+- 実行キューから開始される新しい実行
+- 実行スケジュールまたはセンサーによってトリガーされる実行
 
 :::tip
-Ensure that the `dagster-daemon` process has access to:
+`dagster-daemon` プロセスが以下のファイルにアクセスできることを確認してください。
 
-- Your `dagster.yaml` file
-- Your `workspace.yaml` file
-- The components defined on your instance
-- The repositories defined in your workspace
-  :::
-
-### Monitoring the Daemon
-
-You can check the status of your `dagster-daemon` process in the Dagster UI:
-
-1. Navigate to the Instance tab in the left-hand navigation bar
-2. View the daemon status
-
-:::important
-A deployment can have multiple instances of `dagster-webserver`, but should include only a single `dagster-daemon` process.
+- `dagster.yaml` ファイル
+- `workspace.yaml` ファイル
+- インスタンスで定義されているコンポーネント
+- ワークスペースで定義されているリポジトリ
 :::
 
-## Next Steps
+### デーモンのモニタリング
 
-Now that you have Dagster running as a service, you might want to explore:
+Dagster UI で `dagster-daemon` プロセスのステータスを確認できます。
 
-- [Configuring your Dagster instance](/guides/deploy/dagster-instance-configuration)
-- [Setting up schedules and sensors](/guides/automate/schedules)
+1. 左側のナビゲーションバーから「インスタンス」タブに移動します。
+2. デーモンのステータスを表示します。
+
+:::important
+デプロイメントには `dagster-webserver` のインスタンスを複数含めることができますが、`dagster-daemon` プロセスは 1 つだけ含める必要があります。
+:::
+
+## 次のステップ
+
+Dagster をサービスとして実行できるようになりました。以下の手順をご確認ください。
+
+- [Dagster インスタンスの設定](/guides/deploy/dagster-instance-configuration)
+- [スケジュールとセンサーの設定](/guides/automate/schedules)

@@ -1,12 +1,12 @@
 ---
-title: 'Detect and restart crashed workers with run monitoring'
+title: '実行監視でクラッシュしたワーカーを検出して再起動する'
 sidebar_position: 500
 ---
 
-Dagster can detect hanging runs and restart crashed [run workers](/guides/deploy/oss-deployment-architecture#job-execution-flow). Using run monitoring requires:
+Dagster は、ハングした実行を検出し、クラッシュした [実行ワーカー](/guides/deploy/oss-deployment-architecture#job-execution-flow) を再起動できます。実行モニタリングを使用するには、以下の手順が必要です:
 
-- Running the Dagster Daemon
-- Enabling run monitoring in the Dagster Instance:
+- Dagster デーモンの実行
+- Dagster インスタンスで実行モニタリングを有効にする:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/dagster_instance/dagster.yaml"
@@ -16,23 +16,31 @@ Dagster can detect hanging runs and restart crashed [run workers](/guides/deploy
 
 :::note
 
-In Dagster+, run monitoring is always enabled and can be configured in [deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference)
+Dagster+では、実行監視は常に有効になっており、[デプロイメント設定](/dagster-plus/deployment/management/deployments/deployment-settings-reference)で設定できます。
 
 :::
 
-## Run start timeouts
+## 実行開始タイムアウト
 
-When Dagster launches a run, the run stays in STARTING status until the run worker spins up and marks the run as STARTED. In the event that some failure causes the run worker to not spin up, the run might be stuck in STARTING status. The `start_timeout_seconds` offers a time limit for how long runs can hang in this state before being marked as failed.
+Dagster が実行を開始すると、実行ワーカーが起動して実行を STARTED としてマークするまで、実行は STARTING ステータスのままになります。
+何らかの障害により実行ワーカーが起動しない場合、実行は STARTING ステータスのままになる可能性があります。
+`start_timeout_seconds` は、実行がこの状態で停止する時間制限を指定します。この時間制限を超えると、実行は失敗としてマークされます。
 
-## Run cancelation timeouts
+## 実行キャンセルのタイムアウト
 
-When Dagster terminates a run, the run moves into CANCELING status and sends a termination signal to the run worker. When the run worker cleans up its resources, it moves into CANCELED status. In the event that some failure causes the run worker to not spin down cleanly, the run might be stuck in CANCELING status. The `cancel_timeout_seconds` offers a time limit for how long runs can hang in this state before being marked as canceled.
+Dagster が実行を終了すると、実行は CANCELING ステータスに移行し、実行ワーカーに終了シグナルを送信します。
+実行ワーカーがリソースをクリーンアップすると、CANCELED ステータスに移行します。
+何らかの障害により実行ワーカーが正常にスピンダウンしない場合、実行は CANCELING ステータスのままになる可能性があります。
+`cancel_timeout_seconds` は、実行がこの状態で停止する時間制限を指定します。この時間制限を超えると、実行はキャンセルとしてマークされます。
 
-## General run timeouts
+## 一般的な実行タイムアウト
 
-After a run is marked as STARTED, it may hang indefinitely for various reasons (user API errors, network issues, etc.). You can configure a maximum runtime for every run in a deployment by setting the `run_monitoring.max_runtime_seconds` field in your dagster.yaml or [Dagster+ deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference) to the maximum runtime in seconds. If a run exceeds this timeout and run monitoring is enabled, it will be marked as failed. The `dagster/max_runtime` tag can also be used to set a timeout in seconds on a per-run basis.
+実行が「開始」とマークされた後、さまざまな理由（ユーザー API エラー、ネットワークの問題など）により、無期限にハングアップする可能性があります。
+デプロイメント内のすべての実行の最大実行時間を設定するには、dagster.yaml または [Dagster+ デプロイメント設定](/dagster-plus/deployment/management/deployments/deployment-settings-reference) の `run_monitoring.max_runtime_seconds` フィールドに最大実行時間（秒）を設定します。
+実行がこのタイムアウトを超え、実行モニタリングが有効になっている場合は、失敗とマークされます。
+`dagster/max_runtime` タグを使用して、実行ごとにタイムアウト（秒）を設定することもできます。
 
-For example, to configure a maximum of 2 hours for every run in your deployment:
+たとえば、デプロイメント内のすべての実行の最大実行時間を 2 時間に設定するには、次のようにします。
 
 ```yaml
 run_monitoring:
@@ -40,14 +48,14 @@ run_monitoring:
   max_runtime_seconds: 7200
 ```
 
-or in Dagster+, add the following to your [deployment settings](/dagster-plus/deployment/management/deployments/deployment-settings-reference):
+または、Dagster+ で、[デプロイメント設定](/dagster-plus/deployment/management/deployments/deployment-settings-reference) に以下を追加します:
 
 ```yaml
 run_monitoring:
   max_runtime_seconds: 7200
 ```
 
-The below code example shows how to set a run timeout of 10 seconds on a per-job basis:
+以下のコード例は、ジョブごとに 10 秒の実行タイムアウトを設定する方法を示しています:
 
 <CodeExample
   path="docs_snippets/docs_snippets/deploying/monitoring_daemon/run_timeouts.py"
@@ -55,28 +63,35 @@ The below code example shows how to set a run timeout of 10 seconds on a per-job
   endBefore="end_timeout"
 />
 
-## Detecting run worker crashes
+## 実行ワーカーのクラッシュの検出
 
 :::note
 
-Detecting run worker crashes only works when using a run launcher other than the <PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" />.
+実行ワーカーのクラッシュの検出は、<PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" /> 以外の実行ランチャーを使用している場合にのみ機能します。
 
 :::
 
-It's possible for a run worker process to crash during a run. This can happen for a variety of reasons (the host it's running on could go down, it could run out of memory, etc.). Without the monitoring daemon, there are two possible outcomes, neither desirable:
+実行中に実行ワーカープロセスがクラッシュする可能性があります。
+これは、実行ワーカープロセスが稼働しているホストがダウンしたり、メモリ不足になったりするなど、様々な理由で発生する可能性があります。
+監視デーモンがない場合、以下の2つの結果が考えられますが、どちらも望ましくありません。
 
-- If the run worker was able to catch the interrupt, it will mark the run as failed
-- If the run worker goes down without a grace period, the run could be left hanging in STARTED status
+- 実行ワーカーが割り込みをキャッチできた場合、実行は失敗としてマークされます。
+- 実行ワーカーが猶予期間なしにダウンした場合、実行はSTARTEDステータスのままハングしたままになる可能性があります。
 
-If a run worker crashes, the run it's managing can hang. The monitoring daemon can run health checks on run workers for all active runs to detect this. If a failed run worker is detected (e.g. by the K8s Job having a non-zero exit code), the run is either marked as failed or resumed (see below).
+実行ワーカーがクラッシュすると、そのワーカーが管理している実行もハングする可能性があります。
+監視デーモンは、すべてのアクティブな実行に対して実行ワーカーのヘルスチェックを実行し、これを検出できます。
+失敗した実行ワーカーが検出された場合（例：K8sジョブの終了コードが0以外）、実行は失敗としてマークされるか、再開されます（以下を参照）。
 
-## Resuming runs after run worker crashes
+## 実行ワーカーのクラッシュ後の実行の再開
 
-This feature is currently only supported when using:
+この機能は現在、以下の場合にのみサポートされます。
 
-- [`K8sRunLauncher`](/api/python-api/libraries/dagster-k8s#dagster_k8s.K8sRunLauncher) with the [`k8s_job_executor`](/api/python-api/libraries/dagster-k8s#dagster_k8s.k8s_job_executor)
-- [`DockerRunLauncher`](/api/python-api/libraries/dagster-docker#dagster_docker.DockerRunLauncher) with the [`docker_executor`](/api/python-api/libraries/dagster-docker#dagster_docker.docker_executor)
+- [`K8sRunLauncher`](/api/python-api/libraries/dagster-k8s#dagster_k8s.K8sRunLauncher) と [`k8s_job_executor`](/api/python-api/libraries/dagster-k8s#dagster_k8s.k8s_job_executor) の組み合わせ
+- [`DockerRunLauncher`](/api/python-api/libraries/dagster-docker#dagster_docker.DockerRunLauncher) と [`docker_executor`](/api/python-api/libraries/dagster-docker#dagster_docker.docker_executor) の組み合わせ
 
-The monitoring daemon handles these by performing health checks on the run workers. If a failure is detected, the daemon can launch a new run worker which resumes execution of the existing run. The run worker crash will be show in the event log, and the run will continue to completion. If the run worker continues to crash, the daemon will mark the run as failed after the configured number of attempts.
+監視デーモンは、実行ワーカーのヘルスチェックを実行することでこれらの処理を行います。
+失敗が検出された場合、デーモンは新しい実行ワーカーを起動し、既存の実行を再開します。
+実行ワーカーのクラッシュはイベントログに記録され、実行は完了まで続行されます。
+実行ワーカーがクラッシュし続ける場合、デーモンは設定された試行回数後に実行を失敗としてマークします。
 
-To enable, set `max_resume_run_attempts` to a value greater than 0.
+有効にするには、`max_resume_run_attempts` を 0 より大きい値に設定します。

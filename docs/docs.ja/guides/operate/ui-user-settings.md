@@ -1,20 +1,21 @@
 ---
-title: 'Managing user settings in the Dagster UI'
+title: 'Dagster UI でユーザー設定を管理する'
 sidebar_label: 'User settings in the UI'
 sidebar_position: 30
 ---
 
-The **User settings** page in the [Dagster UI](/guides/operate/webserver) allows you to define settings like your timezone and theme and enable experimental features.
+[Dagster UI](/guides/operate/webserver) の **ユーザー設定** ページでは、タイムゾーンやテーマなどの設定を定義したり、実験的な機能を有効にしたりできます。
 
-## Accessing your settings & preferences
+## 設定と環境設定へのアクセス
 
-To access your settings and preferences:
+設定と環境設定にアクセスするには：
 
-- **In Dagster Open Source (OSS)**: Click the **gear icon** in the upper right corner of the UI
-- **In Dagster+**: Click the **user menu (your icon) > User Settings** in the upper right corner of the UI
+- **Dagster Open Source (OSS) の場合**：UI の右上にある **歯車アイコン** をクリックします。
+- **Dagster+ の場合**：UI の右上にある **ユーザーメニュー（自分のアイコン）> ユーザー設定** をクリックします。
 
-A window will display where you can define settings.
+設定を定義できるウィンドウが表示されます。
 
-## Experimental feature settings
+## 試験運用機能の設定
 
-Use the toggles next to the features in the **Experimental features** section of your **User settings** to enable and disable new features. We'd love your feedback!
+**User settings**の**Experimental features**セクションで、各機能の横にあるトグルボタンを使って新機能の有効/無効を切り替えることができます。
+皆様からのフィードバックをお待ちしております！

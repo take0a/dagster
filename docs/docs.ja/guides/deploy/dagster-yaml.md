@@ -1,17 +1,18 @@
 ---
-title: 'dagster.yaml reference'
+title: 'dagster.yaml リファレンス'
 sidebar_position: 300
 ---
 
-The `dagster.yaml` file is used to configure the Dagster instance. It defines various settings for storage, run execution, logging, and other aspects of a Dagster deployment.
+`dagster.yaml` ファイルは、Dagster インスタンスを構成するために使用されます。
+このファイルは、ストレージ、実行、ログ記録、その他 Dagster デプロイメントのさまざまな設定を定義します。
 
-## File location
+## ファイルの場所
 
-By default, Dagster looks for the `dagster.yaml` file in the directory specified by the `DAGSTER_HOME` environment variable.
+デフォルトでは、Dagster は `DAGSTER_HOME` 環境変数で指定されたディレクトリ内の `dagster.yaml` ファイルを検索します。
 
-## Using environment variables
+## 環境変数の使用
 
-You can use environment variables to override values in the `dagster.yaml` file.
+環境変数を使用して、`dagster.yaml` ファイル内の値を上書きできます。
 
 ```yaml
 instance:
@@ -22,9 +23,9 @@ instance:
       env: ME_ENV_VAR
 ```
 
-## Full configuration specification
+## 完全な構成仕様
 
-Here's a comprehensive `dagster.yaml` specification with all available options:
+利用可能なすべてのオプションを含む包括的な `dagster.yaml` 仕様は次のとおりです:
 
 ```yaml
 local_artifact_storage:
@@ -162,11 +163,11 @@ auto_materialize:
   num_workers: 4
 ```
 
-## Configuration options
+## 設定オプション
 
 ### `storage`
 
-Configures how job and asset history is persisted.
+ジョブとアセットの履歴を保存する方法を構成します。
 
 ```yaml
 storage:
@@ -174,15 +175,15 @@ storage:
     base_dir: /path/to/sqlite/storage
 ```
 
-Options:
+オプション:
 
-- `sqlite`: Use SQLite for storage
-- `postgres`: Use PostgreSQL for storage (requires `dagster-postgres` library)
-- `mysql`: Use MySQL for storage (requires `dagster-mysql` library)
+- `sqlite`: ストレージに SQLite を使用します
+- `postgres`: ストレージに PostgreSQL を使用します (`dagster-postgres` ライブラリが必要です)
+- `mysql`: ストレージに MySQL を使用します (`dagster-mysql` ライブラリが必要です)
 
 ### `run_launcher`
 
-Determines where runs are executed.
+実行される場所を決定します。
 
 ```yaml
 run_launcher:
@@ -190,15 +191,15 @@ run_launcher:
   class: DefaultRunLauncher
 ```
 
-Options:
+オプション:
 
-- `DefaultRunLauncher`: Spawns a new process on the same node as the job's code location
-- `DockerRunLauncher`: Allocates a Docker container per run
-- `K8sRunLauncher`: Allocates a Kubernetes job per run
+- `DefaultRunLauncher`: ジョブのコードと同じノードに新しいプロセスを生成します。
+- `DockerRunLauncher`: 実行ごとに Docker コンテナを割り当てます。
+- `K8sRunLauncher`: 実行ごとに Kubernetes ジョブを割り当てます。
 
 ### `run_coordinator`
 
-Sets prioritization rules and concurrency limits for runs.
+実行の優先順位ルールと同時実行制限を設定します。
 
 ```yaml
 run_coordinator:
@@ -208,14 +209,14 @@ run_coordinator:
     max_concurrent_runs: 25
 ```
 
-Options:
+オプション:
 
-- `DefaultRunCoordinator`: Immediately sends runs to the run launcher
-- `QueuedRunCoordinator`: Allows setting limits on concurrent runs
+- `DefaultRunCoordinator`: 実行を直ちに実行ランチャーに送信します
+- `QueuedRunCoordinator`: 同時実行数の制限を設定できます
 
 ### `compute_logs`
 
-Controls the capture and persistence of stdout and stderr logs.
+stdout および stderr ログのキャプチャと永続性を制御します。
 
 ```yaml
 compute_logs:
@@ -225,17 +226,17 @@ compute_logs:
     base_dir: /path/to/compute/logs
 ```
 
-Options:
+オプション:
 
-- `LocalComputeLogManager`: Writes logs to disk
-- `NoOpComputeLogManager`: Does not store logs
-- `AzureBlobComputeLogManager`: Writes logs to Azure Blob Storage
-- `GCSComputeLogManager`: Writes logs to Google Cloud Storage
-- `S3ComputeLogManager`: Writes logs to AWS S3
+- `LocalComputeLogManager`: ログをディスクに書き込みます
+- `NoOpComputeLogManager`: ログを保存しません
+- `AzureBlobComputeLogManager`: ログを Azure Blob Storage に書き込みます
+- `GCSComputeLogManager`: ログを Google Cloud Storage に書き込みます
+- `S3ComputeLogManager`: ログを AWS S3 に書き込みます
 
 ### `local_artifact_storage`
 
-Configures storage for artifacts that require a local disk or when using the filesystem I/O manager.
+ローカル ディスクを必要とするアーティファクト用、またはファイル システム I/O マネージャーを使用する場合のストレージを構成します。
 
 ```yaml
 local_artifact_storage:
@@ -247,7 +248,7 @@ local_artifact_storage:
 
 ### `telemetry`
 
-Controls whether Dagster collects anonymized usage statistics.
+Dagster が匿名の使用統計を収集するかどうかを制御します。
 
 ```yaml
 telemetry:
@@ -256,7 +257,7 @@ telemetry:
 
 ### `code_servers`
 
-Configures how Dagster loads code in a code location.
+Dagster がコードの場所にコードをロードする方法を構成します。
 
 ```yaml
 code_servers:
@@ -265,7 +266,7 @@ code_servers:
 
 ### `retention`
 
-Configures how long Dagster retains certain types of data.
+Dagster が特定の種類のデータを保持する期間を設定します。
 
 ```yaml
 retention:
@@ -280,7 +281,7 @@ retention:
 
 ### `sensors`
 
-Configures how sensors are evaluated.
+センサーの評価方法を構成します。
 
 ```yaml
 sensors:
@@ -290,7 +291,7 @@ sensors:
 
 ### `schedules`
 
-Configures how schedules are evaluated.
+スケジュールの評価方法を構成します。
 
 ```yaml
 schedules:
@@ -300,7 +301,7 @@ schedules:
 
 ### `auto_materialize`
 
-Configures automatic materialization of assets.
+アセットの自動実体化を構成します。
 
 ```yaml
 auto_materialize:
@@ -315,30 +316,30 @@ auto_materialize:
   num_workers: 4
 ```
 
-Options:
+オプション:
 
-- `enabled`: Whether auto-materialization is enabled (boolean)
-- `minimum_interval_seconds`: Minimum interval between materializations (integer)
-- `run_tags`: Tags to apply to auto-materialization runs (dictionary)
-- `respect_materialization_data_versions`: Whether to respect data versions when materializing (boolean)
-- `max_tick_retries`: Maximum number of retries for each auto-materialize tick that raises an error (integer, default: 3)
-- `use_sensors`: Whether to use sensors for auto-materialization (boolean)
-- `use_threads`: Whether to use threads for processing ticks (boolean, default: false)
-- `num_workers`: Number of threads to use for processing ticks from multiple automation policy sensors in parallel (integer)
+- `enabled`: 自動マテリアライゼーションの有効化 (boolean)
+- `minimum_interval_seconds`: マテリアライゼーション間の最小間隔 (integer)
+- `run_tags`: 自動マテリアライゼーション実行に適用するタグ (dictionary)
+- `respect_materialization_data_versions`: マテリアライゼーション時にデータバージョンを尊重するかどうか (boolean)
+- `max_tick_retries`: エラーが発生した自動マテリアライゼーション ティックごとの最大再試行回数 (integer、default: 3)
+- `use_sensors`: 自動マテリアライゼーションにセンサーを使用するかどうか (boolean)
+- `use_threads`: ティック処理にスレッドを使用するかどうか (boolean、default: false)
+- `num_workers`: 複数の自動化ポリシーセンサーからのティックを並列処理するために使用するスレッド数 (integer)
 
 ### `concurrency`
 
-Configures default concurrency limits for operations.
+操作のデフォルトの同時実行制限を構成します。
 
 ```yaml
 concurrency:
   default_op_concurrency_limit: 10
 ```
 
-Options:
+オプション:
 
-- `default_op_concurrency_limit`: The default maximum number of concurrent operations for an unconfigured concurrency key (integer)
+- `default_op_concurrency_limit`: 未設定の同時実行キーにおける同時操作のデフォルトの最大数 (整数)
 
-## References
+## 参考資料
 
-- [Dagster Instance Config Source Code](https://github.com/dagster-io/dagster/blob/master/python_modules/dagster/dagster/_core/instance/config.py)
+- [Dagsterインスタンス設定ソースコード](https://github.com/dagster-io/dagster/blob/master/python_modules/dagster/dagster/_core/instance/config.py)

@@ -1,68 +1,72 @@
 ---
-title: 'Dagster daemon'
+title: 'Dagster デーモン'
 sidebar_position: 100
 ---
 
-Several Dagster features, like [schedules](/guides/automate/schedules/), [sensors](/guides/automate/sensors/), and [run queueing](/guides/deploy/execution/customizing-run-queue-priority), require a long-running `dagster-daemon` process to be included with your deployment.
+[スケジュール](/guides/automate/schedules/)、[センサー](/guides/automate/sensors/)、[実行キューイング](/guides/deploy/execution/customizing-run-queue-priority)などのいくつかの Dagster 機能では、デプロイメントに長時間実行される `dagster-daemon` プロセスを含める必要があります。
 
-## Starting the daemon
+## デーモンの起動
 
-- [Running locally](#running-locally)
-- [Deploying the daemon](#deploying-the-daemon)
+- [ローカルで実行](#running-locally)
+- [デーモンをデプロイ](#deploying-the-daemon)
 
-### Running locally
+### ローカルで実行 {#running-locally}
 
 <Tabs>
-  <TabItem value="Running the daemon and webserver" label="Running the daemon and webserver">
+  <TabItem value="Running the daemon and webserver" label="デーモンとウェブサーバーの実行">
 
-The easiest way to run the Dagster daemon locally is to run the `dagster dev` command:
+Dagster デーモンをローカルで実行する最も簡単な方法は、`dagster dev` コマンドを実行することです:
 
 ```shell
 dagster dev
 ```
 
-This command launches both the Dagster webserver and the Dagster daemon, allowing you to start a full local deployment of Dagster from the command line. For more information about `dagster dev`, see "[Running Dagster locally](/guides/deploy/deployment-options/running-dagster-locally).
+このコマンドは、DagsterウェブサーバーとDagsterデーモンの両方を起動し、コマンドラインからDagsterの完全なローカルデプロイメントを開始できるようにします。
+`dagster dev`の詳細については、「[Dagsterをローカルで実行する](/guides/deploy/deployment-options/running-dagster-locally)」を参照してください。
 
   </TabItem>
-  <TabItem value="Running only the daemon" label="Running only the daemon">
+  <TabItem value="Running only the daemon" label="デーモンのみ実行">
 
-To run the Dagster daemon by itself:
+Dagster デーモンを単独で実行するには:
 
 ```shell
 dagster-daemon run
 ```
 
-This command takes the same arguments as `dagster dev` for specifying where to find your code.
+このコマンドは、コードの場所を指定するために `dagster dev` と同じ引数を取ります。
 
   </TabItem>
 </Tabs>
 
-### Deploying the daemon
+### デーモンをデプロイ {#deploying-the-daemon}
 
-For information on deploying the daemon to environments like Docker or Kubernetes, see the [deployment options documentation](/guides/deploy/deployment-options/).
+Docker や Kubernetes などの環境にデーモンをデプロイする方法については、[デプロイ オプションのドキュメント](/guides/deploy/deployment-options/)を参照してください。
 
-## Available daemons
+## 利用可能なデーモン
 
-The `dagster-daemon` process reads from your [Dagster instance](/guides/deploy/dagster-instance-configuration) file to determine which daemons should be included. Each of the included daemons then runs on a regular interval in its own threads.
+`dagster-daemon` プロセスは、[Dagster インスタンス](/guides/deploy/dagster-instance-configuration) ファイルを読み取って、どのデーモンを含めるかを決定します。
+含められた各デーモンは、それぞれのスレッドで定期的に実行されます。
 
-The following daemons are currently available:
+現在利用可能なデーモンは次のとおりです:
 
 | Name                  | Description                                                                                        | Enabled by                                                                                                                                                                                        |
 | --------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Scheduler daemon      | Creates runs from active schedules                                                                 | Enabled / runs as long as the default <PyObject section="schedules-sensors" module="dagster._core.scheduler" object="DagsterDaemonScheduler"/> isn't overriden as the scheduler on your instance. |
-| Run queue daemon      | Launches queued runs, taking into account any limits and prioritization rules set on your instance | Setting the [run coordinator](/guides/deploy/execution/run-coordinators) on your instance <PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator" />.  |
-| Sensor daemon         | Creates runs from active [sensors](/guides/automate/sensors/) that are turned on                   | Always enabled.                                                                                                                                                                                   |
-| Run monitoring daemon | Handles [run worker](/guides/deploy/oss-deployment-architecture#job-execution-flow) failures       | Using the `run_monitoring` field in your instance. For more information, see "[Run monitoring](/guides/deploy/execution/run-monitoring)".                                                         |
+| Scheduler daemon      | アクティブなスケジュールから実行を作成します     | デフォルトの <PyObject section="schedules-sensors" module="dagster._core.scheduler" object="DagsterDaemonScheduler"/> がインスタンスのスケジューラとして上書きされない限り、有効/実行されます。 |
+| Run queue daemon      | インスタンスに設定されている制限と優先順位ルールを考慮して、キューに入れられた実行を開始します。 | インスタンスに[実行コーディネーター](/guides/deploy/execution/run-coordinators)を設定します <PyObject section="internals" module="dagster._core.run_coordinator" object="QueuedRunCoordinator" />。  |
+| Sensor daemon         | オンになっているアクティブな[センサー](/guides/automate/sensors/)から実行を作成します  | 常に有効です。                                                                   |
+| Run monitoring daemon | [ワーカーの実行](/guides/deploy/oss-deployment-architecture#job-execution-flow)の失敗を処理します  | インスタンスの「run_monitoring」フィールドを使用します。詳細については、「[実行モニタリング](/guides/deploy/execution/run-monitoring)」をご覧ください。   |
 
-If the daemon is configured to use a [workspace file](/guides/deploy/code-locations/workspace-yaml) to load [code location(s)](/guides/deploy/code-locations/), note that they will periodically reload the file. This means that the `dagster-daemon` process doesn't need to be restarted when workspace files are changed.
+デーモンが [ワークスペースファイル](/guides/deploy/code-locations/workspace-yaml) を使用して [コードの場所](/guides/deploy/code-locations/) をロードするように設定されている場合、ファイルは定期的に再ロードされることに注意してください。
+つまり、ワークスペースファイルが変更されても `dagster-daemon` プロセスを再起動する必要はありません。
 
-## Checking daemon status in the Dagster UI
+## Dagster UI でデーモンのステータスを確認する
 
-To check the status of the `dagster-daemon` process in the UI:
+UI で `dagster-daemon` プロセスのステータスを確認するには:
 
-1. In the top navigation, click **Deployment**.
-2. Click the **Daemons** tab.
+1. 上部のナビゲーションで、**Deployment** をクリックします。
+2. **Daemons** タブをクリックします。
 
-This tab displays information about all the daemons currently configured on your instance.
+このタブには、インスタンスで現在設定されているすべてのデーモンに関する情報が表示されます。
 
-Each daemon periodically writes a heartbeat to your instance storage. If a daemon doesn't show a recent heartbeat, check the logs from your `dagster-daemon` process for errors.
+各デーモンは、定期的にインスタンスのストレージにハートビートを書き込みます。
+デーモンに最近のハートビートが表示されない場合は、`dagster-daemon` プロセスのログでエラーを確認してください。

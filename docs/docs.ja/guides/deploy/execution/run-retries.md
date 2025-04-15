@@ -1,18 +1,20 @@
 ---
-title: 'Configuring run retries'
+title: '実行再試行の設定'
 sidebar_position: 600
 ---
 
-If you configure run retries, a new run will be kicked off whenever a run fails for any reason. Compared to [op retries](/guides/build/ops/op-retries), the maximum retry limit for run retries applies to the whole run instead of each individual op. Run retries also handle the case where the run process crashes or is unexpectedly terminated.
+実行の再試行を設定すると、何らかの理由で実行が失敗するたびに新しい実行が開始されます。
+[op retries](/guides/build/ops/op-retries) と比較すると、実行の再試行の最大再試行回数制限は、個々の op ではなく実行全体に適用されます。
+実行の再試行は、実行プロセスがクラッシュしたり、予期せず終了したりした場合にも対処します。
 
-## Configuration
+## 設定
 
-How to configure run retries depends on whether you're using Dagster+ or Dagster Open Source:
+実行の再試行の設定方法は、Dagster+ と Dagster Open Source のどちらを使用しているかによって異なります:
 
-- **Dagster+**: Use the [Dagster+ UI or the dagster-cloud CLI](/dagster-plus/deployment/management/deployments/deployment-settings-reference) to set a default maximum number of retries. Run retries do not need to be explicitly enabled.
-- **Dagster Open Source**: Use your instance's `dagster.yaml` to enable run retries.
+- **Dagster+**: [Dagster+ UI または dagster-cloud CLI](/dagster-plus/deployment/management/deployments/deployment-settings-reference) を使用して、デフォルトの最大再試行回数を設定します。実行の再試行を明示的に有効にする必要はありません。
+- **Dagster Open Source**: インスタンスの `dagster.yaml` を使用して、実行の再試行を有効にします。
 
-For example, the following will set a default maximum number of retries of `3` for all runs:
+例えば、以下のコマンドは、すべての実行に対してデフォルトの最大再試行回数を `3` に設定します:
 
 ```yaml
 run_retries:
@@ -20,29 +22,34 @@ run_retries:
   max_retries: 3
 ```
 
-In both Dagster+ and Dagster Open Source, you can also configure retries using tags either on Job definitions or in the Dagster UI [Launchpad](/guides/operate/webserver).
+Dagster+ と Dagster Open Source の両方で、ジョブ定義または Dagster UI [Launchpad](/guides/operate/webserver) でタグを使用して再試行を構成することもできます。
 
 <CodeExample path="docs_snippets/docs_snippets/deploying/job_retries.py" />
 
-### Retry Strategy
+### 再試行戦略
 
-The `dagster/retry_strategy` tag controls which ops the retry will run.
+`dagster/retry_strategy` タグは、再試行時に実行するオペレーションを制御します。
 
-By default, retries will re-execute from failure (tag value `FROM_FAILURE`). This means that any successful ops will be skipped, but their output will be used for downstream ops. If the `dagster/retry_strategy` tag is set to `ALL_STEPS`, all the ops will run again.
+デフォルトでは、再試行は失敗から再実行されます（タグ値が `FROM_FAILURE`）。
+つまり、成功したオペレーションはスキップされますが、その出力は下流のオペレーションに使用されます。
+`dagster/retry_strategy` タグが `ALL_STEPS` に設定されている場合、すべてのオペレーションが再実行されます。
 
 :::note
 
-`FROM_FAILURE` requires an I/O manager that can access outputs from other runs. For example, on Kubernetes the <PyObject section="libraries" object="s3.s3_pickle_io_manager" module="dagster_aws" /> would work but the <PyObject section="io-managers" object="FilesystemIOManager" module="dagster" /> would not, since the new run is in a new Kubernetes job with a separate filesystem.
+`FROM_FAILURE` には、他の実行からの出力にアクセスできる I/O マネージャーが必要です。
+たとえば、Kubernetes では <PyObject section="libraries" object="s3.s3_pickle_io_manager" module="dagster_aws" /> は機能しますが、 <PyObject section="io-managers" object="FilesystemIOManager" module="dagster" /> は機能しません。これは、新しい実行が別のファイルシステムを持つ新しい Kubernetes ジョブ内にあるためです。
 
 :::
 
-### Combining op and run retries
+### オペレーションと実行の再試行の組み合わせ
 
-By default, if a run fails due to an op failure and both op and run retries are enabled, the overlapping retries might cause the op to be retried more times than desired. This is because the op retry count will reset for each retried run.
+デフォルトでは、オペレーションの失敗により実行が失敗し、オペレーションと実行の両方の再試行が有効になっている場合、再試行が重複することで、オペレーションが想定よりも多く再試行される可能性があります。
+これは、オペレーションの再試行回数が再試行されるたびにリセットされるためです。
 
-To prevent this, you can configure run retries to only retry when the failure is for a reason other than an op failure, like a crash or an unexpected termination of the run worker. This behavior is controlled by the `run_retries.retry_on_asset_or_op_failure` setting, which defaults to `true` but can be overridden to `false`.
+これを防ぐには、クラッシュや実行ワーカーの予期せぬ終了など、オペレーションの失敗以外の理由で失敗した場合にのみ実行の再試行を行うように設定できます。
+この動作は `run_retries.retry_on_asset_or_op_failure` 設定によって制御されます。この設定はデフォルトで `true` ですが、 `false` にオーバーライドできます。
 
-For example, the following configures run retries so that they ignore runs that failed due to a step failure:
+例えば、以下の設定では、ステップの失敗により失敗した実行を無視するように実行の再試行を設定します:
 
 ```yaml
 run_retries:
@@ -51,7 +58,7 @@ run_retries:
   retry_on_asset_or_op_failure: false
 ```
 
-You can also apply the `dagster/retry_on_asset_or_op_failure` tag on specific jobs using tags to override the default value for runs of that job:
+また、タグを使用して特定のジョブに `dagster/retry_on_asset_or_op_failure` タグを適用し、そのジョブの実行のデフォルト値を上書きすることもできます:
 
 ```python
 from dagster import job
@@ -64,6 +71,6 @@ def sample_job():
 
 :::note
 
-Setting `retry_on_asset_or_op_failure` to `false` will only change retry behavior for runs on Dagster version 1.6.7 or greater.
+`retry_on_asset_or_op_failure` を `false` に設定すると、Dagster バージョン 1.6.7 以降での実行の再試行動作のみが変更されます。
 
 :::

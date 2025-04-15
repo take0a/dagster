@@ -1,42 +1,50 @@
 ---
-title: 'Run launchers'
+title: '実行ランチャー'
 sidebar_position: 200
 ---
 
 :::note
 
-This article applies to Dagster Open Source (OSS) deployments. For information on Dagster+, see the [Dagster+ documentation](/dagster-plus/).
+この記事は、Dagsterオープンソース（OSS）デプロイメントに適用されます。
+Dagster+の詳細については、[Dagster+ドキュメント](/dagster-plus/)をご覧ください。
 
 :::
 
-Runs initiated from the Dagster UI, the scheduler, or the `dagster job launch` CLI command are launched in Dagster. This is a distinct operation from executing a job using the `execute_job` Python API or the CLI `execute` command. A launch operation allocates computational resources (e.g. a process, a container, a Kubernetes pod, etc) to carry out a run execution and then instigates the execution.
+Dagster UI、スケジューラ、または `dagster job launch` CLI コマンドから開始された実行は、Dagster で起動されます。
+これは、`execute_job` Python API または `execute` CLI コマンドを使用してジョブを実行する操作とは異なります。
+起動操作は、実行を実行するための計算リソース（プロセス、コンテナ、Kubernetes ポッドなど）を割り当て、実行を開始します。
 
-The core abstraction in the launch process is the _run launcher_, which is configured as part of the [Dagster instance](/guides/deploy/dagster-instance-configuration) The run launcher is the interface to the computational resources that will be used to actually execute Dagster runs. It receives the ID of a created run and a representation of the pipeline that is about to undergo execution.
+起動プロセスの中核となる抽象化は、_実行ランチャー_です。これは、[Dagsterインスタンス](/guides/deploy/dagster-instance-configuration) の一部として構成されます。
+実行ランチャーは、Dagster の実行を実際に行うために使用される計算リソースへのインターフェースです。
+作成された実行のIDと、実行が開始されるパイプラインの表現を受け取ります。
 
-## Relevant APIs
+## 関連API
 
 | Name                                                                                  | Description                   |
 | ------------------------------------------------------------------------------------- | ----------------------------- |
-| <PyObject section="internals" module="dagster._core.launcher" object="RunLauncher" /> | Base class for run launchers. |
+| <PyObject section="internals" module="dagster._core.launcher" object="RunLauncher" /> | 実行ランチャーの基本クラス。 |
 
-## Built-in run launchers
+## 組み込み実行ランチャー
 
-The simplest run launcher is the built-in run launcher, <PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" />. This run launcher spawns a new process per run on the same node as the job's code location.
+最もシンプルな実行ランチャーは、組み込みの実行ランチャー <PyObject section="internals" module="dagster._core.launcher" object="DefaultRunLauncher" /> です。
+この実行ランチャーは、ジョブのコードと同じノード上で、実行ごとに新しいプロセスを生成します。
 
-Other run launchers include:
+その他の実行ランチャーには、以下のものがあります:
 
 | Name                                                                                       | Description                                                                                                                    | Documentation                                                                                           |
 | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| <PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" />              | A run launcher that allocates a Kubernetes job per run.                                                                        | [Deploying Dagster to Kubernetes](/guides/deploy/deployment-options/kubernetes/deploying-to-kubernetes) |
-| <PyObject section="libraries" module="dagster_aws" object="ecs.EcsRunLauncher" />          | A run launcher that launches an Amazon ECS task per run.                                                                       | [Deploying Dagster to Amazon Web Services](/guides/deploy/deployment-options/aws)                       |
-| <PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" />        | A run launcher that launches runs in a Docker container.                                                                       | [Deploying Dagster using Docker Compose](/guides/deploy/deployment-options/)                            |
-| <PyObject section="libraries" module="dagster_celery_k8s" object="CeleryK8sRunLauncher" /> | A run launcher that launches runs as single Kubernetes jobs with extra configuration to support the `celery_k8s_job_executor`. | [Using Celery with Kubernetes](/guides/deploy/deployment-options/kubernetes/kubernetes-and-celery)      |
+| <PyObject section="libraries" module="dagster_k8s" object="K8sRunLauncher" />              |実行ごとに Kubernetes ジョブを割り当てる実行ランチャー。     | [Deploying Dagster to Kubernetes](/guides/deploy/deployment-options/kubernetes/deploying-to-kubernetes) |
+| <PyObject section="libraries" module="dagster_aws" object="ecs.EcsRunLauncher" />          |実行ごとに Amazon ECS タスクを起動する実行ランチャー。      | [Deploying Dagster to Amazon Web Services](/guides/deploy/deployment-options/aws)                       |
+| <PyObject section="libraries" module="dagster_docker" object="DockerRunLauncher" />        |Docker コンテナ内で実行を起動する実行ランチャー。     | [Deploying Dagster using Docker Compose](/guides/deploy/deployment-options/)                            |
+| <PyObject section="libraries" module="dagster_celery_k8s" object="CeleryK8sRunLauncher" /> |`celery_k8s_job_executor` をサポートするための追加構成を備えた単一の Kubernetes ジョブとして実行を開始する実行ランチャー。 | [Using Celery with Kubernetes](/guides/deploy/deployment-options/kubernetes/kubernetes-and-celery)      |
 
-## Custom run launchers
+## カスタム実行ランチャー
 
-A few examples of when a custom run launcher is needed:
+カスタム実行ランチャーが必要となる例をいくつか挙げます。
 
-- You have custom infrastructure or custom APIs for allocating nodes for execution.
-- You have custom logic for launching runs on different clusters, platforms, etc.
+- 実行用のノードを割り当てるためのカスタムインフラストラクチャまたはカスタムAPIがある場合。
+- 異なるクラスター、プラットフォームなどで実行を開始するためのカスタムロジックがある場合。
 
-We refer to the process or computational resource created by the run launcher as the [run worker](/guides/deploy/oss-deployment-architecture#job-execution-flow). The run launcher only determines the behavior of the run worker. Once execution starts within the run worker, it is the executor - an in-memory abstraction in the run worker process - that takes over management of computational resources.
+実行ランチャーによって作成されるプロセスまたは計算リソースを[実行ワーカー](/guides/deploy/oss-deployment-architecture#job-execution-flow)と呼びます。
+実行ランチャーは、実行ワーカーの動作を決定するだけです。
+実行ワーカー内で実行が開始されると、実行ワーカープロセス内のメモリ内抽象化であるエグゼキューターが計算リソースの管理を引き継ぎます。

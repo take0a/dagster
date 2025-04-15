@@ -1,47 +1,53 @@
 ---
-title: 'Customizing run queue priority'
+title: '実行キューの優先順位のカスタマイズ'
 sidebar_position: 400
 ---
 
-You can define custom prioritization rules for your Dagster instance using concurrency settings.
+同時実行設定を使用して、Dagster インスタンスのカスタム優先順位付けルールを定義できます。
 
-By the end of this guide, you’ll:
+このガイドを完了すると、以下の内容を理解できるようになります。
 
-- Understand how run concurrency works
-- Learn how to define custom prioritization rules
-- Understand how prioritization rules and concurrency limits work together
+- 同時実行の仕組みを理解する
+- カスタム優先順位付けルールを定義する方法を学ぶ
+- 優先順位付けルールと同時実行制限の連携の仕組みを理解する
 
-## Understanding the run queue
+## 実行キューについて
 
-The run queue is a sequence of Dagster runs waiting to be executed. Dagster pulls runs from the queue and calls `launch_run` on submitted runs. It operates as a first-in, first-out priority queue.
+実行キューは、実行を待機している一連の Dagster 実行です。
+Dagster はキューから実行を取得し、送信された実行に対して `launch_run` を呼び出します。
+これは先入先出の優先度キューとして動作します。
 
-For example, if three runs are submitted in the following order:
+例えば、3 つの実行が次の順序で送信された場合:
 
-1. Run `A`
-2. Run `B`
-3. Run `C`
+1. 実行 `A`
+2. 実行 `B`
+3. 実行 `C`
 
-Then the runs will be launched in the same order: Run `A`, then `B`, then `C`. This will be true unless there are [pool or run tag concurrency limits](/guides/operate/managing-concurrency) in place. The launch order can also be customized using prioritization rules, which we’ll cover later in this guide.
+この場合、実行は同じ順序で起動されます: 実行 `A`、次に `B`、次に `C`。
+[プールまたは実行タグの同時実行制限](/guides/operate/managing-concurrency)が設定されていない限り、これは当てはまります。
+起動順序は、優先順位付けルールを使用してカスタマイズすることもできます。これについては、このガイドの後半で説明します。
 
-By default, all runs have a priority of `0`. Dagster launches runs with higher priority first. If multiple runs have the same priority, Dagster will launch the runs in the order they're submitted to the queue.
+デフォルトでは、すべての実行の優先度は `0` です。
+Dagster は優先度の高い実行を最初に起動します。
+複数の実行が同じ優先度を持つ場合、Dagster はキューに送信された順に実行を開始します。
 
-Negative priorities are also allowed and can be useful for de-prioritizing sets of runs, such as backfills.
+負の優先度も許可されており、バックフィルなどの実行セットの優先度を下げるのに役立ちます。
 
-## Defining queue prioritization rules
+## キューの優先順位付けルールの定義
 
-Custom priority is specified using the `dagster/priority` tag, which can be set in code on definitions or in the launchpad of the Dagster UI.
+カスタム優先順位は、`dagster/priority` タグを使用して指定します。このタグは、定義のコード内、または Dagster UI の Launchpad で設定できます。
 
-When defining a priority value, note that:
+優先順位の値を定義する際は、以下の点に注意してください。
 
-- Values must be integers specified as a string. For example: `"1"`
-- Negative values are allowed. For example: `"-1"`
+- 値は文字列として指定された整数である必要があります。例: `"1"`
+- 負の値も使用できます。例: `"-1"`
 
 <Tabs>
-<TabItem value="In Python" label="In Python">
+<TabItem value="In Python" label="Python で">
 
-**In Python**
+**Python で**
 
-In this example, the priority is set to `-1` with a `dagster/priority` tag value of `"-1"`:
+この例では、優先度は `-1` に設定され、`dagster/priority` タグの値は `"-1"` になっています。
 
 <CodeExample
   startAfter="start_marker_priority"
@@ -50,30 +56,32 @@ In this example, the priority is set to `-1` with a `dagster/priority` tag value
 />
 
 </TabItem>
-<TabItem value="In the Dagster UI" label="In the Dagster UI">
+<TabItem value="In the Dagster UI" label="Dagster UI で">
 
-**In the Dagster UI**
+**Dagster UI で**
 
-Using the launchpad in the Dagster UI, you can also override priority tag values. In this example, we clicked the **Edit tags** button to display the following modal:
+Dagster UIのLaunchpadを使用すると、優先度タグの値を上書きすることもできます。この例では、**Edit tags** ボタンをクリックして、次のモーダルを表示しました。
 
 ![Add tags to run modal in Dagster UI Launchpad](/images/guides/deploy/execution/dagster-priority-in-launchpad.png)
 
 </TabItem>
 </Tabs>
 
-**Understanding prioritization rules and concurrency limits**
+**優先順位付けルールと同時実行制限について**
 
-Unless tag concurrency limits and/or prioritization rules are in place, queued runs are executed in the order they’re submitted to the queue. However, a run blocked by tag concurrency limits won’t block runs submitted after it.
+タグ同時実行制限や優先順位付けルールが設定されていない限り、キューに入れられた実行はキューに送信された順に実行されます。
+ただし、タグ同時実行制限によってブロックされた実行は、その後に送信された実行をブロックしません。
 
-Let’s walk through an example to demonstrate. In this example, three runs are submitted in the following order:
+例を挙げて説明しましょう。
+この例では、3 つの実行が次の順序で送信されます。
 
-1. Run `A`, tagged as `team: docs`
-2. Run `B`, tagged as `team: docs`
-3. Run `C`, which isn’t tagged
+1. `team: docs` タグが付けられた `A` を実行
+2. `team: docs` タグが付けられた `B` を実行
+3. タグが付いていない `C` を実行
 
-Without configured limits, these runs will be launched in the order they were submitted, or run `A`, then `B`, then `C`.
+制限が設定されていない場合、これらの実行は送信された順序で、つまり `A`、`B`、`C` の順に実行されます。
 
-Before any more runs are launched, let’s add the following configuration to our instance’s settings:
+さらに実行を開始する前に、インスタンスの設定に次の設定を追加しましょう:
 
 ```yaml
 concurrency:
@@ -83,13 +91,14 @@ concurrency:
         limit: 1
 ```
 
-Now, runs `A` and `B` can’t execute concurrently, while there isn’t a limit on run `C`. Assuming each run executes for a minimum of five minutes, the order in which the runs are launched will change.
+これで、実行 `A` と `B` は同時に実行できなくなり、実行 `C` には制限がなくなります。
+各実行が最低 5 分間実行されると仮定すると、実行の開始順序が変わります。
 
-If the runs are submitted in the same order as before - that is, `A`, `B`, `C` - then the following will occur:
+実行が以前と同じ順序、つまり `A`、`B`、`C` で送信された場合、以下のようになります。
 
-- Run `A` launches
-- Run `B` B is skipped, as run `A` is in progress and concurrent runs are limited to `1` for the `team` tag
-- Run `C` launches
-- Run `B` launches after run `A` finishes
+- 実行 `A` が起動します。
+- 実行 `B` はスキップされます。実行 `A` が進行中で、`team` タグの同時実行数が `1` に制限されているためです。
+- 実行 `C` が起動します。
+- 実行 `A` の終了後に実行 `B` が起動します。
 
-To summarize, due to the concurrency limit, this configuration will change the run launching order to `A`, `C`, `B`.
+まとめると、同時実行制限により、この構成では実行の開始順序が `A`、`C`、`B` に変更されます。
